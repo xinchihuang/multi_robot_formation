@@ -2,7 +2,6 @@
 A interface to operate Vrep APIs
 author: Xinchi Huang
 """
-import time
 
 import sim as vrep
 
@@ -15,61 +14,92 @@ object_names = [
 
 
 def init_vrep():
+    """
+    Initial Vrep, setup connections
+    :return: The client id(The scene id)
+    """
     print("Program started")
     vrep.simxFinish(-1)  # just in case, close all opened connections
-    client_ID = vrep.simxStart(
+    client_id = vrep.simxStart(
         "127.0.0.1", 19997, True, True, 5000, 5
     )  # Connect to V-REP
-    if client_ID != -1:
+    if client_id != -1:
         print("Connected to remote API server")
-        vrep.simxSynchronous(client_ID, True)
-        vrep.simxStartSimulation(client_ID, vrep.simx_opmode_blocking)
-    return client_ID
+        vrep.simxSynchronous(client_id, True)
+        vrep.simxStartSimulation(client_id, vrep.simx_opmode_blocking)
+    return client_id
 
 
-def get_vrep_handle(client_ID, robot_index):
+def get_vrep_handle(client_id, robot_index):
+    """
+    Get handles from simulator, which are labels to components of each robot in the scene
+    :param client_id:The client id(The scene id)
+    :param robot_index:The label to individual robot
+    :return:
+    robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle
+    Handles from simulator
+    """
     handle_name_suffix = "#" + str(robot_index - 1)
     if robot_index == 0:
         handle_name_suffix = ""
     res1, robot_handle = vrep.simxGetObjectHandle(
-        client_ID, "Pioneer_p3dx" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
+        client_id, "Pioneer_p3dx" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
     )
     res2, motor_left_handle = vrep.simxGetObjectHandle(
-        client_ID,
+        client_id,
         "Pioneer_p3dx_leftMotor" + handle_name_suffix,
         vrep.simx_opmode_oneshot_wait,
     )
     res3, motor_right_handle = vrep.simxGetObjectHandle(
-        client_ID,
+        client_id,
         "Pioneer_p3dx_rightMotor" + handle_name_suffix,
         vrep.simx_opmode_oneshot_wait,
     )
     res4, point_cloud_handle = vrep.simxGetObjectHandle(
-        client_ID, "velodyneVPL_16" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
+        client_id, "velodyneVPL_16" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
     )
     print("Vrep res: ", res1, res2, res3, res4)
     return robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle
 
 
-def get_robot_pose(client_ID, robot_handle):
-    res, pos = vrep.simxGetObjectPosition(
-        client_ID, robot_handle, -1, vrep.simx_opmode_blocking
+def get_robot_pose(client_id, robot_handle):
+    """
+    Get robot's pose from the simulator
+    :param client_id: Scene id
+    :param robot_handle: Robot label in the scene
+    :return:
+    pos: Robot position
+    ori: Robot orientation
+
+    """
+    _, pos = vrep.simxGetObjectPosition(
+        client_id, robot_handle, -1, vrep.simx_opmode_blocking
     )
-    res, ori = vrep.simxGetObjectOrientation(
-        client_ID, robot_handle, -1, vrep.simx_opmode_blocking
+    _, ori = vrep.simxGetObjectOrientation(
+        client_id, robot_handle, -1, vrep.simx_opmode_blocking
     )
     return pos, ori
 
 
-def get_sensor_data(client_ID, robot_handle, robot_index):
+def get_sensor_data(client_id, robot_handle, robot_index):
+    """
+    Get the sensor data from the simulator
+    :param client_id: Scene id
+    :param robot_handle: Robot label in the scene
+    :param robot_index: Robot index in the scene
+    :return:
+    vel: Robot linear velocity
+    omega: Robot angle velocity
+    velodyne_points: Point cloud from robot's Lidar sensor
+    """
     handle_name_suffix = "#" + str(robot_index - 1)
     if robot_index == 0:
         handle_name_suffix = ""
-    res, vel, omega = vrep.simxGetObjectVelocity(
-        client_ID, robot_handle, vrep.simx_opmode_blocking
+    _, vel, omega = vrep.simxGetObjectVelocity(
+        client_id, robot_handle, vrep.simx_opmode_blocking
     )
     velodyne_points = vrep.simxCallScriptFunction(
-        client_ID,
+        client_id,
         "velodyneVPL_16" + handle_name_suffix,
         1,
         "getVelodyneData_function",
@@ -83,44 +113,65 @@ def get_sensor_data(client_ID, robot_handle, robot_index):
 
 
 def post_robot_setting():
+    """
+    Not finished yet
+    :return:
+    """
 
-    return
+    return 1
 
 
-def post_robot_pose(client_ID, robot_handle, position, orientation):
-
+def post_robot_pose(client_id, robot_handle, position, orientation):
+    """
+    Set robot's pose in the simulator
+    :param client_id: Scene id
+    :param robot_handle: Robot label in the scene
+    :param position: Robot desired position in the scene
+    :param orientation: Robot desired orientation in the scene
+    """
     vrep.simxSetObjectPosition(
-        client_ID, robot_handle, -1, position, vrep.simx_opmode_oneshot
+        client_id, robot_handle, -1, position, vrep.simx_opmode_oneshot
     )
     vrep.simxSetObjectOrientation(
-        client_ID, robot_handle, -1, orientation, vrep.simx_opmode_oneshot
+        client_id, robot_handle, -1, orientation, vrep.simx_opmode_oneshot
     )
 
-    return
 
+def post_control(
+    client_id, motor_left_handle, motor_right_handle, omega_left, omega_right
+):
+    """
 
-def post_control(client_ID, motor_left_handle, motor_right_handle, omega1, omega2):
+    :param client_id: Scene id
+    :param motor_left_handle: Robot left wheel's label
+    :param motor_right_handle: Robot right wheel's label
+    :param omega1: Robot left wheel's angle velocity
+    :param omega2: Robot right wheel's angle velocity
+    """
     vrep.simxSetJointTargetVelocity(
-        client_ID, motor_left_handle, omega1, vrep.simx_opmode_oneshot
+        client_id, motor_left_handle, omega_left, vrep.simx_opmode_oneshot
     )
     vrep.simxSetJointTargetVelocity(
-        client_ID, motor_right_handle, omega2, vrep.simx_opmode_oneshot
+        client_id, motor_right_handle, omega_right, vrep.simx_opmode_oneshot
     )
-    return
 
 
-def synchronize(clinet_ID):
-    vrep.simxSynchronousTrigger(clinet_ID)
+def synchronize(clinet_id):
+    """
+    Let the simulator synchronize. In order to get data from the simulator
+    :param clinet_id: Scene id
+    """
+    vrep.simxSynchronousTrigger(clinet_id)
 
 
-# client_ID=init_vrep()
+# client_id=init_vrep()
 # robot_index=1
-# robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle = get_vrep_handle(client_ID, robot_index)
-#
+# robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle =
+# get_vrep_handle(client_id, robot_index)
 # while True:
 #
-#     pos,ori=get_robot_pose(client_ID,robot_handle)
-#     vel, omega, velodyne_points=get_sensor_data(client_ID,robot_handle,robot_index)
+#     pos,ori=get_robot_pose(client_id,robot_handle)
+#     vel, omega, velodyne_points=get_sensor_data(client_id,robot_handle,robot_index)
 #     print(pos, ori)
-#     post_control(client_ID, motor_left_handle, motor_right_handle, 10, 10)
-#     synchronize(client_ID)
+#     post_control(client_id, motor_left_handle, motor_right_handle, 10, 10)
+#     synchronize(client_id)
