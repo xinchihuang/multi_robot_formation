@@ -42,23 +42,23 @@ def get_vrep_handle(client_id, robot_index):
     handle_name_suffix = "#" + str(robot_index - 1)
     if robot_index == 0:
         handle_name_suffix = ""
-    res1, robot_handle = vrep.simxGetObjectHandle(
+    _, robot_handle = vrep.simxGetObjectHandle(
         client_id, "Pioneer_p3dx" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
     )
-    res2, motor_left_handle = vrep.simxGetObjectHandle(
+    _, motor_left_handle = vrep.simxGetObjectHandle(
         client_id,
         "Pioneer_p3dx_leftMotor" + handle_name_suffix,
         vrep.simx_opmode_oneshot_wait,
     )
-    res3, motor_right_handle = vrep.simxGetObjectHandle(
+    _, motor_right_handle = vrep.simxGetObjectHandle(
         client_id,
         "Pioneer_p3dx_rightMotor" + handle_name_suffix,
         vrep.simx_opmode_oneshot_wait,
     )
-    res4, point_cloud_handle = vrep.simxGetObjectHandle(
+    _, point_cloud_handle = vrep.simxGetObjectHandle(
         client_id, "velodyneVPL_16" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
     )
-    print("Vrep res: ", res1, res2, res3, res4)
+
     return robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle
 
 

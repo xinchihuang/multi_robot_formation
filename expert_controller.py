@@ -1,4 +1,12 @@
-def expert_control(self, omlist, index):
+"""
+A expert controller for multi-robot formation
+author: Xinchi Huang
+"""
+import numpy as np
+import math
+
+
+def expert_control(self):
     ############## MODEL-BASED CONTROLLER (Most frequently used dynamics model) ##########
     ######################################################################################
     # For e-puk dynamics
@@ -19,8 +27,9 @@ def expert_control(self, omlist, index):
                 continue
             robot = self.scene.robots[j]  # neighbor
             self.dictDistance[j] = self.xi.distancepTo(robot.xi)
-        self.listSortedDistance = sorted(self.dictDistance.items(),
-                                         key=operator.itemgetter(1))
+        self.listSortedDistance = sorted(
+            self.dictDistance.items(), key=operator.itemgetter(1)
+        )
     # velocity in transformed space
     vxp = 0
     vyp = 0
@@ -39,14 +48,23 @@ def expert_control(self, omlist, index):
                 continue
             ri = lsd[i][0]
             rk = lsd[k][0]
-            di = np.array([self.xi.xp - self.scene.robots[rk].xi.xp, self.xi.yp - self.scene.robots[rk].xi.yp])
-            dj = np.array([self.scene.robots[ri].xi.xp - self.scene.robots[rk].xi.xp,
-                           self.scene.robots[ri].xi.yp - self.scene.robots[rk].xi.yp])
+            di = np.array(
+                [
+                    self.xi.xp - self.scene.robots[rk].xi.xp,
+                    self.xi.yp - self.scene.robots[rk].xi.yp,
+                ]
+            )
+            dj = np.array(
+                [
+                    self.scene.robots[ri].xi.xp - self.scene.robots[rk].xi.xp,
+                    self.scene.robots[ri].xi.yp - self.scene.robots[rk].xi.yp,
+                ]
+            )
             c = np.dot(di, dj) / (np.linalg.norm(di) * np.linalg.norm(dj))
             angle = np.degrees(np.arccos(c))
-            if (angle >= 90 and i != k):
+            if angle >= 90 and i != k:
                 connected = False
-        if (connected):
+        if connected:
             jList.append(lsd[i][0])
 
     for j in jList:
