@@ -2,10 +2,13 @@
 A simulation template
 author: Xinchi Huang
 """
-from scene import scene
+from scene import Scene
 
 
-class simulation:
+class Simulation:
+    """
+    Code for simulation
+    """
     def __init__(
         self,
         max_simulation_time,
@@ -23,6 +26,10 @@ class simulation:
         self.scene = None
 
     def run(self):
+        """
+
+        :return:
+        """
         while True:
             if self.check_stop_condition():
                 break
@@ -30,11 +37,17 @@ class simulation:
                 sensor_data = robot.get_sensor_data()
                 print(sensor_data.position)
                 control_data = robot.get_control_data()
+                print(control_data)
                 robot.execute_control()
         return 1
 
     def initial_scene(self, num_robot):
-        simulation_scene = scene(num_robot)
+        """
+
+        :param num_robot:
+        :return:
+        """
+        simulation_scene = Scene(num_robot)
         self.client_id = simulation_scene.initial_vrep()
         for i in range(num_robot):
             simulation_scene.add_robot(i)
@@ -42,4 +55,8 @@ class simulation:
         self.scene = simulation_scene
 
     def check_stop_condition(self):
+        """
+
+        :return:
+        """
         return False

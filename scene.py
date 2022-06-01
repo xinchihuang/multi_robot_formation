@@ -2,13 +2,19 @@
 A scene template
 author: Xinchi Huang
 """
-import vrep_interface
-from robot import robot
 import math
 import random
+import vrep_interface
+from robot import Robot
 
 
-class scene:
+
+
+class Scene:
+    """
+    Scene for multiple robots
+    """
+
     def __init__(self, num_robot):
         self.num_robots = num_robot
         self.robot_list = []
@@ -16,11 +22,20 @@ class scene:
         self.client_id = None
 
     def initial_vrep(self):
+        """
+        initial Vrep get client id
+        :return: A Verp client id
+        """
         self.client_id = vrep_interface.init_vrep()
         return self.client_id
 
     def add_robot(self, robot_index):
-        new_robot = robot()
+        """
+
+        :param robot_index:
+        :return:
+        """
+        new_robot = Robot()
         (
             robot_handle,
             motor_left_handle,
@@ -41,9 +56,21 @@ class scene:
         self.robot_list.append(new_robot)
 
     def update_adjacency_matrix(self):
+        """
+
+        :return:
+        """
+
         return None
 
     def set_one_robot_pose(self, robot_handle, position, orientation):
+        """
+
+        :param robot_handle:
+        :param position:
+        :param orientation:
+        :return:
+        """
         vrep_interface.post_robot_pose(
             self.client_id, robot_handle, position, orientation
         )
@@ -56,7 +83,8 @@ class scene:
 
 
         pose_list:[[x,y,theta],[x,y,theta]]
-        z0: A default parameter for specific robot and simulator. Make sure the robot is not stuck in the ground
+        z0: A default parameter for specific robot and simulator.
+        Make sure the robot is not stuck in the ground
         """
         pose_list = []
         for i in range(self.num_robots):

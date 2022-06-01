@@ -4,7 +4,7 @@ author: Xinchi Huang
 """
 
 
-class recorder:
+class Recorder:
     def __init__(self):
         self.data = None
 

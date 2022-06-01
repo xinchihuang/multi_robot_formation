@@ -5,7 +5,10 @@ author: Xinchi Huang
 import vrep_interface
 
 
-class sensor_data:
+class SensorData:
+    """
+    A class for record sensor data
+    """
     def __init__(self):
         self.position = None
         self.orientation = None
@@ -14,15 +17,21 @@ class sensor_data:
         self.velodyne_points = None
 
 
-class sensor:
+class Sensor:
+    """
+    Robot sensor
+    """
     def __init__(self):
         self.client_id = None
         self.robot_handle = None
         self.robot_index = None
 
     def get_sensor_data(self):
-
-        robot_sensor_data = sensor_data()
+        """
+        Get sensor readings
+        :return: Data from sensor and simulator
+        """
+        robot_sensor_data = SensorData()
         position, orientation = vrep_interface.get_robot_pose(
             self.client_id, self.robot_handle
         )

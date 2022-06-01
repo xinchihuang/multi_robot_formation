@@ -1,5 +1,5 @@
 """
-A expert controller for multi-robot formation
+A expert controller for multi-robot formation centralized control
 author: Xinchi Huang
 """
 import numpy as np
