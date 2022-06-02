@@ -20,4 +20,5 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --ignore=sim.py,simConst.py,scratch.py --disable=too-few-public-methods,too-many-arguments,too-many-locals
+        pylint $(git ls-files '*.py') --ignore=sim.py,simConst.py,scratch.py --disable=too-few-public-methods,too-many-arguments,too-many-locals,no-self-use,invalid-name
+
