@@ -6,20 +6,11 @@ author: Xinchi Huang
 import vrep_interface
 
 
-class ControlData:
-    """
-    A data structure for passing control signals to executor
-    """
-    def __init__(self):
-        self.omega_left = 0
-        self.omega_right = 0
-
-
-
 class Executor:
     """
     A class to execute control from controller
     """
+
     def __init__(self):
         self.client_id = None
         self.robot_handle = None

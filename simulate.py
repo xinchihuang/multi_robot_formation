@@ -9,6 +9,7 @@ class Simulation:
     """
     Code for simulation
     """
+
     def __init__(
         self,
         max_simulation_time,
@@ -33,12 +34,13 @@ class Simulation:
         while True:
             if self.check_stop_condition():
                 break
+            print("robot control")
             for robot in self.scene.robot_list:
-                sensor_data = robot.get_sensor_data()
-                print(sensor_data.position)
-                control_data = robot.get_control_data()
-                print(control_data)
+                robot.get_sensor_data()
+                robot.get_control_data()
                 robot.execute_control()
+            self.scene.update_adjacency_list()
+            self.scene.broadcast_adjacency_list()
         return 1
 
     def initial_scene(self, num_robot):
@@ -47,11 +49,12 @@ class Simulation:
         :param num_robot:
         :return:
         """
-        simulation_scene = Scene(num_robot)
+        simulation_scene = Scene()
         self.client_id = simulation_scene.initial_vrep()
         for i in range(num_robot):
             simulation_scene.add_robot(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
+
         self.scene = simulation_scene
 
     def check_stop_condition(self):
@@ -59,4 +62,5 @@ class Simulation:
 
         :return:
         """
+
         return False

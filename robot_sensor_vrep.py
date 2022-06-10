@@ -9,6 +9,7 @@ class SensorData:
     """
     A class for record sensor data
     """
+
     def __init__(self):
         self.position = None
         self.orientation = None
@@ -21,6 +22,7 @@ class Sensor:
     """
     Robot sensor
     """
+
     def __init__(self):
         self.client_id = None
         self.robot_handle = None

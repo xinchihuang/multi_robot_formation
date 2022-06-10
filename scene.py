@@ -4,10 +4,11 @@ author: Xinchi Huang
 """
 import math
 import random
+import numpy as np
+from collections import defaultdict
 import vrep_interface
 from robot import Robot
-
-
+from utils import get_gabreil_graph
 
 
 class Scene:
@@ -15,10 +16,9 @@ class Scene:
     Scene for multiple robots
     """
 
-    def __init__(self, num_robot):
-        self.num_robots = num_robot
+    def __init__(self):
         self.robot_list = []
-        self.adjacency_matrix = []
+        self.adjacency_list = defaultdict(list)
         self.client_id = None
 
     def initial_vrep(self):
@@ -31,7 +31,7 @@ class Scene:
 
     def add_robot(self, robot_index):
         """
-
+        Add a robot in the scene
         :param robot_index:
         :return:
         """
@@ -42,6 +42,8 @@ class Scene:
             motor_right_handle,
             point_cloud_handle,
         ) = vrep_interface.get_vrep_handle(self.client_id, robot_index)
+        print(robot_handle)
+        new_robot.index=robot_index
 
         new_robot.executor.client_id = self.client_id
         new_robot.executor.robot_handle = robot_handle
@@ -53,16 +55,43 @@ class Scene:
         new_robot.sensor.robot_index = robot_index
         new_robot.sensor.robot_handle = robot_handle
 
+        new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
 
-    def update_adjacency_matrix(self):
+    def update_adjacency_list(self):
         """
+        Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
+        """
+        # print("Distance")
+        node_num = len(self.robot_list)
+        # collect robots' position in th scene
+        position_list = []
+        index_list=[]
+        for i in range(node_num):
+            index_list.append(self.robot_list[i].index)
+            position = self.robot_list[i].sensor_data.position[:-1]
+            position_list.append(position)
+        position_array = np.array(position_list)
+
+        # Get Gabreil Graph
+        gabriel_graph = get_gabreil_graph(position_array,node_num)
+
+        # Create adjacency list
+        new_adj_list=defaultdict(list)
+        for i in range(node_num):
+            for j in range(node_num):
+                if gabriel_graph[i][j]==1 and not i==j:
+                    distance=((position_array[i][0]-position_array[j][0])**2+(position_array[i][1]-position_array[j][1])**2)**0.5
+                    new_adj_list[index_list[i]].append((index_list[j],position_array[j][0],position_array[j][1],distance))
+        self.adjacency_list=new_adj_list
+    def broadcast_adjacency_list(self):
+        """
+        Send adjacency list to all robots for centralized control
         :return:
         """
-
-        return None
-
+        for robot in self.robot_list:
+            robot.network_data=self.adjacency_list
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 
@@ -82,30 +111,30 @@ class Scene:
         :param min_disp_range: max distribute range
 
 
-        pose_list:[[x,y,theta],[x,y,theta]]
-        z0: A default parameter for specific robot and simulator.
+        pose_list:[[pos_x,pos_y,theta],[pos_x,pos_y,theta]]
+        height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
         pose_list = []
-        for i in range(self.num_robots):
+        for i in range(len(self.robot_list)):
             while True:
                 alpha = math.pi * (2 * random.random())
                 rho = max_disp_range * random.random()
-                x = rho * math.cos(alpha)
-                y = rho * math.sin(alpha)
+                pos_x = rho * math.cos(alpha)
+                pos_y = rho * math.sin(alpha)
                 theta = 2 * math.pi * random.random()
                 too_close = False
                 for p in pose_list:
-                    if (x - p[0]) ** 2 + (y - p[1]) ** 2 <= min_disp_range**2:
+                    if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
                         too_close = True
                         break
                 if too_close:
                     continue
-                pose_list.append([x, y, theta])
+                pose_list.append([pos_x, pos_y, theta])
                 break
-        for i in range(self.num_robots):
-            z0 = 0.1587
-            position = [pose_list[i][0], pose_list[i][1], z0]
+        for i in range(len(self.robot_list)):
+            pos_height = 0.1587
+            position = [pose_list[i][0], pose_list[i][1], pos_height]
             orientation = [0, 0, pose_list[i][2]]
             robot_handle = self.robot_list[i].executor.robot_handle
             vrep_interface.post_robot_pose(
