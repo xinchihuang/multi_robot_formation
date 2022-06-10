@@ -32,20 +32,14 @@ class Controller:
         self_x = self_position[0]
         self_y = self_position[1]
         neighbors=network_data[index]
-
         velocity_sum_x=0
         velocity_sum_y=0
-        print("neighbor")
-        print(index,self_x,self_y,neighbors)
         for neighbor in neighbors:
             rate=(neighbor[3]-self.desired_distance)/neighbor[3]
             velocity_x=rate*(self_x-neighbor[1])
             velocity_y=rate*(self_y-neighbor[2])
             velocity_sum_x-=velocity_x
             velocity_sum_y-=velocity_y
-        print(velocity_sum_x,velocity_sum_y,self_position[2])
-        # print("speed")
-        # print(velocity_sum_x,velocity_sum_y)
         # transform speed to wheels speed
         kk = self.centralized_k
         theta = self_orientation[2]
@@ -57,9 +51,6 @@ class Controller:
         wheel_velocity_left = M11 * velocity_sum_x + M12 * velocity_sum_y
         wheel_velocity_right = M21 * velocity_sum_x + M22 * velocity_sum_y
 
-        # print(wheel_velocity_left,wheel_velocity_right)
-
-
         if math.fabs(wheel_velocity_right) >= math.fabs(wheel_velocity_left) and math.fabs(wheel_velocity_right) > self.max_velocity:
             alpha = self.max_velocity / math.fabs(wheel_velocity_right)
         elif math.fabs(wheel_velocity_right) < math.fabs(wheel_velocity_left) and math.fabs(wheel_velocity_left) > self.max_velocity:
@@ -69,8 +60,6 @@ class Controller:
 
         wheel_velocity_left=alpha*wheel_velocity_left
         wheel_velocity_right=alpha*wheel_velocity_right
-
-
         out_put.omega_left=wheel_velocity_left*self.wheel_adjustment
         out_put.omega_right=wheel_velocity_right*self.wheel_adjustment
         return out_put
