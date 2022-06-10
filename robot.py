@@ -13,15 +13,21 @@ class Robot:
     """
 
     def __init__(self):
-        self.index=None
+        self.index = None
         self.sensor_data = None
         self.control_data = None
         self.network_data = None
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
+
     def set_up_components(self):
+        """
+
+        :return:
+        """
         pass
+
     def get_sensor_data(self):
         """
         Read sensor data from sensor in simulator/realworld
@@ -30,14 +36,15 @@ class Robot:
         self.sensor_data = self.sensor.get_sensor_data()
         return self.sensor_data
 
-
     def get_control_data(self):
         """
         Get controls
         :return: Control data
         """
-        self.control_data = self.controller.centralized_control(self.index,self.sensor_data,self.network_data)
-        print(self.control_data.omega_left,self.control_data.omega_right)
+        self.control_data = self.controller.centralized_control(
+            self.index, self.sensor_data, self.network_data
+        )
+        print(self.control_data.omega_left, self.control_data.omega_right)
         return self.control_data
 
     def execute_control(self):

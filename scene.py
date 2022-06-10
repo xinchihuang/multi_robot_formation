@@ -4,9 +4,10 @@ author: Xinchi Huang
 """
 import math
 import random
-import numpy as np
 from collections import defaultdict
+import numpy as np
 import vrep_interface
+
 from robot import Robot
 from utils import get_gabreil_graph
 
@@ -43,7 +44,7 @@ class Scene:
             point_cloud_handle,
         ) = vrep_interface.get_vrep_handle(self.client_id, robot_index)
         print(robot_handle)
-        new_robot.index=robot_index
+        new_robot.index = robot_index
 
         new_robot.executor.client_id = self.client_id
         new_robot.executor.robot_handle = robot_handle
@@ -67,7 +68,7 @@ class Scene:
         node_num = len(self.robot_list)
         # collect robots' position in th scene
         position_list = []
-        index_list=[]
+        index_list = []
         for i in range(node_num):
             index_list.append(self.robot_list[i].index)
             position = self.robot_list[i].sensor_data.position[:-1]
@@ -75,23 +76,35 @@ class Scene:
         position_array = np.array(position_list)
 
         # Get Gabreil Graph
-        gabriel_graph = get_gabreil_graph(position_array,node_num)
+        gabriel_graph = get_gabreil_graph(position_array, node_num)
 
         # Create adjacency list
-        new_adj_list=defaultdict(list)
+        new_adj_list = defaultdict(list)
         for i in range(node_num):
             for j in range(node_num):
-                if gabriel_graph[i][j]==1 and not i==j:
-                    distance=((position_array[i][0]-position_array[j][0])**2+(position_array[i][1]-position_array[j][1])**2)**0.5
-                    new_adj_list[index_list[i]].append((index_list[j],position_array[j][0],position_array[j][1],distance))
-        self.adjacency_list=new_adj_list
+                if gabriel_graph[i][j] == 1 and not i == j:
+                    distance = (
+                        (position_array[i][0] - position_array[j][0]) ** 2
+                        + (position_array[i][1] - position_array[j][1]) ** 2
+                    ) ** 0.5
+                    new_adj_list[index_list[i]].append(
+                        (
+                            index_list[j],
+                            position_array[j][0],
+                            position_array[j][1],
+                            distance,
+                        )
+                    )
+        self.adjacency_list = new_adj_list
+
     def broadcast_adjacency_list(self):
         """
         Send adjacency list to all robots for centralized control
         :return:
         """
         for robot in self.robot_list:
-            robot.network_data=self.adjacency_list
+            robot.network_data = self.adjacency_list
+
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 
