@@ -21,12 +21,12 @@ class Robot:
         self.executor = Executor()
         self.controller = Controller()
 
-    def set_up_components(self):
-        """
-
-        :return:
-        """
-        pass
+    # def set_up_components(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     pass
 
     def get_sensor_data(self):
         """
@@ -44,7 +44,6 @@ class Robot:
         self.control_data = self.controller.centralized_control(
             self.index, self.sensor_data, self.network_data
         )
-        print(self.control_data.omega_left, self.control_data.omega_right)
         return self.control_data
 
     def execute_control(self):

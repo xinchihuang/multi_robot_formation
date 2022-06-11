@@ -11,6 +11,7 @@ class SensorData:
     """
 
     def __init__(self):
+        self.robot_index=None
         self.position = None
         self.orientation = None
         self.linear_velocity = None
@@ -44,7 +45,7 @@ class Sensor:
         ) = vrep_interface.get_sensor_data(
             self.client_id, self.robot_handle, self.robot_index
         )
-
+        robot_sensor_data.robot_index=self.robot_index
         robot_sensor_data.position = position
         robot_sensor_data.orientation = orientation
         robot_sensor_data.linear_velocity = linear_velocity

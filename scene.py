@@ -18,6 +18,12 @@ class Scene:
     """
 
     def __init__(self):
+        """
+        robot_list: A list contains all robot in the scene
+        adjacency_list: A dict records robots' neighbor position and relative distance in gabreil graph
+        {robot index:[(neighbor index, neighbor x, neighbor y,relative distance)..]..}
+        client_id: A unique Id for the simulation environment
+        """
         self.robot_list = []
         self.adjacency_list = defaultdict(list)
         self.client_id = None
@@ -43,7 +49,6 @@ class Scene:
             motor_right_handle,
             point_cloud_handle,
         ) = vrep_interface.get_vrep_handle(self.client_id, robot_index)
-        print(robot_handle)
         new_robot.index = robot_index
 
         new_robot.executor.client_id = self.client_id
@@ -96,6 +101,13 @@ class Scene:
                         )
                     )
         self.adjacency_list = new_adj_list
+
+        print("DISTANCE")
+        for r in self.adjacency_list:
+            for n in self.adjacency_list[r]:
+                print("edge:",r,n[0],"distance:",n[3])
+
+
 
     def broadcast_adjacency_list(self):
         """

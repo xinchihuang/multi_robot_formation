@@ -10,6 +10,7 @@ class ControlData:
     """
 
     def __init__(self):
+        self.robot_index=None
         self.omega_left = 0
         self.omega_right = 0
 
@@ -43,6 +44,7 @@ class Controller:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
+        self_robot_index=sensor_data.robot_index
         self_position = sensor_data.position
         self_orientation = sensor_data.orientation
         self_x = self_position[0]
@@ -82,6 +84,8 @@ class Controller:
 
         wheel_velocity_left = alpha * wheel_velocity_left
         wheel_velocity_right = alpha * wheel_velocity_right
+
+        out_put.robot_index=self_robot_index
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
