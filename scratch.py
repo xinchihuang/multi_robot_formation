@@ -6,7 +6,7 @@ from simulate import Simulation
 import numpy as np
 
 
-test_simulation = Simulation(0.1, 0.05)
+test_simulation = Simulation(20, 0.05)
 test_simulation.initial_scene(5)
 test_simulation.run()
 # point = np.load(

@@ -26,6 +26,10 @@ class Recorder:
         """
         :param sensor_data: Sensor data from robot sensor and simulator. Defined in robot_sensor_vrep.py(SensorData)
         :return:
+        trace_data:[ [position],
+                     [orientation],
+                     [linear_velocity],
+                     [angular_velocity] ]
         """
         trace_data = []
         trace_data.append(sensor_data.position)
@@ -46,6 +50,11 @@ class Recorder:
         )
 
     def save_to_file(self):
+        """
+        Save recorded data to files
+        :return:
+        """
+
         present = os.getcwd()
         root = os.path.join(present, self.root_dir)
         print(root)
