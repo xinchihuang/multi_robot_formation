@@ -5,6 +5,7 @@ author: Xinchi Huang
 
 import numpy as np
 
+
 def get_gabreil_graph(position_array, node_num):
     """
     Return a gabreil graph of the scene
@@ -26,5 +27,3 @@ def get_gabreil_graph(position_array, node_num):
                     gabriel_graph[v][u] = 0
                     break
     return gabriel_graph
-
-

@@ -20,7 +20,8 @@ class Scene:
     def __init__(self):
         """
         robot_list: A list contains all robot in the scene
-        adjacency_list: A dict records robots' neighbor position and relative distance in gabreil graph
+        adjacency_list: A dict records robots' neighbor position and
+        relative distance in gabreil graph
         {robot index:[(neighbor index, neighbor x, neighbor y,relative distance)..]..}
         client_id: A unique Id for the simulation environment
         """
@@ -105,9 +106,7 @@ class Scene:
         print("DISTANCE")
         for r in self.adjacency_list:
             for n in self.adjacency_list[r]:
-                print("edge:",r,n[0],"distance:",n[3])
-
-
+                print("edge:", r, n[0], "distance:", n[3])
 
     def broadcast_adjacency_list(self):
         """

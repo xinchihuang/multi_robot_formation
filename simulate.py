@@ -4,17 +4,19 @@ author: Xinchi Huang
 """
 from scene import Scene
 from recorder import Recorder
+
+
 class Simulation:
     """
     Code for simulation
     """
 
     def __init__(
-            self,
-            max_simulation_time,
-            time_step=0.05,
-            initial_max_range=5,
-            initial_min_range=1,
+        self,
+        max_simulation_time,
+        time_step=0.05,
+        initial_max_range=5,
+        initial_min_range=1,
     ):
         self.max_simulation_time = max_simulation_time
         # Simulator related parameter. Used only for record and check stopping condition
@@ -31,17 +33,20 @@ class Simulation:
         :return:
         """
         simulation_time = 0
-        data_recorder=Recorder()
-        data_recorder.root_dir="saved_data"
+        data_recorder = Recorder()
+        data_recorder.root_dir = "saved_data"
         while True:
-            if self.check_stop_condition() or simulation_time > self.max_simulation_time:
+            if (
+                self.check_stop_condition()
+                or simulation_time > self.max_simulation_time
+            ):
                 break
             simulation_time += self.time_step
             print("robot control at time")
             print(simulation_time)
             for robot in self.scene.robot_list:
-                sensor_data=robot.get_sensor_data()
-                control_data=robot.get_control_data()
+                sensor_data = robot.get_sensor_data()
+                control_data = robot.get_control_data()
                 robot.execute_control()
                 # record data
                 data_recorder.record_sensor_data(sensor_data)
@@ -50,7 +55,7 @@ class Simulation:
 
             self.scene.update_adjacency_list()
             self.scene.broadcast_adjacency_list()
-            break
+
         data_recorder.save_to_file()
         return 1
 
