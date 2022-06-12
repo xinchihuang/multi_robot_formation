@@ -156,7 +156,8 @@ class Scene:
                     continue
                 pose_list.append([pos_x, pos_y, theta])
                 break
-        for i in range(len(self.robot_list)):
+        num_robot=len(self.robot_list)
+        for i in range(num_robot):
             pos_height = 0.1587
             position = [pose_list[i][0], pose_list[i][1], pos_height]
             orientation = [0, 0, pose_list[i][2]]
