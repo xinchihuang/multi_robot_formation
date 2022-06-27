@@ -2,8 +2,8 @@
 A robot template
 author: Xinchi Huang
 """
-from robot_executor_vrep import Executor
-from robot_sensor_vrep import Sensor
+from vrep.robot_executor_vrep import Executor
+from vrep.robot_sensor_vrep import Sensor
 from controller import Controller
 
 

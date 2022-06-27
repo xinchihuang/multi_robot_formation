@@ -2,7 +2,7 @@
 A sensor template. Get information from simulator/real-world
 author: Xinchi Huang
 """
-import vrep_interface
+from vrep import vrep_interface
 
 
 class SensorData:

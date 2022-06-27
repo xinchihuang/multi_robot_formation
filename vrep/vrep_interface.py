@@ -3,7 +3,7 @@ A interface to operate Vrep APIs
 author: Xinchi Huang
 """
 
-import sim as vrep
+from vrep import sim as vrep
 
 object_names = [
     "Pioneer_p3dx",

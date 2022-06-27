@@ -6,7 +6,7 @@ import math
 import random
 from collections import defaultdict
 import numpy as np
-import vrep_interface
+from vrep import vrep_interface
 
 from robot import Robot
 from utils import get_gabreil_graph

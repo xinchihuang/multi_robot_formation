@@ -107,7 +107,6 @@ def plot_relative_distance(dt, pose_array, save_path):
     plt.close()
 
 
-
 def plot_relative_distance_gabreil(dt, pose_array, save_path):
     """
     Plot line chart for robots relative distance, Only show the distance which are edges of gabreil graph
@@ -144,7 +143,6 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
         os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png")
     )
     plt.close()
-
 
 
 def plot_formation_gabreil(pose_array, save_path):
@@ -205,6 +203,7 @@ def plot_trace(position_array, save_path):
     plt.savefig(os.path.join(save_path, "robot_trace_" + str(rob_num) + ".png"))
     plt.close()
 
+
 def plot_load_data(dt, root_dir):
     """
 
@@ -212,35 +211,35 @@ def plot_load_data(dt, root_dir):
     :param dir: Root dir
     :return:
     """
-    robot_path_list=[]
-    for root, dirs, files in os.walk(root_dir, topdown=False):
+    robot_path_list = []
+    for _, dirs, _ in os.walk(root_dir, topdown=False):
         for name in dirs:
             robot_path_list.append(name)
-    trace_array=None
+    trace_array = None
     for robot_path in robot_path_list:
-        trace_array_single=np.load(os.path.join(root_dir,robot_path,"trace.npy"))
-        trace_array_single=np.expand_dims(trace_array_single,axis=0)
-        if type(trace_array) == type(None):
-            trace_array=trace_array_single
+        trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"))
+        trace_array_single = np.expand_dims(trace_array_single, axis=0)
+        if isinstance(trace_array,type(None)):
+            trace_array = trace_array_single
             continue
-        trace_array=np.concatenate((trace_array,trace_array_single),axis=0)
-    position_array=trace_array[:,:,0,:2]
+        trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
+    position_array = trace_array[:, :, 0, :2]
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array, root_dir)
     plot_trace(position_array, root_dir)
-    velocity_array=None
+    velocity_array = None
     for robot_path in robot_path_list:
-        velocity_array_single=np.load(os.path.join(root_dir,robot_path,"control.npy"))
-        velocity_array_single=np.expand_dims(velocity_array_single,axis=0)
-        if type(velocity_array) == type(None):
-            velocity_array=velocity_array_single
+        velocity_array_single = np.load(
+            os.path.join(root_dir, robot_path, "control.npy")
+        )
+        velocity_array_single = np.expand_dims(velocity_array_single, axis=0)
+        if isinstance(velocity_array,type(None)):
+            velocity_array = velocity_array_single
             continue
         velocity_array = np.concatenate((velocity_array, velocity_array_single), axis=0)
-    plot_wheel_speed(dt, velocity_array,root_dir)
-
-
+    plot_wheel_speed(dt, velocity_array, root_dir)
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05,"/home/xinchi/multi_robot_formation/saved_data/0")
+    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/0")
