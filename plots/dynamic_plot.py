@@ -1,9 +1,14 @@
+"""
+A script to plot the gabreil graph changes.
+"""
+
+import math
 import numpy as np
 import matplotlib.pyplot as plt
-import math
+
 
 pose_array = np.load(
-    "/home/xinchi/GNN-control/gnn-formation-control/results/results2022.5.6/expert compare/expert_5/58/pose_array_scene.npy"
+    ""
 )
 node_num = np.shape(pose_array)[0]
 iters = pose_array.shape[1]
@@ -36,7 +41,7 @@ for time_step in range(iters):
             distance = math.sqrt(
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
-            ax.plot(xlist, ylist, label="Distane: {d:.2f}".format(d=distance))
+            ax.plot(xlist, ylist, label=f"Distane: {distance:8 .2f}")
     ax.legend(fontsize=18)
     ax.set_title("Formation", size=20)
     ax.set_xlabel("X(m)", size=20)
@@ -44,7 +49,7 @@ for time_step in range(iters):
     ax.grid()
     ax.set_xlim(-5, 5)
     ax.set_ylim(-5, 5)
-    ax.text(-1, 4, "Time={:.2f}s".format(time_step * 0.05), size=20)
+    ax.text(-1, 4, f"Time={time_step * 0.05:8 .2f}s", size=20)
     plt.pause(0.05)
     ax.cla()
 plt.show()

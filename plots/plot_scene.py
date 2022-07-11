@@ -2,13 +2,12 @@
 Codes for plot experiment results
 author: Xinchi Huang
 """
-
+import os
 import math
+import itertools
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import itertools
 import numpy as np
-import os
 
 
 def gabriel(pose_array):
@@ -96,7 +95,7 @@ def plot_relative_distance(dt, pose_array, save_path):
             )
             distance_dict[name] = distance_array
     plt.figure(figsize=(10, 10))
-    for key in distance_dict:
+    for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key)
     # plt.legend()
     plt.title("Relative distance")
@@ -109,7 +108,8 @@ def plot_relative_distance(dt, pose_array, save_path):
 
 def plot_relative_distance_gabreil(dt, pose_array, save_path):
     """
-    Plot line chart for robots relative distance, Only show the distance which are edges of gabreil graph
+    Plot line chart for robots relative distance, Only show the distance which are
+    edges of gabreil graph
     :param dt: Time interval
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
     :param save_path: Path to save figures
@@ -132,7 +132,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
             )
             distance_dict[name] = distance_array
     plt.figure(figsize=(10, 10))
-    for key in distance_dict:
+    for key,_ in distance_dict:
         plt.plot(xlist, distance_dict[key], label=key)
     # plt.legend()
     plt.title("Relative distance gabreil")
@@ -166,7 +166,7 @@ def plot_formation_gabreil(pose_array, save_path):
             distance = math.sqrt(
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
-            plt.plot(xlist, ylist, label="Distane: {d:.2f}".format(d=distance))
+            plt.plot(xlist, ylist, label=f"Distane: {distance:8 .2f}")
     plt.legend()
     plt.title("Formation")
     plt.xlabel("distance(m)")
