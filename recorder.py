@@ -57,7 +57,7 @@ class Recorder:
 
         present = os.getcwd()
         root = os.path.join(present, self.root_dir)
-        print(root)
+
         if not os.path.exists(root):
             os.mkdir(root)
         num_dirs = len(os.listdir(root))

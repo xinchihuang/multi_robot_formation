@@ -20,9 +20,12 @@ class Scene:
     def __init__(self):
         """
         robot_list: A list contains all robot in the scene
+        []
+
         adjacency_list: A dict records robots' neighbor position and
         relative distance in gabreil graph
         {robot index:[(neighbor index, neighbor x, neighbor y,relative distance)..]..}
+
         client_id: A unique Id for the simulation environment
         """
         self.robot_list = []

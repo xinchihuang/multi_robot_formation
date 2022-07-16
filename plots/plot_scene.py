@@ -225,8 +225,8 @@ def plot_load_data(dt, root_dir):
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
     position_array = trace_array[:, :, 0, :2]
     plot_relative_distance(dt, position_array, root_dir)
-    plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array, root_dir)
+    # plot_relative_distance_gabreil(dt, position_array, root_dir)
+    # plot_formation_gabreil(position_array, root_dir)
     plot_trace(position_array, root_dir)
     velocity_array = None
     for robot_path in robot_path_list:
@@ -242,4 +242,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/0")
+    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/2")

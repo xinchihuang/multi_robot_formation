@@ -44,6 +44,9 @@ class Robot:
         self.control_data = self.controller.centralized_control(
             self.index, self.sensor_data, self.network_data
         )
+        # self.control_data = self.controller.centralized_control_line(
+        #     self.index, self.sensor_data, self.network_data
+        # )
         return self.control_data
 
     def execute_control(self):

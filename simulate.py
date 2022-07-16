@@ -4,8 +4,7 @@ author: Xinchi Huang
 """
 from scene import Scene
 from recorder import Recorder
-
-
+from vrep import vrep_interface
 class Simulation:
     """
     Code for simulation
@@ -15,7 +14,7 @@ class Simulation:
         self,
         max_simulation_time,
         time_step=0.05,
-        initial_max_range=5,
+        initial_max_range=10,
         initial_min_range=1,
     ):
         self.max_simulation_time = max_simulation_time
@@ -52,7 +51,8 @@ class Simulation:
                 data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
-
+                
+            vrep_interface.synchronize(self.client_id)
             self.scene.update_adjacency_list()
             self.scene.broadcast_adjacency_list()
 

@@ -4,9 +4,12 @@ author: Xinchi Huang
 """
 import torch
 import torch.nn as nn
-from graphs.weights_initializer import weights_init
+from weights_initializer import weights_init
 import graphUtils.graphML as gml
-
+class DecentralController(nn.Module):
+    def __init__(self,number_of_agent=3, input_width=100,input_height=100):
+        super().__init__()
+        self.S=None
 class DecentralPlannerNet(nn.Module):
     def __init__(self, nA = 3, inW = 100, inH = 100):
         super().__init__()
