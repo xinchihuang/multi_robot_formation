@@ -132,7 +132,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
             )
             distance_dict[name] = distance_array
     plt.figure(figsize=(10, 10))
-    for key,_ in distance_dict:
+    for key, _ in distance_dict:
         plt.plot(xlist, distance_dict[key], label=key)
     # plt.legend()
     plt.title("Relative distance gabreil")
@@ -219,7 +219,7 @@ def plot_load_data(dt, root_dir):
     for robot_path in robot_path_list:
         trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"))
         trace_array_single = np.expand_dims(trace_array_single, axis=0)
-        if isinstance(trace_array,type(None)):
+        if isinstance(trace_array, type(None)):
             trace_array = trace_array_single
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
@@ -234,7 +234,7 @@ def plot_load_data(dt, root_dir):
             os.path.join(root_dir, robot_path, "control.npy")
         )
         velocity_array_single = np.expand_dims(velocity_array_single, axis=0)
-        if isinstance(velocity_array,type(None)):
+        if isinstance(velocity_array, type(None)):
             velocity_array = velocity_array_single
             continue
         velocity_array = np.concatenate((velocity_array, velocity_array_single), axis=0)

@@ -41,8 +41,11 @@ class Robot:
         Get controls
         :return: Control data
         """
-        self.control_data = self.controller.centralized_control(
-            self.index, self.sensor_data, self.network_data
+        # self.control_data = self.controller.centralized_control(
+        #     self.index, self.sensor_data, self.network_data
+        # )
+        self.control_data = self.controller.decentralized_control(
+            self.index, self.sensor_data, self.network_data,number_of_agents=5
         )
         # self.control_data = self.controller.centralized_control_line(
         #     self.index, self.sensor_data, self.network_data

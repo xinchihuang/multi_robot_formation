@@ -7,9 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-pose_array = np.load(
-    ""
-)
+pose_array = np.load("")
 node_num = np.shape(pose_array)[0]
 iters = pose_array.shape[1]
 # plt.figure(figsize=(10, 10))

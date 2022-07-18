@@ -5,6 +5,8 @@ author: Xinchi Huang
 from scene import Scene
 from recorder import Recorder
 from vrep import vrep_interface
+
+
 class Simulation:
     """
     Code for simulation
@@ -51,12 +53,13 @@ class Simulation:
                 data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
-                
+
             vrep_interface.synchronize(self.client_id)
             self.scene.update_adjacency_list()
             self.scene.broadcast_adjacency_list()
 
         data_recorder.save_to_file()
+        vrep_interface.stop(self.client_id)
         return 1
 
     def initial_scene(self, num_robot):

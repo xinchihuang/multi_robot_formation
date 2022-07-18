@@ -3,7 +3,7 @@ A controller template
 """
 import collections
 import math
-
+import numpy as np
 
 class ControlData:
     """
@@ -32,7 +32,15 @@ class Controller:
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
-    def velocity_transform(self,velocity_x,velocity_y,theta):
+
+    def velocity_transform(self, velocity_x, velocity_y, theta):
+        """
+        Transform robot velocity to wheels velocity
+        :param velocity_x:  robot velocity x (float)
+        :param velocity_y: robot velocity y (float)
+        :param theta: Robot orientation
+        :return: wheel velocity left and right (float)
+        """
         kk = self.centralized_k
         M11 = kk * math.sin(theta) + math.cos(theta)
         M12 = -kk * math.cos(theta) + math.sin(theta)
@@ -43,13 +51,13 @@ class Controller:
         wheel_velocity_right = M21 * velocity_x + M22 * velocity_y
 
         if (
-                math.fabs(wheel_velocity_right) >= math.fabs(wheel_velocity_left)
-                and math.fabs(wheel_velocity_right) > self.max_velocity
+            math.fabs(wheel_velocity_right) >= math.fabs(wheel_velocity_left)
+            and math.fabs(wheel_velocity_right) > self.max_velocity
         ):
             alpha = self.max_velocity / math.fabs(wheel_velocity_right)
         elif (
-                math.fabs(wheel_velocity_right) < math.fabs(wheel_velocity_left)
-                and math.fabs(wheel_velocity_left) > self.max_velocity
+            math.fabs(wheel_velocity_right) < math.fabs(wheel_velocity_left)
+            and math.fabs(wheel_velocity_left) > self.max_velocity
         ):
             alpha = self.max_velocity / math.fabs(wheel_velocity_left)
         else:
@@ -57,7 +65,7 @@ class Controller:
 
         wheel_velocity_left = alpha * wheel_velocity_left
         wheel_velocity_right = alpha * wheel_velocity_right
-        return wheel_velocity_left,wheel_velocity_right
+        return wheel_velocity_left, wheel_velocity_right
 
     def centralized_control(self, index, sensor_data, network_data):
         """
@@ -87,13 +95,25 @@ class Controller:
             velocity_sum_x -= velocity_x
             velocity_sum_y -= velocity_y
         # transform speed to wheels speed
-        theta=sensor_data.orientation[2]
-        wheel_velocity_left,wheel_velocity_right=self.velocity_transform(velocity_sum_x,velocity_sum_y,theta)
+        theta = sensor_data.orientation[2]
+        wheel_velocity_left, wheel_velocity_right = self.velocity_transform(
+            velocity_sum_x, velocity_sum_y, theta
+        )
         out_put.robot_index = self_robot_index
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
-    def centralized_control_line(self,index, sensor_data, network_data,separation=2,angle=math.pi/4,max_distance=10,K_c=2):
+
+    def centralized_control_line(
+        self,
+        index,
+        sensor_data,
+        network_data,
+        separation=2,
+        angle=math.pi / 4,
+        max_distance=10,
+        K_c=2,
+    ):
         """
         A centralized controller to form a line, Expert control
         :param index: Dobot index
@@ -109,43 +129,84 @@ class Controller:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-        target_position=[]
-        robot_num=len(network_data)
+        target_position = []
+        robot_num = len(network_data)
         for i in range(robot_num):
-            target_position.append([i*separation*math.cos(angle),i*separation*math.sin(angle)])
-        robot_position_dict=collections.defaultdict(tuple)
-        for key,value in network_data.items():
+            target_position.append(
+                [i * separation * math.cos(angle), i * separation * math.sin(angle)]
+            )
+        robot_position_dict = collections.defaultdict(tuple)
+        for _, value in network_data.items():
             for item in value:
-                robot_position_dict[item[0]]=(item[1],item[2])
-        neighbor_list=[]
-        desired_force =[]
+                robot_position_dict[item[0]] = (item[1], item[2])
+        neighbor_list = []
+        desired_force = []
         for ri in range(robot_num):
-            if not ri==index and ((robot_position_dict[index][0] - robot_position_dict[ri][0]) ** 2 +
-                                  (robot_position_dict[index][1] - robot_position_dict[ri][1]) ** 2)**0.5<max_distance:
-                neighbor_list.append((robot_position_dict[ri][0],robot_position_dict[ri][1]))
-                desired_force.append((target_position[index][0]-target_position[ri][0],
-                                      target_position[index][1]-target_position[ri][1]))
+            if (
+                not ri == index
+                and (
+                    (robot_position_dict[index][0] - robot_position_dict[ri][0]) ** 2
+                    + (robot_position_dict[index][1] - robot_position_dict[ri][1]) ** 2
+                )
+                ** 0.5
+                < max_distance
+            ):
+                neighbor_list.append(
+                    (robot_position_dict[ri][0], robot_position_dict[ri][1])
+                )
+                desired_force.append(
+                    (
+                        target_position[index][0] - target_position[ri][0],
+                        target_position[index][1] - target_position[ri][1],
+                    )
+                )
         #### get speed
-        velocity_index_x=0
+        velocity_index_x = 0
         velocity_index_y = 0
-        self_position=sensor_data.position[:2]
-        theta=sensor_data.orientation[2]
-        for i in range(len(neighbor_list)):
-            w_ij=[self_position[0]-neighbor_list[i][0]-desired_force[i][0],
-                  self_position[1]-neighbor_list[i][1]-desired_force[i][1]]
-            velocity_index_x = velocity_index_x-K_c*w_ij[0]
+        self_position = sensor_data.position[:2]
+        theta = sensor_data.orientation[2]
+        neighbor_num=len(neighbor_list)
+        for i in range(neighbor_num):
+            w_ij = [
+                self_position[0] - neighbor_list[i][0] - desired_force[i][0],
+                self_position[1] - neighbor_list[i][1] - desired_force[i][1],
+            ]
+            velocity_index_x = velocity_index_x - K_c * w_ij[0]
             velocity_index_y = velocity_index_y - K_c * w_ij[1]
-        wheel_velocity_left, wheel_velocity_right = self.velocity_transform(velocity_index_x, velocity_index_y, theta)
+        wheel_velocity_left, wheel_velocity_right = self.velocity_transform(
+            velocity_index_x, velocity_index_y, theta
+        )
 
         self_robot_index = sensor_data.robot_index
         out_put.robot_index = self_robot_index
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
-    def decentralized_control(self, sensor_data):
+
+    def decentralized_control(self,index, sensor_data,network_data,number_of_agents=3,input_height=100,input_width=100):
         """
         Decentralized controller
-        :param sensor_data:
+        :param sensor_data: Densor_data from robots' sensors or simulators
         :return:
         """
-        return sensor_data
+
+        out_put = ControlData()
+        if not network_data:
+            out_put.omega_left = 0
+            out_put.omega_right = 0
+            return out_put
+        input_occupancy_map = np.zeros((1, number_of_agents, input_width, input_height))
+
+        adjacency_matrix = np.zeros((number_of_agents, number_of_agents), dtype=np.float32)
+        for key,value in network_data.items():
+            for item in value:
+                adjacency_matrix[key][item[0]]=1
+        print(adjacency_matrix)
+        r = np.zeros((1, number_of_agents, 1))
+        a = np.zeros((1, number_of_agents, 1))
+        for i in range(number_of_agents):
+            input_occupancy_map[0,i,:,:] = omlist[i][0].reshape((input_width, input_height))
+            r[0,i,0] = omlist[i][2]
+            a[0,i,0] = omlist[i][3]
+
+        return out_put

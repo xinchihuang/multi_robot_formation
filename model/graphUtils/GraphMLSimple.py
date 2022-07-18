@@ -47,6 +47,7 @@ infiniteNumber = 1e12  # infinity equals this number
 
 # WARNING: Only scalar bias.
 
+
 def LSIGF(h, S, x, b=None):
     """
     LSIGF(filter_taps, GSO, input, bias=None) Computes the output of a linear
@@ -134,14 +135,15 @@ def LSIGF(h, S, x, b=None):
     # z to be B x N x E x K x G and reshape it to B x N x EKG (remember we
     # always reshape the last dimensions), and then make h be E x K x G x F and
     # reshape it to EKG x F, and then multiply
-    y = torch.matmul(z.permute(0, 4, 1, 2, 3).reshape([B, N, E * K * G]),
-                     h.reshape([F, E * K * G]).permute(1, 0)).permute(0, 2, 1)
+    y = torch.matmul(
+        z.permute(0, 4, 1, 2, 3).reshape([B, N, E * K * G]),
+        h.reshape([F, E * K * G]).permute(1, 0),
+    ).permute(0, 2, 1)
     # And permute againt to bring it from B x N x F to B x F x N.
     # Finally, add the bias
     if b is not None:
         y = y + b
     return y
-
 
 
 class GraphFilter(nn.Module):
@@ -213,13 +215,13 @@ class GraphFilter(nn.Module):
         if bias:
             self.bias = nn.parameter.Parameter(torch.Tensor(F, 1))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         # Initialize parameters
         self.reset_parameters()
 
     def reset_parameters(self):
         # Taken from _ConvNd initialization of parameters:
-        stdv = 1. / math.sqrt(self.G * self.K)
+        stdv = 1.0 / math.sqrt(self.G * self.K)
         self.weight.data.uniform_(-stdv, stdv)
         if self.bias is not None:
             self.bias.data.uniform_(-stdv, stdv)
@@ -240,10 +242,9 @@ class GraphFilter(nn.Module):
         Nin = x.shape[2]
         # And now we add the zero padding
         if Nin < self.N:
-            x = torch.cat((x,
-                           torch.zeros(B, F, self.N - Nin) \
-                           .type(x.dtype).to(x.device)
-                           ), dim=2)
+            x = torch.cat(
+                (x, torch.zeros(B, F, self.N - Nin).type(x.dtype).to(x.device)), dim=2
+            )
         # Compute the filter output
         u = LSIGF(self.weight, self.S, x, self.bias)
         # So far, u is of shape batchSize x dimOutFeatures x numberNodes
@@ -255,10 +256,12 @@ class GraphFilter(nn.Module):
         return u
 
     def extra_repr(self):
-        reprString = "in_features=%d, out_features=%d, " % (
-            self.G, self.F) + "filter_taps=%d, " % (
-                         self.K) + "edge_features=%d, " % (self.E) + \
-                     "bias=%s, " % (self.bias is not None)
+        reprString = (
+            "in_features=%d, out_features=%d, " % (self.G, self.F)
+            + "filter_taps=%d, " % (self.K)
+            + "edge_features=%d, " % (self.E)
+            + "bias=%s, " % (self.bias is not None)
+        )
         if self.S is not None:
             reprString += "GSO stored"
         else:
@@ -343,23 +346,23 @@ class GraphFilterRNN(nn.Module):
             self.bias_B = nn.parameter.Parameter(torch.Tensor(H, 1))
             self.bias_U = nn.parameter.Parameter(torch.Tensor(F, 1))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         # Initialize parameters
         self.reset_parameters()
 
     def reset_parameters(self):
         # Taken from _ConvNd initialization of parameters:
-        stdv_a = 1. / math.sqrt(self.G * self.K)
+        stdv_a = 1.0 / math.sqrt(self.G * self.K)
         self.weight_A.data.uniform_(-stdv_a, stdv_a)
         if self.bias_A is not None:
             self.bias_A.data.uniform_(-stdv_a, stdv_a)
 
-        stdv_b = 1. / math.sqrt(self.H * self.K)
+        stdv_b = 1.0 / math.sqrt(self.H * self.K)
         self.weight_B.data.uniform_(-stdv_b, stdv_b)
         if self.bias_B is not None:
             self.bias_B.data.uniform_(-stdv_b, stdv_b)
 
-        stdv_u = 1. / math.sqrt(self.H * self.K)
+        stdv_u = 1.0 / math.sqrt(self.H * self.K)
         self.weight_U.data.uniform_(-stdv_u, stdv_u)
         if self.bias_U is not None:
             self.bias_U.data.uniform_(-stdv_u, stdv_u)
@@ -380,10 +383,9 @@ class GraphFilterRNN(nn.Module):
         Nin = x.shape[2]
         # And now we add the zero padding
         if Nin < self.N:
-            x = torch.cat((x,
-                           torch.zeros(B, F, self.N - Nin) \
-                           .type(x.dtype).to(x.device)
-                           ), dim=2)
+            x = torch.cat(
+                (x, torch.zeros(B, F, self.N - Nin).type(x.dtype).to(x.device)), dim=2
+            )
         # Compute the filter output
         u_a = LSIGF(self.weight_A, self.S, x, self.bias_A)
 
@@ -401,10 +403,13 @@ class GraphFilterRNN(nn.Module):
         return u
 
     def extra_repr(self):
-        reprString = "in_features=%d, out_features=%d, hidden_features=%d" % (
-            self.G, self.F, self.H) + "filter_taps=%d, " % (
-                         self.K) + "edge_features=%d, " % (self.E) + \
-                     "bias=%s, " % (self.bias is not None)
+        reprString = (
+            "in_features=%d, out_features=%d, hidden_features=%d"
+            % (self.G, self.F, self.H)
+            + "filter_taps=%d, " % (self.K)
+            + "edge_features=%d, " % (self.E)
+            + "bias=%s, " % (self.bias is not None)
+        )
         if self.S is not None:
             reprString += "GSO stored"
         else:
@@ -499,8 +504,10 @@ def BatchLSIGF(h, S, x, b=None):
     # z to be B x N x E x K x F and reshape it to B x N x EKG (remember we
     # always reshape the last dimensions), and then make h be E x K x F x G and
     # reshape it to EKF x G, and then multiply
-    y = torch.matmul(z.permute(0, 4, 1, 2, 3).reshape([B, N, E * K * F]),
-                     h.reshape([F, E * K * G]).permute(1, 0)).permute(0, 2, 1)
+    y = torch.matmul(
+        z.permute(0, 4, 1, 2, 3).reshape([B, N, E * K * F]),
+        h.reshape([F, E * K * G]).permute(1, 0),
+    ).permute(0, 2, 1)
     # And permute againt to bring it from B x N x G to B x G x N.
     # Finally, add the bias
     if b is not None:
@@ -577,13 +584,13 @@ class GraphFilterBatch(nn.Module):
         if bias:
             self.bias = nn.parameter.Parameter(torch.Tensor(G, 1))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         # Initialize parameters
         self.reset_parameters()
 
     def reset_parameters(self):
         # Taken from _ConvNd initialization of parameters:
-        stdv = 1. / math.sqrt(self.F * self.K)
+        stdv = 1.0 / math.sqrt(self.F * self.K)
         self.weight.data.uniform_(-stdv, stdv)
         if self.bias is not None:
             self.bias.data.uniform_(-stdv, stdv)
@@ -604,10 +611,9 @@ class GraphFilterBatch(nn.Module):
         Nin = x.shape[2]
         # And now we add the zero padding
         if Nin < self.N:
-            x = torch.cat((x,
-                           torch.zeros(B, F, self.N - Nin) \
-                           .type(x.dtype).to(x.device)
-                           ), dim=2)
+            x = torch.cat(
+                (x, torch.zeros(B, F, self.N - Nin).type(x.dtype).to(x.device)), dim=2
+            )
         # Compute the filter output
         u = BatchLSIGF(self.weight, self.S, x, self.bias)
         # So far, u is of shape batchSize x dimOutFeatures x numberNodes
@@ -619,10 +625,12 @@ class GraphFilterBatch(nn.Module):
         return u
 
     def extra_repr(self):
-        reprString = "in_features=%d, out_features=%d, " % (
-            self.F, self.G) + "filter_taps=%d, " % (
-                         self.K) + "edge_features=%d, " % (self.E) + \
-                     "bias=%s, " % (self.bias is not None)
+        reprString = (
+            "in_features=%d, out_features=%d, " % (self.F, self.G)
+            + "filter_taps=%d, " % (self.K)
+            + "edge_features=%d, " % (self.E)
+            + "bias=%s, " % (self.bias is not None)
+        )
         if self.S is not None:
             reprString += "GSO stored"
         else:
@@ -704,23 +712,23 @@ class GraphFilterRNNBatch(nn.Module):
             self.bias_B = nn.parameter.Parameter(torch.Tensor(H, 1))
             self.bias_D = nn.parameter.Parameter(torch.Tensor(G, 1))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         # Initialize parameters
         self.reset_parameters()
 
     def reset_parameters(self):
         # Taken from _ConvNd initialization of parameters:
-        stdv_a = 1. / math.sqrt(self.F * self.K)
+        stdv_a = 1.0 / math.sqrt(self.F * self.K)
         self.weight_A.data.uniform_(-stdv_a, stdv_a)
         if self.bias_A is not None:
             self.bias_A.data.uniform_(-stdv_a, stdv_a)
 
-        stdv_b = 1. / math.sqrt(self.H * self.K)
+        stdv_b = 1.0 / math.sqrt(self.H * self.K)
         self.weight_B.data.uniform_(-stdv_b, stdv_b)
         if self.bias_B is not None:
             self.bias_B.data.uniform_(-stdv_b, stdv_b)
 
-        stdv_d = 1. / math.sqrt(self.H * self.K)
+        stdv_d = 1.0 / math.sqrt(self.H * self.K)
         self.weight_U.data.uniform_(-stdv_d, stdv_d)
         if self.bias_U is not None:
             self.bias_U.data.uniform_(-stdv_d, stdv_d)
@@ -745,10 +753,9 @@ class GraphFilterRNNBatch(nn.Module):
         Nin = x.shape[2]
         # And now we add the zero padding
         if Nin < self.N:
-            x = torch.cat((x,
-                           torch.zeros(B, F, self.N - Nin) \
-                           .type(x.dtype).to(x.device)
-                           ), dim=2)
+            x = torch.cat(
+                (x, torch.zeros(B, F, self.N - Nin).type(x.dtype).to(x.device)), dim=2
+            )
         # Compute the filter output
         u_a = BatchLSIGF(self.weight_A, self.S, x, self.bias_A)
         u_b = BatchLSIGF(self.weight_B, self.S, self.hiddenState, self.bias_B)
@@ -768,17 +775,18 @@ class GraphFilterRNNBatch(nn.Module):
         return u
 
     def extra_repr(self):
-        reprString = "in_features=%d, out_features=%d, hidden_features=%d," % (
-            self.G, self.F, self.H) + "filter_taps=%d, " % (
-                         self.K) + "edge_features=%d, " % (self.E) + \
-                     "bias=%s, " % (self.bias_D is not None)
+        reprString = (
+            "in_features=%d, out_features=%d, hidden_features=%d,"
+            % (self.G, self.F, self.H)
+            + "filter_taps=%d, " % (self.K)
+            + "edge_features=%d, " % (self.E)
+            + "bias=%s, " % (self.bias_D is not None)
+        )
         if self.S is not None:
             reprString += "GSO stored"
         else:
             reprString += "no GSO stored"
         return reprString
-
-
 
 
 class NoActivation(nn.Module):
@@ -846,7 +854,10 @@ class NoPool(nn.Module):
 
     def extra_repr(self):
         reprString = "in_dim=%d, out_dim=%d, number_hops = %d, " % (
-            self.nInputNodes, self.nOutputNodes, self.nHops)
+            self.nInputNodes,
+            self.nOutputNodes,
+            self.nHops,
+        )
         reprString += "no neighborhood needed"
         return reprString
 
@@ -916,9 +927,9 @@ class MaxPoolLocal(nn.Module):
         # computeNeighborhood function
         S = np.array(S.cpu())
         # Compute neighborhood
-        neighborhood = graphTools.computeNeighborhood(S, self.nHops,
-                                                      self.nOutputNodes,
-                                                      self.nInputNodes, 'matrix')
+        neighborhood = graphTools.computeNeighborhood(
+            S, self.nHops, self.nOutputNodes, self.nInputNodes, "matrix"
+        )
         # And move the neighborhood back to a tensor
         neighborhood = torch.tensor(neighborhood).to(device)
         # The neighborhood matrix has to be a tensor of shape
@@ -969,9 +980,9 @@ class MaxPoolLocal(nn.Module):
         # And the neighbors that we need to gather are the same across the batch
         # and feature dimensions, so we need to repeat the matrix along those
         # dimensions
-        gatherNeighbor = self.neighborhood.reshape([1, 1,
-                                                    self.nOutputNodes,
-                                                    self.maxNeighborhoodSize])
+        gatherNeighbor = self.neighborhood.reshape(
+            [1, 1, self.nOutputNodes, self.maxNeighborhoodSize]
+        )
         gatherNeighbor = gatherNeighbor.repeat([batchSize, dimNodeSignals, 1, 1])
         # And finally we're in position of getting all the neighbors in line
         xNeighbors = torch.gather(x, 2, gatherNeighbor)
@@ -984,7 +995,10 @@ class MaxPoolLocal(nn.Module):
 
     def extra_repr(self):
         reprString = "in_dim=%d, out_dim=%d, number_hops = %d, " % (
-            self.nInputNodes, self.nOutputNodes, self.nHops)
+            self.nInputNodes,
+            self.nOutputNodes,
+            self.nHops,
+        )
         if self.neighborhood is not None:
             reprString += "neighborhood stored"
         else:
