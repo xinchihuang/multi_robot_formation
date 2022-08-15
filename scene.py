@@ -114,11 +114,15 @@ class Scene:
     def broadcast_adjacency_list(self):
         """
         Send adjacency list to all robots for centralized control
-        :return:
+        :return: None
         """
         for robot in self.robot_list:
             robot.network_data = self.adjacency_list
-
+    def broadcast_observations(self):
+        """
+        Send observations  to all robots for GNN control
+        :return: None
+        """
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 
