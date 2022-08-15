@@ -11,6 +11,15 @@ from vrep import vrep_interface
 from robot import Robot
 from utils import get_gabreil_graph
 
+class SceneData:
+    """
+    A class for passing data from scene
+    """
+
+    def __init__(self):
+        self.observations = None
+        self.adjacency_list = None
+
 
 class Scene:
     """
@@ -116,13 +125,25 @@ class Scene:
         Send adjacency list to all robots for centralized control
         :return: None
         """
+        self.update_adjacency_list()
         for robot in self.robot_list:
             robot.network_data = self.adjacency_list
-    def broadcast_observations(self):
+    def broadcast_all(self):
         """
-        Send observations  to all robots for GNN control
+        Send observations to all robots for GNN control
+        Observations: (All robots' observation, adjacency_list)
         :return: None
         """
+        output=SceneData()
+        observation_list=[]
+        for robot in self.robot_list:
+            observation=robot.get_sensor_data()
+            observation_list.append(observation)
+        self.update_adjacency_list()
+        output.observation_list=observation_list
+        output.adjacency_list=self.adjacency_list
+        for robot in self.robot_list:
+            robot.network_data = output
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 
