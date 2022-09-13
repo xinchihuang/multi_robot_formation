@@ -4,7 +4,8 @@ A controller template
 import collections
 import math
 import numpy as np
-
+import torch
+from model.GNN_based_model import DecentralController
 class ControlData:
     """
     A data structure for passing control signals to executor
@@ -32,6 +33,8 @@ class Controller:
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
+        self.GNN_model=None
+        self.use_cuda=False
 
     def velocity_transform(self, velocity_x, velocity_y, theta):
         """
@@ -67,16 +70,16 @@ class Controller:
         wheel_velocity_right = alpha * wheel_velocity_right
         return wheel_velocity_left, wheel_velocity_right
 
-    def centralized_control(self, index, sensor_data, network_data):
+    def centralized_control(self, index, sensor_data, scene_data):
         """
         A centralized control, Expert control
         :param index: Robot index
         :param sensor_data: Data from robot sensor
-        :param network_data: Data from the scene
+        :param scene_data: Data from the scene
         :return: Control data
         """
         out_put = ControlData()
-        if not network_data:
+        if not scene_data:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
@@ -85,7 +88,8 @@ class Controller:
         self_orientation = sensor_data.orientation
         self_x = self_position[0]
         self_y = self_position[1]
-        neighbors = network_data[index]
+        neighbors = scene_data.adjacency_list[index]
+        # print(neighbors)
         velocity_sum_x = 0
         velocity_sum_y = 0
         for neighbor in neighbors:
@@ -103,12 +107,16 @@ class Controller:
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
-
+    def initialize_GNN_model(self,num_robot,model_path):
+        self.GNN_model=DecentralController(number_of_agent=num_robot)
+        self.GNN_model.load_state_dict(torch.load(model_path))
+        if self.use_cuda:
+            self.GNN_model.to("cuda")
     def centralized_control_line(
         self,
         index,
         sensor_data,
-        network_data,
+        scene_data,
         separation=2,
         angle=math.pi / 4,
         max_distance=10,
@@ -116,27 +124,27 @@ class Controller:
     ):
         """
         A centralized controller to form a line, Expert control
-        :param index: Dobot index
-        :param sensor_data: Densor_data from robots' sensors or simulators
-        :param network_data: Data from the scene
+        :param index: Robot index
+        :param sensor_data: Sensor_data from robots' sensors or simulators
+        :param scene_data: Data from the scene
         :param separation: Distance between each robots
         :param angle: Desired line angle to the positive part of x axis
         :param max_distance: Robots only interact within this region
         :return: Control data
         """
         out_put = ControlData()
-        if not network_data:
+        if not scene_data:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
         target_position = []
-        robot_num = len(network_data)
+        robot_num = len(scene_data)
         for i in range(robot_num):
             target_position.append(
                 [i * separation * math.cos(angle), i * separation * math.sin(angle)]
             )
         robot_position_dict = collections.defaultdict(tuple)
-        for _, value in network_data.items():
+        for _, value in scene_data.adjacency_list.items():
             for item in value:
                 robot_position_dict[item[0]] = (item[1], item[2])
         neighbor_list = []
@@ -183,30 +191,65 @@ class Controller:
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
 
-    def decentralized_control(self,index, sensor_data,network_data,number_of_agents=3,input_height=100,input_width=100):
+    def decentralized_control(self,index, sensor_data,scene_data,number_of_agents=3,input_height=100,input_width=100):
         """
-        Decentralized controller
-        :param sensor_data: Densor_data from robots' sensors or simulators
+
+        :param index: Robots' index
+        :param sensor_data: Sensor_data from robots' sensors or simulators
+        :param scene_data: Data from the scene
+        :param number_of_agents: The number of agent
+        :param input_height: Input occupancy map height
+        :param input_width: Input occupancy map width
         :return:
         """
 
         out_put = ControlData()
-        if not network_data:
+        if not scene_data:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-        input_occupancy_map = np.zeros((1, number_of_agents, input_width, input_height))
+        if not sensor_data.occupancy_map:
+            out_put.omega_left = 0
+            out_put.omega_right = 0
+            return out_put
+        input_occupancy_maps = np.zeros((1, number_of_agents, input_width, input_height))
+        neighbor=np.zeros((number_of_agents,number_of_agents))
 
-        adjacency_matrix = np.zeros((number_of_agents, number_of_agents), dtype=np.float32)
-        for key,value in network_data.items():
-            for item in value:
-                adjacency_matrix[key][item[0]]=1
-        print(adjacency_matrix)
-        r = np.zeros((1, number_of_agents, 1))
-        a = np.zeros((1, number_of_agents, 1))
+        ref = np.zeros((1, number_of_agents, 1))
+        scale = np.zeros((1, number_of_agents, 1))
         for i in range(number_of_agents):
-            input_occupancy_map[0,i,:,:] = omlist[i][0].reshape((input_width, input_height))
-            r[0,i,0] = omlist[i][2]
-            a[0,i,0] = omlist[i][3]
+            print(sensor_data.occupancy_map)
+            input_occupancy_maps[0,i,:,:]=sensor_data.occupancy_map
+            ref[0,i,0] = 0
+            scale[0,i,0]=self.desired_distance
+        input_tensor=torch.from_numpy(input_occupancy_maps).double()
+        if self.use_cuda:
+            input_tensor = input_tensor.to('cuda')
+        for key,value in scene_data.adjacency_list.items():
+            for n in value:
+                neighbor[key][n[0]]=1
+        neighbor = torch.from_numpy(neighbor).double()
+        neighbor = neighbor.unsqueeze(0)
+        if self.use_cuda:
+            neighbor = neighbor.to('cuda')
 
+        ref = torch.from_numpy(ref).double()
+        if self.use_cuda:
+            ref = ref.to('cuda')
+
+        scale = torch.from_numpy(scale).double()
+        if self.use_cuda:
+            scale = scale.to('cuda')
+        self.GNN_model.eval()
+        self.GNN_model.addGSO(neighbor)
+
+        #### Set a threshold to eliminate small movements
+        # threshold=0.05
+        control=self.GNN_model(input_tensor,ref,scale)[index] ## model output
+
+        # torch.where(control<threshold, 0., control)
+        # torch.where(control>-threshold, 0., control)
+        out_put = [control]
+        # print("Control",outs)
+        # print(outs)
         return out_put

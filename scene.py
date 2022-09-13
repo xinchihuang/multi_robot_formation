@@ -7,7 +7,6 @@ import random
 from collections import defaultdict
 import numpy as np
 from vrep import vrep_interface
-
 from robot import Robot
 from utils import get_gabreil_graph
 
@@ -76,7 +75,9 @@ class Scene:
 
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
-
+    def initial_GNN(self,num_robot,model_path):
+        for robot in self.robot_list:
+            robot.controller.initialize_GNN_model(num_robot,model_path)
     def update_adjacency_list(self):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -143,7 +144,7 @@ class Scene:
         output.observation_list=observation_list
         output.adjacency_list=self.adjacency_list
         for robot in self.robot_list:
-            robot.network_data = output
+            robot.scene_data = output
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 

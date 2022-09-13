@@ -20,7 +20,7 @@ class Recorder:
         :param sensor_data: Sensor data from robot sensor and simulator. Defined in robot_sensor_vrep.py(SensorData)
         :return:
         """
-        self.sensor_data[sensor_data.robot_index].append(sensor_data.velodyne_points)
+        self.sensor_data[sensor_data.robot_index].append(sensor_data.occupancy_map)
 
     def record_robot_trace(self, sensor_data):
         """

@@ -5,7 +5,7 @@ author: Xinchi Huang
 from vrep.robot_executor_vrep import Executor
 from vrep.robot_sensor_vrep import Sensor
 from controller import Controller
-
+from model.GNN_based_model import DecentralController
 
 class Robot:
     """
@@ -14,9 +14,10 @@ class Robot:
 
     def __init__(self):
         self.index = None
+        self.GNN_model=None
         self.sensor_data = None
         self.control_data = None
-        self.network_data = None
+        self.scene_data = None
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
@@ -27,6 +28,7 @@ class Robot:
     #     :return:
     #     """
     #     pass
+
 
     def get_sensor_data(self):
         """
@@ -42,14 +44,13 @@ class Robot:
         :return: Control data
         """
         # self.control_data = self.controller.centralized_control(
-        #     self.index, self.sensor_data, self.network_data
+        #     self.index, self.sensor_data, self.scene_data
         # )
+
         self.control_data = self.controller.decentralized_control(
-            self.index, self.sensor_data, self.network_data,number_of_agents=5
+            self.index, self.sensor_data, self.scene_data,self.GNN_model,number_of_agents=5
         )
-        # self.control_data = self.controller.centralized_control_line(
-        #     self.index, self.sensor_data, self.network_data
-        # )
+
         return self.control_data
 
     def execute_control(self):
