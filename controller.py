@@ -6,6 +6,8 @@ import math
 import numpy as np
 import torch
 from model.GNN_based_model import DecentralController
+
+
 class ControlData:
     """
     A data structure for passing control signals to executor
@@ -108,7 +110,7 @@ class Controller:
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
     def initialize_GNN_model(self,num_robot,model_path):
-        self.GNN_model=DecentralController(number_of_agent=num_robot)
+        self.GNN_model=DecentralController(number_of_agent=num_robot,use_cuda=False)
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
             self.GNN_model.to("cuda")
@@ -133,6 +135,7 @@ class Controller:
         :return: Control data
         """
         out_put = ControlData()
+
         if not scene_data:
             out_put.omega_left = 0
             out_put.omega_right = 0
@@ -204,41 +207,47 @@ class Controller:
         """
 
         out_put = ControlData()
+
         if not scene_data:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-        if not sensor_data.occupancy_map:
+        if not scene_data.observation_list:
+            out_put.omega_left = 0
+            out_put.omega_right = 0
+            return out_put
+
+        if type(sensor_data.occupancy_map)==None:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
         input_occupancy_maps = np.zeros((1, number_of_agents, input_width, input_height))
         neighbor=np.zeros((number_of_agents,number_of_agents))
 
+        ### need to be removed later
         ref = np.zeros((1, number_of_agents, 1))
+        ### control the formation distance
         scale = np.zeros((1, number_of_agents, 1))
         for i in range(number_of_agents):
-            print(sensor_data.occupancy_map)
-            input_occupancy_maps[0,i,:,:]=sensor_data.occupancy_map
+            # print(sensor_data.occupancy_map)
+            ### need to be modified
+            input_occupancy_maps[0,i,:,:]=scene_data.observation_list[i].occupancy_map
             ref[0,i,0] = 0
             scale[0,i,0]=self.desired_distance
+        ### a
         input_tensor=torch.from_numpy(input_occupancy_maps).double()
-        if self.use_cuda:
-            input_tensor = input_tensor.to('cuda')
         for key,value in scene_data.adjacency_list.items():
             for n in value:
                 neighbor[key][n[0]]=1
         neighbor = torch.from_numpy(neighbor).double()
         neighbor = neighbor.unsqueeze(0)
-        if self.use_cuda:
-            neighbor = neighbor.to('cuda')
-
         ref = torch.from_numpy(ref).double()
-        if self.use_cuda:
-            ref = ref.to('cuda')
-
         scale = torch.from_numpy(scale).double()
+
         if self.use_cuda:
+            input_tensor = input_tensor.to('cuda')
+            neighbor = neighbor.to('cuda')
+            ref = ref.to('cuda')
             scale = scale.to('cuda')
         self.GNN_model.eval()
         self.GNN_model.addGSO(neighbor)
@@ -249,7 +258,14 @@ class Controller:
 
         # torch.where(control<threshold, 0., control)
         # torch.where(control>-threshold, 0., control)
-        out_put = [control]
-        # print("Control",outs)
-        # print(outs)
+
+        out_put.robot_index=index
+        out_put.omega_left = float(control[0][0]) * self.wheel_adjustment
+        out_put.omega_right = float(control[0][1]) * self.wheel_adjustment
+
+
+
+        # out_put = [control]
+        # print("Control",out_put)
+        # # print(outs)
         return out_put

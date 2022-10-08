@@ -18,6 +18,7 @@ class Robot:
         self.sensor_data = None
         self.control_data = None
         self.scene_data = None
+        self.controller_type="model"
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
@@ -43,13 +44,14 @@ class Robot:
         Get controls
         :return: Control data
         """
-        # self.control_data = self.controller.centralized_control(
-        #     self.index, self.sensor_data, self.scene_data
-        # )
-
-        self.control_data = self.controller.decentralized_control(
-            self.index, self.sensor_data, self.scene_data,self.GNN_model,number_of_agents=5
-        )
+        if self.controller_type=="expert":
+            self.control_data = self.controller.centralized_control(
+                self.index, self.sensor_data, self.scene_data
+            )
+        elif self.controller_type=="model":
+            self.control_data = self.controller.decentralized_control(
+                self.index, self.sensor_data, self.scene_data,number_of_agents=5
+            )
 
         return self.control_data
 

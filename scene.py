@@ -16,7 +16,7 @@ class SceneData:
     """
 
     def __init__(self):
-        self.observations = None
+        self.observation_list = None
         self.adjacency_list = None
 
 

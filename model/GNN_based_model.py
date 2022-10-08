@@ -9,11 +9,11 @@ from model.graphUtils import graphML as gml
 
 
 class DecentralController(nn.Module):
-    def __init__(self, number_of_agent=3, input_width=100, input_height=100):
+    def __init__(self, number_of_agent=3, input_width=100, input_height=100,use_cuda=False):
         super().__init__()
         self.S = None
         self.numAgents = number_of_agent
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = "cuda" if use_cuda else "cpu"
         conv_W=[input_width]
         conv_H=[input_height]
         action_num=2
@@ -74,7 +74,7 @@ class DecentralController(nn.Module):
             conv_W.append(W_tmp)
             conv_H.append(H_tmp)
 
-        self.ConvLayers = nn.Sequential(*conv_layers)
+        self.ConvLayers = nn.Sequential(*conv_layers).double()
 
         num_feature_map = channel_num[-1] * conv_W[-1] * conv_H[-1]
 
@@ -97,7 +97,7 @@ class DecentralController(nn.Module):
             )
             compress_mlp.append(nn.LeakyReLU(inplace=True))
 
-        self.compressMLP = nn.Sequential(*compress_mlp)
+        self.compressMLP = nn.Sequential(*compress_mlp).double()
 
         self.numFeatures2Share = compress_features_num[-1]
 
@@ -109,7 +109,7 @@ class DecentralController(nn.Module):
 
         self.L = len(graph_filter_taps_num)  # Number of graph filtering layers
         # self.F = [numCompressFeatures[-1]] + [numCompressFeatures[-1]] + [numCompressFeatures[-1]] + dimNodeSignals  # Features
-        self.F = [graph_filter_taps_num[-1]] + node_signals_dim
+        self.F = [compress_features_num[-1]] + node_signals_dim
         # self.F = [numFeatureMap] + dimNodeSignals  # Features
         self.K = graph_filter_taps_num  # nFilterTaps # Filter taps
         self.E = 1  # Number of edge features
@@ -131,7 +131,7 @@ class DecentralController(nn.Module):
             gfl.append(nn.LeakyReLU(inplace=True))
 
         # And now feed them into the sequential
-        self.GFL = nn.Sequential(*gfl)  # Graph Filtering Layers
+        self.GFL = nn.Sequential(*gfl).double()  # Graph Filtering Layers
 
         #####################################################################
         #                                                                   #
@@ -163,7 +163,7 @@ class DecentralController(nn.Module):
                     )
                 )
 
-        self.actionsMLP = nn.Sequential(*actionsfc)
+        self.actionsMLP = nn.Sequential(*actionsfc).double()
         self.apply(weights_init)
 
     def addGSO(self, S):
@@ -178,17 +178,18 @@ class DecentralController(nn.Module):
             assert S.shape[1] == self.E
             self.S = S
 
-    def forward(self, inputTensor, refs, alphas):
+    def forward(self, input_tensor, refs, alphas):
 
-        B = inputTensor.shape[0]  # batch size
+        B = input_tensor.shape[0] # batch size
         # B x G x N
         extractFeatureMap = torch.zeros(B, self.numFeatures2Share, self.numAgents).to(
             self.device
         )
         for id_agent in range(self.numAgents):
             # for id_agent in range(1):
-            input_currentAgent = inputTensor[:, id_agent, :, :]
+            input_currentAgent = input_tensor[:, id_agent, :, :]
             input_currentAgent = input_currentAgent.unsqueeze(1).double()
+
             featureMap = self.ConvLayers(input_currentAgent)
             featureMapFlatten = featureMap.view(featureMap.size(0), -1)
             # extractFeatureMap[:, :, id_agent] = featureMapFlatten
@@ -419,9 +420,9 @@ class DecentralPlannerNet(nn.Module):
         )
         for id_agent in range(self.numAgents):
             # for id_agent in range(1):
-            input_currentAgent = inputTensor[:, id_agent, :, :]
-            input_currentAgent = input_currentAgent.unsqueeze(1).double()
-            featureMap = self.ConvLayers(input_currentAgent)
+            input_current_agent = inputTensor[:, id_agent, :, :]
+            input_current_agent = input_current_agent.unsqueeze(1).double()
+            featureMap = self.ConvLayers(input_current_agent)
             featureMapFlatten = featureMap.view(featureMap.size(0), -1)
             # extractFeatureMap[:, :, id_agent] = featureMapFlatten
             compressfeature = self.compressMLP(featureMapFlatten)

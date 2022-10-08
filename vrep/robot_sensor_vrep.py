@@ -73,6 +73,7 @@ class Sensor:
             if point_map==None:
                 continue
             occupancy_map[point_map[0]][point_map[1]]=0
+        return occupancy_map
 
     def get_sensor_data(self):
         """

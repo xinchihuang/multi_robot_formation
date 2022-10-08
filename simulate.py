@@ -51,9 +51,9 @@ class Simulation:
                 control_data = robot.get_control_data()
                 robot.execute_control()
                 # record data
-                data_recorder.record_sensor_data(sensor_data)
-                data_recorder.record_robot_trace(sensor_data)
-                data_recorder.record_controller_output(control_data)
+                # data_recorder.record_sensor_data(sensor_data)
+                # data_recorder.record_robot_trace(sensor_data)
+                # data_recorder.record_controller_output(control_data)
 
             vrep_interface.synchronize(self.client_id)
             # self.scene.broadcast_adjacency_list()
