@@ -61,7 +61,8 @@ class Simulation:
         data_recorder.save_to_file()
         vrep_interface.stop(self.client_id)
         return 1
-    def initial_scene(self, num_robot,model_path):
+
+    def initial_scene(self, num_robot, model_path):
         """
 
         :param num_robot:
@@ -72,7 +73,7 @@ class Simulation:
         for i in range(num_robot):
             simulation_scene.add_robot(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
-        simulation_scene.initial_GNN(num_robot,model_path)
+        simulation_scene.initial_GNN(num_robot, model_path)
         self.scene = simulation_scene
 
     def check_stop_condition(self):

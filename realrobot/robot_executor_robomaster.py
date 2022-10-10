@@ -3,7 +3,7 @@ A executor template. Record simulator/physical robot information,
  and used for execute control in simulator or real robot
 author: Xinchi Huang
 """
-from vrep import vrep_interface
+
 
 
 class Executor:
@@ -20,7 +20,7 @@ class Executor:
 
     def execute_control(self, control_data):
         """
-        Use interface/APIs to execute control in simulator/real world
+        Use interface/APIs to execute control in real world
         :param control_data: Controls to be execute
         """
         omega_left = control_data.omega_left
@@ -29,11 +29,3 @@ class Executor:
         print("left", omega_left)
         print("right", omega_right)
 
-        vrep_interface.post_control(
-            self.client_id,
-            self.motor_left_handle,
-            self.motor_right_handle,
-            omega_left,
-            omega_right,
-        )
-        # vrep_interface.synchronize(self.client_id)

@@ -10,6 +10,7 @@ from vrep import vrep_interface
 from robot import Robot
 from utils import get_gabreil_graph
 
+
 class SceneData:
     """
     A class for passing data from scene
@@ -75,9 +76,11 @@ class Scene:
 
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
-    def initial_GNN(self,num_robot,model_path):
+
+    def initial_GNN(self, num_robot, model_path):
         for robot in self.robot_list:
-            robot.controller.initialize_GNN_model(num_robot,model_path)
+            robot.controller.initialize_GNN_model(num_robot, model_path)
+
     def update_adjacency_list(self):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -129,22 +132,24 @@ class Scene:
         self.update_adjacency_list()
         for robot in self.robot_list:
             robot.network_data = self.adjacency_list
+
     def broadcast_all(self):
         """
         Send observations to all robots for GNN control
         Observations: (All robots' observation, adjacency_list)
         :return: None
         """
-        output=SceneData()
-        observation_list=[]
+        output = SceneData()
+        observation_list = []
         for robot in self.robot_list:
-            observation=robot.get_sensor_data()
+            observation = robot.get_sensor_data()
             observation_list.append(observation)
         self.update_adjacency_list()
-        output.observation_list=observation_list
-        output.adjacency_list=self.adjacency_list
+        output.observation_list = observation_list
+        output.adjacency_list = self.adjacency_list
         for robot in self.robot_list:
             robot.scene_data = output
+
     def set_one_robot_pose(self, robot_handle, position, orientation):
         """
 
@@ -185,12 +190,7 @@ class Scene:
                     continue
                 pose_list.append([pos_x, pos_y, theta])
                 break
-        pose_list = [[-4.5,-4.5,0],
-                       [-4.5,4,1],
-                       [4,4.5,2],
-                       [4,-4,3],
-                       [-0.5,-0.5,4],
-                      ]
+        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         num_robot = len(self.robot_list)
         for i in range(num_robot):
             pos_height = 0.1587

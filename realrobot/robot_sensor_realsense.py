@@ -6,7 +6,7 @@ import math
 import numpy
 import numpy as np
 
-from vrep import vrep_interface
+
 import occupancy_map_simulator
 
 
@@ -106,38 +106,28 @@ class Sensor:
         :return: Data from sensor and simulator
         """
         robot_sensor_data = SensorData()
-        position, orientation = vrep_interface.get_robot_pose(
-            self.client_id, self.robot_handle
-        )
-        point_cloud = []
+
         linear_velocity = 0
         angular_velocity = 0
-        for i in range(1):
-            (
-                linear_velocity,
-                angular_velocity,
-                velodyne_points,
-            ) = vrep_interface.get_sensor_data(
-                self.client_id, self.robot_handle, self.robot_index
-            )
-            point_cloud.extend(velodyne_points[2])
-            # vrep_interface.synchronize(self.client_id)
-        # print(len(point_cloud))
-        robot_sensor_data.robot_index = self.robot_index
-        robot_sensor_data.position = position
-        robot_sensor_data.orientation = orientation
-        robot_sensor_data.linear_velocity = linear_velocity
-        robot_sensor_data.angular_velocity = angular_velocity
-
+        position=None
+        orientation=None
         # occupancy_map=self.process_raw_data(point_cloud)
-
         ### fake data
+
         global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
         robot_size, max_height, map_size, max_x, max_y = 0.2, 0.3, 100, 10, 10
         occupancy_map = occupancy_map_simulator.generate_map(
             position_lists_local, robot_size, max_height, map_size, max_x, max_y
         )
+        position=global_positions[self.robot_index]
+        orientation=global_positions[self.robot_index]
+        robot_sensor_data.robot_index = self.robot_index
+        robot_sensor_data.position = position
+        robot_sensor_data.orientation = orientation
+        robot_sensor_data.linear_velocity = linear_velocity
+        robot_sensor_data.angular_velocity = angular_velocity
         robot_sensor_data.occupancy_map = occupancy_map[self.robot_index]
+
 
         return robot_sensor_data

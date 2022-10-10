@@ -35,8 +35,8 @@ class Controller:
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
-        self.GNN_model=None
-        self.use_cuda=False
+        self.GNN_model = None
+        self.use_cuda = False
 
     def velocity_transform(self, velocity_x, velocity_y, theta):
         """
@@ -87,7 +87,6 @@ class Controller:
             return out_put
         self_robot_index = index
 
-
         self_position = sensor_data.position
         self_orientation = sensor_data.orientation
         self_x = self_position[0]
@@ -111,11 +110,13 @@ class Controller:
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
-    def initialize_GNN_model(self,num_robot,model_path):
-        self.GNN_model=DecentralController(number_of_agent=num_robot,use_cuda=False)
+
+    def initialize_GNN_model(self, num_robot, model_path):
+        self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=False)
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
             self.GNN_model.to("cuda")
+
     def centralized_control_line(
         self,
         index,
@@ -178,7 +179,7 @@ class Controller:
         velocity_index_y = 0
         self_position = sensor_data.position[:2]
         theta = sensor_data.orientation[2]
-        neighbor_num=len(neighbor_list)
+        neighbor_num = len(neighbor_list)
         for i in range(neighbor_num):
             w_ij = [
                 self_position[0] - neighbor_list[i][0] - desired_force[i][0],
@@ -196,7 +197,15 @@ class Controller:
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
 
-    def decentralized_control(self,index, sensor_data,scene_data,number_of_agents=3,input_height=100,input_width=100):
+    def decentralized_control(
+        self,
+        index,
+        sensor_data,
+        scene_data,
+        number_of_agents=3,
+        input_height=100,
+        input_width=100,
+    ):
         """
 
         :param index: Robots' index
@@ -224,8 +233,10 @@ class Controller:
         #     out_put.omega_left = 0
         #     out_put.omega_right = 0
         #     return out_put
-        input_occupancy_maps = np.zeros((1, number_of_agents, input_width, input_height))
-        neighbor=np.zeros((number_of_agents,number_of_agents))
+        input_occupancy_maps = np.zeros(
+            (1, number_of_agents, input_width, input_height)
+        )
+        neighbor = np.zeros((number_of_agents, number_of_agents))
         ### need to be removed later
         ref = np.zeros((1, number_of_agents, 1))
         ### control the formation distance
@@ -233,41 +244,40 @@ class Controller:
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
-            input_occupancy_maps[0,i,:,:]=scene_data.observation_list[i].occupancy_map
-            ref[0,i,0] = 0
-            scale[0,i,0]=self.desired_distance
+            input_occupancy_maps[0, i, :, :] = scene_data.observation_list[
+                i
+            ].occupancy_map
+            ref[0, i, 0] = 0
+            scale[0, i, 0] = self.desired_distance
         ### a
-        input_tensor=torch.from_numpy(input_occupancy_maps).double()
-        for key,value in scene_data.adjacency_list.items():
+        input_tensor = torch.from_numpy(input_occupancy_maps).double()
+        for key, value in scene_data.adjacency_list.items():
             for n in value:
-                neighbor[key][n[0]]=1
+                neighbor[key][n[0]] = 1
         neighbor = torch.from_numpy(neighbor).double()
         neighbor = neighbor.unsqueeze(0)
         ref = torch.from_numpy(ref).double()
         scale = torch.from_numpy(scale).double()
         # print("TENSOR")
 
-
         if self.use_cuda:
-            input_tensor = input_tensor.to('cuda')
-            neighbor = neighbor.to('cuda')
-            ref = ref.to('cuda')
-            scale = scale.to('cuda')
+            input_tensor = input_tensor.to("cuda")
+            neighbor = neighbor.to("cuda")
+            ref = ref.to("cuda")
+            scale = scale.to("cuda")
         self.GNN_model.eval()
         self.GNN_model.addGSO(neighbor)
 
         #### Set a threshold to eliminate small movements
         # threshold=0.05
-        control=self.GNN_model(input_tensor,ref,scale)[index] ## model output
+        control = self.GNN_model(input_tensor, ref, scale)[index]  ## model output
 
         # torch.where(control<threshold, 0., control)
         # torch.where(control>-threshold, 0., control)
 
-        out_put.robot_index=index
+        out_put.robot_index = index
         out_put.omega_left = float(control[0][0]) * self.wheel_adjustment
         out_put.omega_right = float(control[0][1]) * self.wheel_adjustment
-
-
 
         # out_put = [control]
         # print("Control",out_put)

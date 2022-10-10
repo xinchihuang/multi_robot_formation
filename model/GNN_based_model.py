@@ -9,23 +9,25 @@ from model.graphUtils import graphML as gml
 
 
 class DecentralController(nn.Module):
-    def __init__(self, number_of_agent=3, input_width=100, input_height=100,use_cuda=False):
+    def __init__(
+        self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
+    ):
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
-        conv_W=[input_width]
-        conv_H=[input_height]
-        action_num=2
-        channel_num=[1] + [32, 32, 64, 64, 128]
-        stride_num=[1, 1, 1, 1, 1]
+        conv_W = [input_width]
+        conv_H = [input_height]
+        action_num = 2
+        channel_num = [1] + [32, 32, 64, 64, 128]
+        stride_num = [1, 1, 1, 1, 1]
         compress_MLP_dim = 1
-        compress_features_num = [2 ** 7]
+        compress_features_num = [2**7]
 
         max_pool_filter_Taps = 2
         max_pool_stride = 2
         # # 1 layer origin
-        node_signals_dim = [2 ** 7]
+        node_signals_dim = [2**7]
 
         # nGraphFilterTaps = [3,3,3]
         graph_filter_taps_num = [3]
@@ -58,12 +60,12 @@ class DecentralController(nn.Module):
             conv_layers.append(nn.LeakyReLU(inplace=True))
 
             W_tmp = (
-                    int((conv_W[l] - filter_taps[l] + 2 * padding_size[l]) / stride_num[l])
-                    + 1
+                int((conv_W[l] - filter_taps[l] + 2 * padding_size[l]) / stride_num[l])
+                + 1
             )
             H_tmp = (
-                    int((conv_H[l] - filter_taps[l] + 2 * padding_size[l]) / stride_num[l])
-                    + 1
+                int((conv_H[l] - filter_taps[l] + 2 * padding_size[l]) / stride_num[l])
+                + 1
             )
             # Adding maxpooling
             if l % 2 == 0:
@@ -108,9 +110,7 @@ class DecentralController(nn.Module):
         #####################################################################
 
         self.L = len(graph_filter_taps_num)  # Number of graph filtering layers
-        # self.F = [numCompressFeatures[-1]] + [numCompressFeatures[-1]] + [numCompressFeatures[-1]] + dimNodeSignals  # Features
         self.F = [compress_features_num[-1]] + node_signals_dim
-        # self.F = [numFeatureMap] + dimNodeSignals  # Features
         self.K = graph_filter_taps_num  # nFilterTaps # Filter taps
         self.E = 1  # Number of edge features
         self.bias = True
@@ -141,7 +141,7 @@ class DecentralController(nn.Module):
 
         # + 10 for ref angles, +10 for alphas
         action_features_num = (
-                [self.F[-1] + 10 + 10] + [self.F[-1]] + [self.F[-1]] + action_features_num
+            [self.F[-1] + 10 + 10] + [self.F[-1]] + [self.F[-1]] + action_features_num
         )
         actionsfc = []
         for l in range(action_MLP_dim):
@@ -180,21 +180,21 @@ class DecentralController(nn.Module):
 
     def forward(self, input_tensor, refs, alphas):
 
-        B = input_tensor.shape[0] # batch size
+        B = input_tensor.shape[0]  # batch size
         # B x G x N
-        extractFeatureMap = torch.zeros(B, self.numFeatures2Share, self.number_of_agent).to(
-            self.device
-        )
+        extract_feature_map = torch.zeros(
+            B, self.numFeatures2Share, self.number_of_agent
+        ).to(self.device)
         for id_agent in range(self.number_of_agent):
             # for id_agent in range(1):
             input_current_agent = input_tensor[:, id_agent, :, :]
             input_current_agent = input_current_agent.unsqueeze(1).double()
 
-            featureMap = self.ConvLayers(input_current_agent)
-            featureMapFlatten = featureMap.view(featureMap.size(0), -1)
-            # extractFeatureMap[:, :, id_agent] = featureMapFlatten
-            compressfeature = self.compressMLP(featureMapFlatten)
-            extractFeatureMap[:, :, id_agent] = compressfeature  # B x F x N
+            feature_map = self.ConvLayers(input_current_agent)
+            feature_map_flatten = feature_map.view(feature_map.size(0), -1)
+            # extract_feature_map[:, :, id_agent] = feature_mapFlatten
+            compressed_feature = self.compressMLP(feature_map_flatten)
+            extract_feature_map[:, :, id_agent] = compressed_feature  # B x F x N
 
         # DCP
         for l in range(self.L):
@@ -205,33 +205,32 @@ class DecentralController(nn.Module):
             self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
 
         # B x F x N - > B x G x N,
-        sharedFeature = self.GFL(extractFeatureMap)
-        sharedFeature = sharedFeature.permute(0, 2, 1)
+        shared_feature = self.GFL(extract_feature_map)
+        shared_feature = shared_feature.permute(0, 2, 1)
 
         # ref angles and alpha concatenation
         for i in range(10):
-            sharedFeature = torch.cat((sharedFeature, refs), dim=2)
+            shared_feature = torch.cat((shared_feature, refs), dim=2)
         for i in range(10):
-            sharedFeature = torch.cat((sharedFeature, alphas), dim=2)
+            shared_feature = torch.cat((shared_feature, alphas), dim=2)
 
-        sharedFeature = sharedFeature.permute(0, 2, 1)
-        sharedFeature = sharedFeature.float()
+        shared_feature = shared_feature.permute(0, 2, 1)
+        shared_feature = shared_feature.float()
         action_predict = []
         for id_agent in range(self.number_of_agent):
             # for id_agent in range(1):
             # DCP_nonGCN
-            # sharedFeature_currentAgent = extractFeatureMap[:, :, id_agent]
+            # shared_feature_currentAgent = extract_feature_map[:, :, id_agent]
             # DCP
-            # torch.index_select(sharedFeature_currentAgent, 3, id_agent)
-            sharedFeature_currentAgent = sharedFeature[:, :, id_agent]
-            # print("sharedFeature_currentAgent.requires_grad: {}\n".format(sharedFeature_currentAgent.requires_grad))
-            # print("sharedFeature_currentAgent.grad_fn: {}\n".format(sharedFeature_currentAgent.grad_fn))
+            # torch.index_select(shared_feature_currentAgent, 3, id_agent)
+            shared_feature_current = shared_feature[:, :, id_agent]
 
-            sharedFeatureFlatten = sharedFeature_currentAgent.view(
-                sharedFeature_currentAgent.size(0), -1
+            shared_feature_flatten = shared_feature_current.view(
+                shared_feature_current.size(0), -1
             ).double()
-            action_currentAgents = self.actionsMLP(sharedFeatureFlatten)  # 1 x 5
-            action_predict.append(action_currentAgents)  # N x 5
+            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x 5
+            action_predict.append(action_current)  # N x 5
 
         return action_predict
+
 

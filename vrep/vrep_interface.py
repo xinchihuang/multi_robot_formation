@@ -162,6 +162,8 @@ def synchronize(clinet_id):
     :param clinet_id: Scene id
     """
     vrep.simxSynchronousTrigger(clinet_id)
+
+
 def stop(client_id):
     """
     Stop
@@ -170,6 +172,7 @@ def stop(client_id):
     """
     vrep.simxStopSimulation(client_id, vrep.simx_opmode_blocking)
     vrep.simxFinish(client_id)
+
 
 # client_id=init_vrep()
 # robot_index=1
