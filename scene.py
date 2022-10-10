@@ -185,6 +185,12 @@ class Scene:
                     continue
                 pose_list.append([pos_x, pos_y, theta])
                 break
+        pose_list = [[-4.5,-4.5,0],
+                       [-4.5,4,1],
+                       [4,4.5,2],
+                       [4,-4,3],
+                       [-0.5,-0.5,4],
+                      ]
         num_robot = len(self.robot_list)
         for i in range(num_robot):
             pos_height = 0.1587

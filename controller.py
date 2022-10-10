@@ -31,7 +31,7 @@ class Controller:
         max_velocity: Maximum linear velocity
         wheel_adjustment: Used for transform linear velocity to angular velocity
         """
-        self.desired_distance = 2
+        self.desired_distance = 2.0
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
@@ -85,7 +85,9 @@ class Controller:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-        self_robot_index = sensor_data.robot_index
+        self_robot_index = index
+
+
         self_position = sensor_data.position
         self_orientation = sensor_data.orientation
         self_x = self_position[0]
@@ -105,7 +107,7 @@ class Controller:
         wheel_velocity_left, wheel_velocity_right = self.velocity_transform(
             velocity_sum_x, velocity_sum_y, theta
         )
-        out_put.robot_index = self_robot_index
+        out_put.robot_index = index
         out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
         out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
         return out_put
@@ -207,23 +209,23 @@ class Controller:
         """
 
         out_put = ControlData()
-
         if not scene_data:
+            print("No scene data")
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
         if not scene_data.observation_list:
+            print("No observation")
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-
-        if type(sensor_data.occupancy_map)==None:
-            out_put.omega_left = 0
-            out_put.omega_right = 0
-            return out_put
+        # if type(sensor_data.occupancy_map)==None:
+        #     print("No occupancy_map")
+        #     out_put.omega_left = 0
+        #     out_put.omega_right = 0
+        #     return out_put
         input_occupancy_maps = np.zeros((1, number_of_agents, input_width, input_height))
         neighbor=np.zeros((number_of_agents,number_of_agents))
-
         ### need to be removed later
         ref = np.zeros((1, number_of_agents, 1))
         ### control the formation distance
@@ -243,6 +245,8 @@ class Controller:
         neighbor = neighbor.unsqueeze(0)
         ref = torch.from_numpy(ref).double()
         scale = torch.from_numpy(scale).double()
+        # print("TENSOR")
+
 
         if self.use_cuda:
             input_tensor = input_tensor.to('cuda')

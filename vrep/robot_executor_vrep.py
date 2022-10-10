@@ -28,6 +28,7 @@ class Executor:
         print("index",control_data.robot_index)
         print("left",omega_left)
         print("right",omega_right)
+
         vrep_interface.post_control(
             self.client_id,
             self.motor_left_handle,
