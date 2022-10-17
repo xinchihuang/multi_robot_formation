@@ -22,9 +22,10 @@ class Robot:
         self.scene_data = None
         self.controller_type = "model"
         self.sensor = Sensor()
-        self.executor = Executor()
+        self.executor = Executor(self.index)
         self.controller = Controller()
-
+    def executor_initialize(self):
+        self.executor.initialize()
     # def set_up_components(self):
     #     """
     #
@@ -51,7 +52,7 @@ class Robot:
             )
         elif self.controller_type == "model":
             self.control_data = self.controller.decentralized_control(
-                self.index, self.sensor_data, self.scene_data, number_of_agents=5
+                self.index, self.sensor_data, self.scene_data, number_of_agents=1
             )
 
         return self.control_data

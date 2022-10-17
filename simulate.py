@@ -2,6 +2,8 @@
 A simulation template
 author: Xinchi Huang
 """
+import time
+
 from scene import Scene
 from recorder import Recorder
 from vrep import vrep_interface
@@ -38,7 +40,8 @@ class Simulation:
         data_recorder.root_dir = "saved_data"
 
         while True:
-            vrep_interface.synchronize(self.client_id)
+            # vrep_interface.synchronize(self.client_id)
+            time.sleep(0.05)
             if (
                 self.check_stop_condition()
                 or simulation_time > self.max_simulation_time
@@ -59,7 +62,7 @@ class Simulation:
             # self.scene.broadcast_adjacency_list()
 
         data_recorder.save_to_file()
-        vrep_interface.stop(self.client_id)
+        # vrep_interface.stop(self.client_id)
         return 1
 
     def initial_scene(self, num_robot, model_path):
@@ -69,7 +72,7 @@ class Simulation:
         :return:
         """
         simulation_scene = Scene()
-        self.client_id = simulation_scene.initial_vrep()
+        # self.client_id = simulation_scene.initial_vrep()
         for i in range(num_robot):
             simulation_scene.add_robot(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
