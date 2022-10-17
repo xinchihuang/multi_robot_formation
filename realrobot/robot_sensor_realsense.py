@@ -533,6 +533,7 @@ class Sensor:
         pc = rs.pointcloud()
         decimate = rs.decimation_filter()
         frames = self.pipeline.wait_for_frames()
+        print(frames)
         depth_frame = frames.get_depth_frame()
         depth_frame = decimate.process(depth_frame)
         # Grab new intrinsics (maybe changed by decimation)

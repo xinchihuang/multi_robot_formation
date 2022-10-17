@@ -41,7 +41,7 @@ class Simulation:
 
         while True:
             # vrep_interface.synchronize(self.client_id)
-            time.sleep(0.05)
+            time.sleep(0.2)
             if (
                 self.check_stop_condition()
                 or simulation_time > self.max_simulation_time

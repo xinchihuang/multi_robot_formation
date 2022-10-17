@@ -276,9 +276,10 @@ class Controller:
         # torch.where(control>-threshold, 0., control)
 
         out_put.robot_index = index
-        out_put.omega_left = float(control[0][0]) * self.wheel_adjustment
-        out_put.omega_right = float(control[0][1]) * self.wheel_adjustment
-
+        # out_put.omega_left = float(control[0][0]) * self.wheel_adjustment*10
+        # out_put.omega_right = float(control[0][1]) * self.wheel_adjustment*10
+        out_put.omega_left = 1
+        out_put.omega_right = 1
         # out_put = [control]
         # print("Control",out_put)
         # # print(outs)
