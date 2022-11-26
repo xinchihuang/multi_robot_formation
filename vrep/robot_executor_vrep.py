@@ -11,13 +11,24 @@ class Executor:
     A class to execute control from controller
     """
 
-    def __init__(self):
+    def __init__(self,index):
+        self.robot_index = index
         self.client_id = None
         self.robot_handle = None
         self.motor_left_handle = None
         self.motor_right_handle = None
         self.point_cloud_handle = None
-
+    def initialize(self):
+        (
+            robot_handle,
+            motor_left_handle,
+            motor_right_handle,
+            point_cloud_handle,
+        ) = vrep_interface.get_vrep_handle(self.client_id, self.robot_index)
+        self.robot_handle = robot_handle
+        self.motor_left_handle = motor_left_handle
+        self.motor_right_handle = motor_right_handle
+        self.point_cloud_handle = point_cloud_handle
     def execute_control(self, control_data):
         """
         Use interface/APIs to execute control in simulator/real world

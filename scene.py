@@ -9,7 +9,7 @@ import numpy as np
 from vrep import vrep_interface
 from robot import Robot
 from utils import get_gabreil_graph
-
+from realrobot.robot_executor_robomaster import Executor
 
 class SceneData:
     """
@@ -41,6 +41,7 @@ class Scene:
         self.adjacency_list = defaultdict(list)
         self.client_id = None
 
+
     def initial_vrep(self):
         """
         initial Vrep get client id
@@ -49,6 +50,22 @@ class Scene:
         self.client_id = vrep_interface.init_vrep()
         return self.client_id
 
+    def add_robot_vrep(self, robot_index):
+        """
+        Add a robot in the scene
+        :param robot_index:
+        :return:
+        """
+        new_robot = Robot()
+
+        new_robot.index = robot_index
+        new_robot.executor.client_id = self.client_id
+        new_robot.executor.initialize()
+        new_robot.sensor.client_id = self.client_id
+        new_robot.sensor.robot_index = robot_index
+        new_robot.sensor.robot_handle = new_robot.executor.robot_handle
+        new_robot.sensor.get_sensor_data()
+        self.robot_list.append(new_robot)
     def add_robot(self, robot_index):
         """
         Add a robot in the scene
@@ -56,27 +73,12 @@ class Scene:
         :return:
         """
         new_robot = Robot()
-        (
-            robot_handle,
-            motor_left_handle,
-            motor_right_handle,
-            point_cloud_handle,
-        ) = vrep_interface.get_vrep_handle(self.client_id, robot_index)
         new_robot.index = robot_index
-
-        new_robot.executor.client_id = self.client_id
-        new_robot.executor.robot_handle = robot_handle
-        new_robot.executor.motor_left_handle = motor_left_handle
-        new_robot.executor.motor_right_handle = motor_right_handle
-        new_robot.executor.point_cloud_handle = point_cloud_handle
-
-        new_robot.sensor.client_id = self.client_id
+        new_robot.executor.initialize()
         new_robot.sensor.robot_index = robot_index
-        new_robot.sensor.robot_handle = robot_handle
-
+        new_robot.sensor.initial_realsense()
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
-
     def initial_GNN(self, num_robot, model_path):
         for robot in self.robot_list:
             robot.controller.initialize_GNN_model(num_robot, model_path)
@@ -158,9 +160,9 @@ class Scene:
         :param orientation:
         :return:
         """
-        vrep_interface.post_robot_pose(
-            self.client_id, robot_handle, position, orientation
-        )
+        # vrep_interface.post_robot_pose(
+        #     self.client_id, robot_handle, position, orientation
+        # )
 
     def reset_pose(self, max_disp_range, min_disp_range):
         """
@@ -190,13 +192,13 @@ class Scene:
                     continue
                 pose_list.append([pos_x, pos_y, theta])
                 break
-        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         num_robot = len(self.robot_list)
-        for i in range(num_robot):
-            pos_height = 0.1587
-            position = [pose_list[i][0], pose_list[i][1], pos_height]
-            orientation = [0, 0, pose_list[i][2]]
-            robot_handle = self.robot_list[i].executor.robot_handle
-            vrep_interface.post_robot_pose(
-                self.client_id, robot_handle, position, orientation
-            )
+        # for i in range(num_robot):
+        #     pos_height = 0.1587
+        #     position = [pose_list[i][0], pose_list[i][1], pos_height]
+        #     orientation = [0, 0, pose_list[i][2]]
+        #     robot_handle = self.robot_list[i].executor.robot_handle
+            # vrep_interface.post_robot_pose(
+            #     self.client_id, robot_handle, position, orientation
+            # )

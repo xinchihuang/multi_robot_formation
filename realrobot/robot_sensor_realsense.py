@@ -11,7 +11,6 @@ import occupancy_map_simulator
 import pyrealsense2 as rs
 import cv2
 
-
 def get_frame():
     # Create a pipeline
     pipeline = rs.pipeline()
@@ -28,7 +27,7 @@ def get_frame():
 
     found_rgb = False
     for s in device.sensors:
-        if s.get_info(rs.camera_info.name) == "RGB Camera":
+        if s.get_info(rs.camera_info.name) == 'RGB Camera':
             found_rgb = True
             break
     if not found_rgb:
@@ -37,7 +36,7 @@ def get_frame():
 
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 
-    if device_product_line == "L500":
+    if device_product_line == 'L500':
         config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
     else:
         config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -48,11 +47,11 @@ def get_frame():
     # Getting the depth sensor's depth scale (see rs-align example for explanation)
     depth_sensor = profile.get_device().first_depth_sensor()
     depth_scale = depth_sensor.get_depth_scale()
-    print("Depth Scale is: ", depth_scale)
+    print("Depth Scale is: " , depth_scale)
 
     # We will be removing the background of objects more than
     #  clipping_distance_in_meters meters away
-    clipping_distance_in_meters = 1  # 1 meter
+    clipping_distance_in_meters = 1 #1 meter
     clipping_distance = clipping_distance_in_meters / depth_scale
 
     # Create an align object
@@ -72,9 +71,7 @@ def get_frame():
             aligned_frames = align.process(frames)
 
             # Get aligned frames
-            aligned_depth_frame = (
-                aligned_frames.get_depth_frame()
-            )  # aligned_depth_frame is a 640x480 depth image
+            aligned_depth_frame = aligned_frames.get_depth_frame() # aligned_depth_frame is a 640x480 depth image
             color_frame = aligned_frames.get_color_frame()
 
             # Validate that both frames are valid
@@ -86,34 +83,24 @@ def get_frame():
 
             # Remove background - Set pixels further than clipping_distance to grey
             grey_color = 153
-            depth_image_3d = np.dstack(
-                (depth_image, depth_image, depth_image)
-            )  # depth image is 1 channel, color is 3 channels
-            bg_removed = np.where(
-                (depth_image_3d > clipping_distance) | (depth_image_3d <= 0),
-                grey_color,
-                color_image,
-            )
+            depth_image_3d = np.dstack((depth_image,depth_image,depth_image)) #depth image is 1 channel, color is 3 channels
+            bg_removed = np.where((depth_image_3d > clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
 
             # Render images:
             #   depth align to color on left
             #   depth on right
-            depth_colormap = cv2.applyColorMap(
-                cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
-            )
+            depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
             images = np.hstack((bg_removed, depth_colormap))
 
-            cv2.namedWindow("Align Example", cv2.WINDOW_NORMAL)
-            cv2.imshow("Align Example", images)
+            cv2.namedWindow('Align Example', cv2.WINDOW_NORMAL)
+            cv2.imshow('Align Example', images)
             key = cv2.waitKey(1)
             # Press esc or 'q' to close the image window
-            if key & 0xFF == ord("q") or key == 27:
+            if key & 0xFF == ord('q') or key == 27:
                 cv2.destroyAllWindows()
                 break
     finally:
         pipeline.stop()
-
-
 class SensorData:
     """
     A class for record sensor data
@@ -213,8 +200,8 @@ class Sensor:
 
         linear_velocity = 0
         angular_velocity = 0
-        position = None
-        orientation = None
+        position=None
+        orientation=None
         # occupancy_map=self.process_raw_data(point_cloud)
         ### fake data
 
@@ -224,13 +211,14 @@ class Sensor:
         occupancy_map = occupancy_map_simulator.generate_map(
             position_lists_local, robot_size, max_height, map_size, max_x, max_y
         )
-        position = global_positions[self.robot_index]
-        orientation = global_positions[self.robot_index]
+        position=global_positions[self.robot_index]
+        orientation=global_positions[self.robot_index]
         robot_sensor_data.robot_index = self.robot_index
         robot_sensor_data.position = position
         robot_sensor_data.orientation = orientation
         robot_sensor_data.linear_velocity = linear_velocity
         robot_sensor_data.angular_velocity = angular_velocity
         robot_sensor_data.occupancy_map = occupancy_map[self.robot_index]
+
 
         return robot_sensor_data
