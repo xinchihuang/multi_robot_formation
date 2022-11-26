@@ -85,10 +85,10 @@ class Controller:
             out_put.omega_left = 0
             out_put.omega_right = 0
             return out_put
-        self_robot_index = index
+        # self_robot_index = index
 
         self_position = sensor_data.position
-        self_orientation = sensor_data.orientation
+        # self_orientation = sensor_data.orientation
         self_x = self_position[0]
         self_y = self_position[1]
         neighbors = scene_data.adjacency_list[index]
@@ -112,6 +112,12 @@ class Controller:
         return out_put
 
     def initialize_GNN_model(self, num_robot, model_path):
+        """
+
+        :param num_robot: The number of robots in simulation run
+        :param model_path: Path to pretrained model
+        :return:
+        """
         self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=False)
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
@@ -244,9 +250,7 @@ class Controller:
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
-            input_occupancy_maps[0, i, :, :] = scene_data.observation_list[
-                i
-            ].occupancy_map
+            input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
         ### a

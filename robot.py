@@ -2,10 +2,10 @@
 A robot template
 author: Xinchi Huang
 """
-# from vrep.robot_executor_vrep import Executor
-# from vrep.robot_sensor_vrep import Sensor
-from realrobot.robot_executor_robomaster import Executor
-from realrobot.robot_sensor_realsense import Sensor
+from vrep.robot_executor_vrep import Executor
+from vrep.robot_sensor_vrep import Sensor
+# from realrobot.robot_executor_robomaster import Executor
+# from realrobot.robot_sensor_realsense import Sensor
 from controller import Controller
 
 

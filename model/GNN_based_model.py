@@ -232,5 +232,3 @@ class DecentralController(nn.Module):
             action_predict.append(action_current)  # N x 5
 
         return action_predict
-
-

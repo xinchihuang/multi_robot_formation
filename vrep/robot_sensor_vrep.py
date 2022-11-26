@@ -8,7 +8,7 @@ import numpy as np
 
 from vrep import vrep_interface
 import occupancy_map_simulator
-
+import cv2
 
 class SensorData:
     """
@@ -41,8 +41,11 @@ class Sensor:
         self.min_range = 0.2
 
         #### sensor output settings
+        self.point_cloud=[]
         self.occupancy_map_size = 100
 
+        self.sensor_buffer=[]
+        self.sensor_buffer_count=0
     def filter_data(self, world_point):
         x = world_point[0]
         y = world_point[1]
@@ -80,7 +83,7 @@ class Sensor:
             np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255
         )
         # print(occupancy_map)
-
+        print(len(sensor_points))
         for i in range(0, len(sensor_points), 3):
             x_world = sensor_points[i + 0]
             y_world = sensor_points[i + 2]
@@ -109,35 +112,41 @@ class Sensor:
         position, orientation = vrep_interface.get_robot_pose(
             self.client_id, self.robot_handle
         )
-        point_cloud = []
-        linear_velocity = 0
-        angular_velocity = 0
-        for i in range(1):
-            (
-                linear_velocity,
-                angular_velocity,
-                velodyne_points,
-            ) = vrep_interface.get_sensor_data(
-                self.client_id, self.robot_handle, self.robot_index
-            )
-            point_cloud.extend(velodyne_points[2])
-            # vrep_interface.synchronize(self.client_id)
-        # print(len(point_cloud))
+        (
+            linear_velocity,
+            angular_velocity,
+            velodyne_points,
+        ) = vrep_interface.get_sensor_data(
+            self.client_id, self.robot_handle, self.robot_index
+        )
+
+
+        self.sensor_buffer.extend(velodyne_points[2])
+        self.sensor_buffer_count+=1
+        print(self.sensor_buffer_count)
+        if self.sensor_buffer_count==8:
+            self.point_cloud=self.sensor_buffer.copy()
+            self.sensor_buffer.clear()
+            self.sensor_buffer_count=0
+
+        print("points ",len(self.point_cloud))
         robot_sensor_data.robot_index = self.robot_index
         robot_sensor_data.position = position
         robot_sensor_data.orientation = orientation
         robot_sensor_data.linear_velocity = linear_velocity
         robot_sensor_data.angular_velocity = angular_velocity
 
-        # occupancy_map=self.process_raw_data(point_cloud)
+        occupancy_map=self.process_raw_data(self.point_cloud)
 
-        ### fake data
-        global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
-        robot_size, max_height, map_size, max_x, max_y = 0.2, 0.3, 100, 10, 10
-        occupancy_map = occupancy_map_simulator.generate_map(
-            position_lists_local, robot_size, max_height, map_size, max_x, max_y
-        )
+        # ### fake data
+        # global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
+        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.3, 100, 10, 10
+        # occupancy_map = occupancy_map_simulator.generate_map(
+        #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
+        # )
         robot_sensor_data.occupancy_map = occupancy_map[self.robot_index]
 
+        cv2.imshow(str(self.robot_index),occupancy_map)
+        cv2.waitKey(1)
         return robot_sensor_data
