@@ -72,9 +72,9 @@ class Simulation:
         :return:
         """
         simulation_scene = Scene()
-        # self.client_id = simulation_scene.initial_vrep()
+        self.client_id = simulation_scene.initial_vrep()
         for i in range(num_robot):
-            simulation_scene.add_robot(i)
+            simulation_scene.add_robot_vrep(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
         simulation_scene.initial_GNN(num_robot, model_path)
         self.scene = simulation_scene

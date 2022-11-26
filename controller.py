@@ -255,7 +255,9 @@ class Controller:
             scale[0, i, 0] = self.desired_distance
         ### a
         input_tensor = torch.from_numpy(input_occupancy_maps).double()
+
         for key, value in scene_data.adjacency_list.items():
+
             for n in value:
                 neighbor[key][n[0]] = 1
         neighbor = torch.from_numpy(neighbor).double()

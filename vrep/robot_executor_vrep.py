@@ -11,14 +11,15 @@ class Executor:
     A class to execute control from controller
     """
 
-    def __init__(self,index):
-        self.robot_index = index
+    def __init__(self):
+        self.robot_index = None
         self.client_id = None
         self.robot_handle = None
         self.motor_left_handle = None
         self.motor_right_handle = None
         self.point_cloud_handle = None
-    def initialize(self):
+    def initialize(self,robot_index,client_id):
+        self.client_id, self.robot_index = robot_index,client_id
         (
             robot_handle,
             motor_left_handle,

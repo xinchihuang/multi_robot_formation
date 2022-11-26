@@ -53,23 +53,21 @@ class Scene:
     def add_robot_vrep(self, robot_index):
         """
         Add a robot in the scene
-        :param robot_index:
+        :param robot_index: The robot index
         :return:
         """
         new_robot = Robot()
-
         new_robot.index = robot_index
-        new_robot.executor.client_id = self.client_id
-        new_robot.executor.initialize()
+        new_robot.executor.initialize(robot_index,self.client_id)
         new_robot.sensor.client_id = self.client_id
         new_robot.sensor.robot_index = robot_index
         new_robot.sensor.robot_handle = new_robot.executor.robot_handle
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
-    def add_robot(self, robot_index):
+    def add_robot_robomaster(self, robot_index):
         """
         Add a robot in the scene
-        :param robot_index:
+        :param robot_index: The robot index
         :return:
         """
         new_robot = Robot()
