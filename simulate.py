@@ -52,14 +52,14 @@ class Simulation:
             print(simulation_time)
             self.scene.broadcast_all()
             for robot in self.scene.robot_list:
-                # robot.get_sensor_data()
-                robot.get_control_data()
+                sensor_data=robot.get_sensor_data()
+                control_data=robot.get_control_data()
                 robot.execute_control()
                 # record data
-                # data_recorder.record_sensor_data(sensor_data)
-                # data_recorder.record_robot_trace(sensor_data)
-                # data_recorder.record_controller_output(control_data)
-            # self.scene.broadcast_adjacency_list()
+                data_recorder.record_sensor_data(sensor_data)
+                data_recorder.record_robot_trace(sensor_data)
+                data_recorder.record_controller_output(control_data)
+
 
         data_recorder.save_to_file()
         # vrep_interface.stop(self.client_id)
@@ -72,9 +72,9 @@ class Simulation:
         :return:
         """
         simulation_scene = Scene()
-        # self.client_id = simulation_scene.initial_vrep()
+        self.client_id = simulation_scene.initial_vrep()
         for i in range(num_robot):
-            simulation_scene.add_robot(i)
+            simulation_scene.add_robot_vrep(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
         simulation_scene.initial_GNN(num_robot, model_path)
         self.scene = simulation_scene

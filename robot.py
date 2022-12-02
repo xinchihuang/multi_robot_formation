@@ -2,10 +2,10 @@
 A robot template
 author: Xinchi Huang
 """
-# from vrep.robot_executor_vrep import Executor
-# from vrep.robot_sensor_vrep import Sensor
-from realrobot.robot_executor_robomaster import Executor
-from realrobot.robot_sensor_realsense import Sensor
+from vrep.robot_executor_vrep import Executor
+from vrep.robot_sensor_vrep import Sensor
+# from realrobot.robot_executor_robomaster import Executor
+# from realrobot.robot_sensor_realsense import Sensor
 from controller import Controller
 
 
@@ -22,10 +22,10 @@ class Robot:
         self.scene_data = None
         self.controller_type = "model"
         self.sensor = Sensor()
-        self.executor = Executor(self.index)
+        self.executor = Executor()
         self.controller = Controller()
-    def executor_initialize(self):
-        self.executor.initialize()
+    # def executor_initialize(self):
+    #     self.executor.initialize()
     # def set_up_components(self):
     #     """
     #
@@ -52,7 +52,7 @@ class Robot:
             )
         elif self.controller_type == "model":
             self.control_data = self.controller.decentralized_control(
-                self.index, self.sensor_data, self.scene_data, number_of_agents=1
+                self.index, self.sensor_data, self.scene_data, number_of_agents=5
             )
 
         return self.control_data
