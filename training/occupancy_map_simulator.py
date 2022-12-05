@@ -157,6 +157,7 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
         )
 
         for world_points in position_lists_local[robot_index]:
+            print(world_points)
             world_points_filtered = data_filter(
                 world_points, max_x, max_y, max_height, 2 * robot_size
             )
