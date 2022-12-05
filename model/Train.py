@@ -158,7 +158,7 @@ class Trainer:
             self.model.addGSO(S)
             self.optimizer.zero_grad()
             outs = self.model(inputs, refs, alphas)
-            print(outs[0], actions[:, 0])
+            # print(outs[0], actions[:, 0])
             loss = self.criterion(outs[0], actions[:, 0])
             for i in range(1, self.nA):
                 loss += self.criterion(outs[i], actions[:, i])
@@ -167,7 +167,7 @@ class Trainer:
             total_loss += loss.item()
 
             total += inputs.size(0) * self.nA
-        print(iteration)
+        # print(iteration)
         print("Average training loss:", total_loss / total)
         return total_loss / total
 

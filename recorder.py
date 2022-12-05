@@ -46,7 +46,7 @@ class Recorder:
         """
 
         self.control_data[control_data.robot_index].append(
-            [control_data.omega_left, control_data.omega_right]
+            [control_data.velocity_x, control_data.velocity_y]
         )
 
     def save_to_file(self):

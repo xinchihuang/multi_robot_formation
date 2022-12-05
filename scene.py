@@ -58,23 +58,12 @@ class Scene:
         """
         new_robot = Robot()
         new_robot.index = robot_index
+        print("index",robot_index)
         new_robot.executor.initialize(robot_index,self.client_id)
         new_robot.sensor.client_id = self.client_id
         new_robot.sensor.robot_index = robot_index
         new_robot.sensor.robot_handle = new_robot.executor.robot_handle
-        new_robot.sensor.get_sensor_data()
-        self.robot_list.append(new_robot)
-    def add_robot_robomaster(self, robot_index):
-        """
-        Add a robot in the scene
-        :param robot_index: The robot index
-        :return:
-        """
-        new_robot = Robot()
-        new_robot.index = robot_index
-        new_robot.executor.initialize()
-        new_robot.sensor.robot_index = robot_index
-        new_robot.sensor.initial_realsense()
+        print("handle",new_robot.executor.robot_handle)
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
     def initial_GNN(self, num_robot, model_path):
@@ -95,6 +84,7 @@ class Scene:
             index_list.append(self.robot_list[i].index)
             position = self.robot_list[i].sensor_data.position[:-1]
             position_list.append(position)
+        print(position_list)
         position_array = np.array(position_list)
 
         # Get Gabreil Graph
@@ -173,30 +163,34 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = []
-        for i in range(len(self.robot_list)):
-            while True:
-                alpha = math.pi * (2 * random.random())
-                rho = max_disp_range * random.random()
-                pos_x = rho * math.cos(alpha)
-                pos_y = rho * math.sin(alpha)
-                theta = 2 * math.pi * random.random()
-                too_close = False
-                for p in pose_list:
-                    if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
-                        too_close = True
-                        break
-                if too_close:
-                    continue
-                pose_list.append([pos_x, pos_y, theta])
-                break
-        # pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # pose_list = []
+        # for i in range(len(self.robot_list)):
+        #     while True:
+        #         alpha = math.pi * (2 * random.random())
+        #         rho = max_disp_range * random.random()
+        #         pos_x = rho * math.cos(alpha)
+        #         pos_y = rho * math.sin(alpha)
+        #         theta = 2 * math.pi * random.random()
+        #         too_close = False
+        #         for p in pose_list:
+        #             if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
+        #                 too_close = True
+        #                 break
+        #         if too_close:
+        #             continue
+        #         pose_list.append([pos_x, pos_y, theta])
+        #
+        pose_list = [[-4, -4, 1], [-4, 4, 1], [4, 4, 1], [4, -4, 1], [0, 0, 1]]
         num_robot = len(self.robot_list)
-        # for i in range(num_robot):
-        #     pos_height = 0.1587
-        #     position = [pose_list[i][0], pose_list[i][1], pos_height]
-        #     orientation = [0, 0, pose_list[i][2]]
-        #     robot_handle = self.robot_list[i].executor.robot_handle
-            # vrep_interface.post_robot_pose(
-            #     self.client_id, robot_handle, position, orientation
-            # )
+
+        for i in range(num_robot):
+            pos_height = 0.1587
+            position = [pose_list[i][0], pose_list[i][1], pos_height]
+
+            orientation = [0, 0, pose_list[i][2]]
+
+            robot_handle = self.robot_list[i].executor.robot_handle
+
+            vrep_interface.post_robot_pose(
+                self.client_id, robot_handle, position, orientation
+            )

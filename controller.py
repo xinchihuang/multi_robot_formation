@@ -15,8 +15,11 @@ class ControlData:
 
     def __init__(self):
         self.robot_index = None
-        self.omega_left = 0
-        self.omega_right = 0
+        # self.omega_left = 0
+        # self.omega_right = 0
+
+        self.velocity_x = 0
+        self.velocity_y = 0
 
 
 class Controller:
@@ -38,40 +41,6 @@ class Controller:
         self.GNN_model = None
         self.use_cuda = False
 
-    def velocity_transform(self, velocity_x, velocity_y, theta):
-        """
-        Transform robot velocity to wheels velocity
-        :param velocity_x:  robot velocity x (float)
-        :param velocity_y: robot velocity y (float)
-        :param theta: Robot orientation
-        :return: wheel velocity left and right (float)
-        """
-        kk = self.centralized_k
-        M11 = kk * math.sin(theta) + math.cos(theta)
-        M12 = -kk * math.cos(theta) + math.sin(theta)
-        M21 = -kk * math.sin(theta) + math.cos(theta)
-        M22 = kk * math.cos(theta) + math.sin(theta)
-
-        wheel_velocity_left = M11 * velocity_x + M12 * velocity_y
-        wheel_velocity_right = M21 * velocity_x + M22 * velocity_y
-
-        if (
-            math.fabs(wheel_velocity_right) >= math.fabs(wheel_velocity_left)
-            and math.fabs(wheel_velocity_right) > self.max_velocity
-        ):
-            alpha = self.max_velocity / math.fabs(wheel_velocity_right)
-        elif (
-            math.fabs(wheel_velocity_right) < math.fabs(wheel_velocity_left)
-            and math.fabs(wheel_velocity_left) > self.max_velocity
-        ):
-            alpha = self.max_velocity / math.fabs(wheel_velocity_left)
-        else:
-            alpha = 1
-
-        wheel_velocity_left = alpha * wheel_velocity_left
-        wheel_velocity_right = alpha * wheel_velocity_right
-        return wheel_velocity_left, wheel_velocity_right
-
     def centralized_control(self, index, sensor_data, scene_data):
         """
         A centralized control, Expert control
@@ -82,9 +51,10 @@ class Controller:
         """
         out_put = ControlData()
         if not scene_data:
-            out_put.omega_left = 0
-            out_put.omega_right = 0
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
             return out_put
+        print("robot index",index)
         # self_robot_index = index
 
         self_position = sensor_data.position
@@ -103,12 +73,10 @@ class Controller:
             velocity_sum_y -= velocity_y
         # transform speed to wheels speed
         theta = sensor_data.orientation[2]
-        wheel_velocity_left, wheel_velocity_right = self.velocity_transform(
-            velocity_sum_x, velocity_sum_y, theta
-        )
         out_put.robot_index = index
-        out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
-        out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
+        out_put.velocity_x = velocity_sum_x
+        out_put.velocity_y = velocity_sum_y
+
         return out_put
 
     def initialize_GNN_model(self, num_robot, model_path):
@@ -146,8 +114,8 @@ class Controller:
         out_put = ControlData()
 
         if not scene_data:
-            out_put.omega_left = 0
-            out_put.omega_right = 0
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
             return out_put
         target_position = []
         robot_num = len(scene_data)
@@ -193,14 +161,11 @@ class Controller:
             ]
             velocity_index_x = velocity_index_x - K_c * w_ij[0]
             velocity_index_y = velocity_index_y - K_c * w_ij[1]
-        wheel_velocity_left, wheel_velocity_right = self.velocity_transform(
-            velocity_index_x, velocity_index_y, theta
-        )
 
         self_robot_index = sensor_data.robot_index
         out_put.robot_index = self_robot_index
-        out_put.omega_left = wheel_velocity_left * self.wheel_adjustment
-        out_put.omega_right = wheel_velocity_right * self.wheel_adjustment
+        out_put.velocity_x = velocity_index_x
+        out_put.velocity_y = velocity_index_y
         return out_put
 
     def decentralized_control(
@@ -226,19 +191,15 @@ class Controller:
         out_put = ControlData()
         if not scene_data:
             print("No scene data")
-            out_put.omega_left = 0
-            out_put.omega_right = 0
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
             return out_put
         if not scene_data.observation_list:
             print("No observation")
-            out_put.omega_left = 0
-            out_put.omega_right = 0
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
             return out_put
-        # if type(sensor_data.occupancy_map)==None:
-        #     print("No occupancy_map")
-        #     out_put.omega_left = 0
-        #     out_put.omega_right = 0
-        #     return out_put
+
         input_occupancy_maps = np.zeros(
             (1, number_of_agents, input_width, input_height)
         )
@@ -282,11 +243,7 @@ class Controller:
         # torch.where(control>-threshold, 0., control)
 
         out_put.robot_index = index
-        # out_put.omega_left = float(control[0][0]) * self.wheel_adjustment*10
-        # out_put.omega_right = float(control[0][1]) * self.wheel_adjustment*10
-        out_put.omega_left = 1
-        out_put.omega_right = 1
-        # out_put = [control]
-        # print("Control",out_put)
-        # # print(outs)
+        out_put.velocity_x= 1
+        out_put.velocity_y = 1
+
         return out_put

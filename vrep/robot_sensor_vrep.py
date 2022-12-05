@@ -80,10 +80,9 @@ class Sensor:
     def process_raw_data(self, point_cloud):
         sensor_points = point_cloud
         occupancy_map = (
-            np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255
-        )
+            np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255)
         # print(occupancy_map)
-        print(len(sensor_points))
+        # print(len(sensor_points))
         for i in range(0, len(sensor_points), 3):
             x_world = sensor_points[i + 0]
             y_world = sensor_points[i + 2]
@@ -123,13 +122,13 @@ class Sensor:
 
         self.sensor_buffer.extend(velodyne_points[2])
         self.sensor_buffer_count+=1
-        print(self.sensor_buffer_count)
+        # print(self.sensor_buffer_count)
         if self.sensor_buffer_count==8:
             self.point_cloud=self.sensor_buffer.copy()
             self.sensor_buffer.clear()
             self.sensor_buffer_count=0
 
-        print("points ",len(self.point_cloud))
+        # print("points ",len(self.point_cloud))
         robot_sensor_data.robot_index = self.robot_index
         robot_sensor_data.position = position
         robot_sensor_data.orientation = orientation

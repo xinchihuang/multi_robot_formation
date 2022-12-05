@@ -157,7 +157,6 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
         )
 
         for world_points in position_lists_local[robot_index]:
-            print(world_points)
             world_points_filtered = data_filter(
                 world_points, max_x, max_y, max_height, 2 * robot_size
             )
@@ -185,10 +184,10 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
 #                 [4,-4,0],
 #                 [0,0,0]]
 # position_lists_local,self_pose=global_to_local(global_positions)
-# self_position_list=[math.pi/4,math.pi/4,0,0,0]
+# self_orientation_list=[math.pi/4,math.pi/4,0,0,0]
 # robot_size,map_size,max_x,max_y=0.2 ,100,10,10
 # max_height=0.3
-# maps=generate_maps(position_lists_local,self_pose,self_position_list,robot_size,max_height,map_size,max_x,max_y)
-# map=maps[1]
+# maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
+# map=maps[2]
 # cv2.imshow("image",map)
 # cv2.waitKey(0)

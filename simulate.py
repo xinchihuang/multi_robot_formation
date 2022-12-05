@@ -52,6 +52,7 @@ class Simulation:
             print(simulation_time)
             self.scene.broadcast_all()
             for robot in self.scene.robot_list:
+                # print("robot index",robot.index)
                 sensor_data=robot.get_sensor_data()
                 control_data=robot.get_control_data()
                 robot.execute_control()
@@ -76,7 +77,7 @@ class Simulation:
         for i in range(num_robot):
             simulation_scene.add_robot_vrep(i)
         simulation_scene.reset_pose(self.initial_max_range, self.initial_min_range)
-        simulation_scene.initial_GNN(num_robot, model_path)
+        # simulation_scene.initial_GNN(num_robot, model_path)
         self.scene = simulation_scene
 
     def check_stop_condition(self):
