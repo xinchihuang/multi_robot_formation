@@ -7,7 +7,6 @@ import numpy
 import numpy as np
 
 from vrep import vrep_interface
-import occupancy_map_simulator
 import cv2
 
 class SensorData:
@@ -146,6 +145,6 @@ class Sensor:
         # )
         robot_sensor_data.occupancy_map = occupancy_map[self.robot_index]
 
-        cv2.imshow(str(self.robot_index),occupancy_map)
-        cv2.waitKey(1)
+        # cv2.imshow(str(self.robot_index),occupancy_map)
+        # cv2.waitKey(1)
         return robot_sensor_data

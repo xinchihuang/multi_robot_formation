@@ -103,7 +103,6 @@ def global_to_local(position_lists_global):
                 ]
             )
         position_lists_local.append(position_list_local_i)
-    print(position_lists_local)
     position_lists_local=blocking(position_lists_local,robot_size=0.2)
     return position_lists_local,self_pose_list
 
@@ -208,19 +207,19 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
     return maps
 
 
-global_positions=[[-4,-4,0],
-                [-4,4,0],
-                [4,4,0],
-                [4,-4,0],
-                [0,0,0]]
-position_lists_local,self_pose=global_to_local(global_positions)
-self_orientation_list=[0,0,0,0,0]
-robot_size,map_size,max_x,max_y=0.2,100,10,10
-max_height=0.3
-maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
-for i in range(5):
-    print(global_positions[i])
-    print(position_lists_local[i])
-    cv2.imshow("image", maps[i])
-    cv2.waitKey(0)
+# global_positions=[[-4,-4,0],
+#                 [-4,4,0],
+#                 [4,4,0],
+#                 [4,-4,0],
+#                 [0,0,0]]
+# position_lists_local,self_pose=global_to_local(global_positions)
+# self_orientation_list=[0,0,0,0,0]
+# robot_size,map_size,max_x,max_y=0.2,100,10,10
+# max_height=0.3
+# maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
+# for i in range(5):
+#     print(global_positions[i])
+#     print(position_lists_local[i])
+#     cv2.imshow("image", maps[i])
+#     cv2.waitKey(0)
 # print(arctan(-8,-0)/math.pi)

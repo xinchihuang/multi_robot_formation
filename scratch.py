@@ -13,7 +13,7 @@ import numpy as np
 #
 # print(a)
 test_simulation = Simulation(50, 0.2)
-test_simulation.initial_scene(5, "saved_model/model_train_episode-200_robot-5.pth")
+test_simulation.initial_scene(5, "/home/xinchi/multi_robot_formation/model/graphUtils/model_final.pth")
 test_simulation.run()
 # point = np.load(
 #     "/home/xinchi/multi_robot_formation/saved_data/0/0/points.npy", allow_pickle=True

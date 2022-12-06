@@ -95,8 +95,6 @@ def centralized_control(index, sensor_data, scene_data, desired_distance):
         out_put.velocity_x = 0
         out_put.velocity_y = 0
         return out_put
-    print("robot index", index)
-    # self_robot_index = index
 
     self_position = sensor_data.position
     # self_orientation = sensor_data.orientation
@@ -153,9 +151,8 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
         scene_data_i.adjacency_list=adjacency_list_i
         control_i=centralized_control(i, sensor_data_i, scene_data_i,desired_distance)
         ref_control_list.append([control_i.velocity_x,control_i.velocity_y])
-        print("robot index", i,[control_i.velocity_x,control_i.velocity_y])
-        cv2.imshow("image",occupancy_maps[i])
-        cv2.waitKey(0)
+        #
+
     return occupancy_maps,ref_control_list,adjacency_lists
 
 present = os.getcwd()
@@ -164,7 +161,9 @@ if not os.path.exists(root):
     os.mkdir(root)
 
 i=0
-while i<1:
+while i<10000:
+    if i%100==0:
+        print(i)
     num_dirs = len(os.listdir(root))
     data_path = os.path.join(root, str(num_dirs))
     try:

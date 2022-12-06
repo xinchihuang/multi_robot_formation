@@ -81,9 +81,10 @@ class Trainer:
         self.inW = inW
         self.inH = inH
         self.batch_size = batch_size
-        self.model = DecentralController(number_of_agent=self.nA, input_width=self.inW, input_height=self.inH,use_cuda=False).double()
+        self.model = DecentralController(number_of_agent=self.nA, input_width=self.inW, input_height=self.inH,use_cuda=cuda).double()
         self.use_cuda = cuda
         if self.use_cuda:
+
             self.model = self.model.to("cuda")
 
         self.lr = lr
@@ -116,8 +117,9 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 10:
+        while self.epoch <10:
             self.epoch+=1
+            iteration=0
             for i, batch in enumerate(tqdm(trainloader)):
                 occupancy_maps = batch["occupancy_maps"]
                 neighbor = batch["neighbor"]
@@ -126,28 +128,32 @@ class Trainer:
                 scale = batch["scale"]
 
                 if self.use_cuda:
-                    occupancy_maps.to("cuda")
-                    neighbor.to("cuda")
-                    reference.to("cuda")
-                    useless.to("cuda")
-                    scale.to("cuda")
+
+                    occupancy_maps=occupancy_maps.to("cuda")
+                    neighbor=neighbor.to("cuda")
+                    reference=reference.to("cuda")
+                    useless=useless.to("cuda")
+                    scale=scale.to("cuda")
                 self.model.addGSO(neighbor)
                 self.optimizer.zero_grad()
                 outs = self.model(occupancy_maps, useless, scale)
                 # print(outs[0], actions[:, 0])
                 loss = self.criterion(outs[0], reference[:,0])
                 for i in range(1, self.nA):
-
                     loss += self.criterion(outs[i], reference[:,i])
                 loss.backward()
                 self.optimizer.step()
                 total_loss += loss.item()
                 total += occupancy_maps.size(0) * self.nA
+                iteration+=1
             # print(iteration)
-            print("Average training_data loss:", total_loss / total)
+                if iteration%100==0:
+                    print("Average training_data loss at iteration "+str(iteration)+":", total_loss / total)
+                    self.save("model_"+str(iteration)+".pth")
         return total_loss / total
 
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
 T=Trainer()
-T.train(data_path_root='/home/xinchi/multi_robot_formation/training_data/data')
+T.train(data_path_root='/home/xinchi/data')
+T.save("model_final.pth")

@@ -22,7 +22,7 @@ class Robot:
         self.scene_data = None
 
         self.platform="vrep"
-        self.controller_type = "expert"
+        self.controller_type = "model"
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()

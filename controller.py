@@ -241,9 +241,9 @@ class Controller:
 
         # torch.where(control<threshold, 0., control)
         # torch.where(control>-threshold, 0., control)
-
+        # print(control)
         out_put.robot_index = index
-        out_put.velocity_x= 1
-        out_put.velocity_y = 1
+        out_put.velocity_x= control[0][0]
+        out_put.velocity_y = control[0][1]
 
         return out_put
