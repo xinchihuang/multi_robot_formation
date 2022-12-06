@@ -3,6 +3,8 @@ import math
 import random
 import numpy as np
 from collections import defaultdict
+import cv2
+import os
 
 class ControlData:
     """
@@ -63,7 +65,6 @@ def update_adjacency_list(position_list):
 
     """
     node_num=len(position_list)
-    print(position_list)
     position_array = np.array(position_list)
 
     # Get Gabreil Graph
@@ -87,14 +88,8 @@ def update_adjacency_list(position_list):
                     )
                 )
     return  new_adj_list
-def centralized_control(index, sensor_data, scene_data,desired_distance):
-    """
-    A centralized control, Expert control
-    :param index: Robot index
-    :param sensor_data: Data from robot sensor
-    :param scene_data: Data from the scene
-    :return: Control data
-    """
+def centralized_control(index, sensor_data, scene_data, desired_distance):
+
     out_put = ControlData()
     if not scene_data:
         out_put.velocity_x = 0
@@ -145,11 +140,12 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
             self_orientation_list.append(theta)
             break
     position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_list)
-    print(position_lists_local)
     occupancy_maps=occupancy_map_simulator.generate_maps(position_lists_local,self_orientation_list)
     ref_control_list=[]
+    adjacency_lists=[]
     for i in range(number_of_robot):
-        adjacency_list_i=update_adjacency_list(position_lists_local[i])
+        adjacency_list_i=update_adjacency_list(global_pose_list)
+        adjacency_lists.append(adjacency_list_i)
         sensor_data_i=SensorData()
         sensor_data_i.position=global_pose_list[i]
         sensor_data_i.orientation=[0,0,global_pose_list[i][2]]
@@ -157,6 +153,29 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
         scene_data_i.adjacency_list=adjacency_list_i
         control_i=centralized_control(i, sensor_data_i, scene_data_i,desired_distance)
         ref_control_list.append([control_i.velocity_x,control_i.velocity_y])
-    print(type(occupancy_maps))
+        print("robot index", i,[control_i.velocity_x,control_i.velocity_y])
+        cv2.imshow("image",occupancy_maps[i])
+        cv2.waitKey(0)
+    return occupancy_maps,ref_control_list,adjacency_lists
 
-generate(5,5,0.2,2)
+present = os.getcwd()
+root = os.path.join(present, "data")
+if not os.path.exists(root):
+    os.mkdir(root)
+
+i=0
+while i<1:
+    num_dirs = len(os.listdir(root))
+    data_path = os.path.join(root, str(num_dirs))
+    try:
+        occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,1)
+        occupancy_maps_array=np.array(occupancy_maps)
+        ref_control_array=np.array(ref_control_list)
+        adjacency_lists_array=np.array(adjacency_lists)
+        os.mkdir(data_path)
+        np.save(os.path.join(data_path,"occupancy_maps"),occupancy_maps_array)
+        np.save(os.path.join(data_path, "reference_controls"), ref_control_array)
+        np.save(os.path.join(data_path, "adjacency_lists"), adjacency_lists_array)
+        i+=1
+    except:
+        continue

@@ -10,11 +10,23 @@ def arctan(x,y):
     if x == 0 and y > 0:
         theta = math.pi / 2
     elif x == 0 and y < 0:
-        theta = -math.pi / 2
+        theta = math.pi*3 / 2
     elif x == 0 and y == 0:
         theta=0
+    elif x>0 and y==0:
+        theta=0
+    elif x<0 and y==0:
+        theta=math.pi
     else:
         theta = math.atan(y / x)
+        if x > 0 and y > 0:
+            pass
+        elif x<0 and y>0:
+            theta=theta+math.pi
+        elif x<0 and y<0:
+            theta=theta+math.pi
+        elif x>0 and y<0:
+            theta=theta+2*math.pi
     return theta
 def blocking(position_lists_local,robot_size=0.2):
     out_position_lists_local=[]
@@ -24,6 +36,8 @@ def blocking(position_lists_local,robot_size=0.2):
             x = position_lists_local[self_i][robot_j][0]
             y = position_lists_local[self_i][robot_j][1]
             theta=arctan(x,y)
+
+
             block=False
             for robot_k in range(len(position_lists_local[self_i])):
                 if robot_k==robot_j:
@@ -38,11 +52,26 @@ def blocking(position_lists_local,robot_size=0.2):
                 x_k2 = x_k + (robot_size / 2) * math.sin(theta)
                 y_k2 = y_k - (robot_size / 2) * math.cos(theta)
 
-                theta_k_1 = arctan(y_k1 , x_k1)
-                theta_k_2 = arctan(y_k2 , x_k2)
-
-                if min(theta_k_1,theta_k_2)<theta<max(theta_k_1,theta_k_2):
-                    block=True
+                theta_k_1 = arctan(x_k1 , y_k1)
+                theta_k_2 = arctan(x_k2 , y_k2)
+                if max(theta_k_1,theta_k_2)-min(theta_k_1,theta_k_2)<math.pi:
+                    if theta_k_1<theta<theta_k_2 or theta_k_2<theta<theta_k_1:
+                        # print(theta/math.pi)
+                        # print(theta_k_1/math.pi,theta_k_2/math.pi)
+                        # print(x,y)
+                        # print(x_k,y_k)
+                        # print(x_k1,y_k1)
+                        # print(x_k2,y_k2)
+                        block=True
+                else:
+                    if theta>max(theta_k_1,theta_k_2) or theta<min(theta_k_1,theta_k_2):
+                        # print(theta/math.pi)
+                        # print(theta_k_1/math.pi,theta_k_2/math.pi)
+                        # print(x,y)
+                        # print(x_k,y_k)
+                        # print(x_k1,y_k1)
+                        # print(x_k2,y_k2)
+                        block=True
             if block==False:
                 position_lists_i.append(position_lists_local[self_i][robot_j])
         out_position_lists_local.append(position_lists_i)
@@ -74,6 +103,7 @@ def global_to_local(position_lists_global):
                 ]
             )
         position_lists_local.append(position_list_local_i)
+    print(position_lists_local)
     position_lists_local=blocking(position_lists_local,robot_size=0.2)
     return position_lists_local,self_pose_list
 
@@ -157,7 +187,6 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
         )
 
         for world_points in position_lists_local[robot_index]:
-            print(world_points)
             world_points_filtered = data_filter(
                 world_points, max_x, max_y, max_height, 2 * robot_size
             )
@@ -179,16 +208,19 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
     return maps
 
 
-# global_positions=[[-4,-4,0],
-#                 [-4,4,0],
-#                 [4,4,0],
-#                 [4,-4,0],
-#                 [0,0,0]]
-# position_lists_local,self_pose=global_to_local(global_positions)
-# self_orientation_list=[math.pi/4,math.pi/4,0,0,0]
-# robot_size,map_size,max_x,max_y=0.2 ,100,10,10
-# max_height=0.3
-# maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
-# map=maps[2]
-# cv2.imshow("image",map)
-# cv2.waitKey(0)
+global_positions=[[-4,-4,0],
+                [-4,4,0],
+                [4,4,0],
+                [4,-4,0],
+                [0,0,0]]
+position_lists_local,self_pose=global_to_local(global_positions)
+self_orientation_list=[0,0,0,0,0]
+robot_size,map_size,max_x,max_y=0.2,100,10,10
+max_height=0.3
+maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
+for i in range(5):
+    print(global_positions[i])
+    print(position_lists_local[i])
+    cv2.imshow("image", maps[i])
+    cv2.waitKey(0)
+# print(arctan(-8,-0)/math.pi)

@@ -1709,7 +1709,7 @@ class NodeVariantGF(nn.Module):
             # the matrix is ordered by score, we just keep the first N
             # weights
             self.copyNodes = torch.arange(self.N).to(S.device)
-        # OBS.: self.weight is updated on each training step, so we cannot
+        # OBS.: self.weight is updated on each training_data step, so we cannot
         # define the self.h vector (i.e. the vector with N elements) here,
         # because otherwise it wouldn't be updated every time. So we need, in
         # the for, to use index_select on the actual weights, to create the
@@ -2213,7 +2213,7 @@ class GraphFilterBatchGSO(GraphFilter):
         with a different GSO for each signal in the batch.
 
     This function is typically useful when not only the graph signal is changed
-    during training, but also the GSO. That is, each data point in the batch is
+    during training_data, but also the GSO. That is, each data point in the batch is
     of the form (x_b,S_b) for b = 1,...,B instead of just x_b. The filter
     coefficients are still the same being applied to all graph filters, but both
     the GSO and the graph signal are different for each datapoint in the batch.

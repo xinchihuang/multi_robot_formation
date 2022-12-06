@@ -86,7 +86,7 @@ class Trainer:
         inW=100,
         inH=100,
         batch_size=16,
-        nA=3,
+        nA=5,
         lr=0.01,
         cuda=True,
     ):
@@ -146,7 +146,7 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        print("training")
+        print("training_data")
         iteration = 0
         for i, batch in enumerate(tqdm(trainloader)):
             iteration += 1
@@ -168,7 +168,7 @@ class Trainer:
 
             total += inputs.size(0) * self.nA
         # print(iteration)
-        print("Average training loss:", total_loss / total)
+        print("Average training_data loss:", total_loss / total)
         return total_loss / total
 
     def save(self, pth):

@@ -118,7 +118,7 @@ class Agent:
         self.model.train()
         total_loss = 0
         total = 0
-        print("training")
+        print("training_data")
         iteration = 0
         for i, batch in enumerate(tqdm(trainloader)):
             iteration += 1
@@ -140,7 +140,7 @@ class Agent:
 
             total += inputs.size(0) * self.nA
         # print(iteration)
-        print("Average training loss:", total_loss / total)
+        print("Average training_data loss:", total_loss / total)
         return total_loss / total
 
     def save(self, pth):

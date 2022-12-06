@@ -173,7 +173,7 @@ class Controller:
         index,
         sensor_data,
         scene_data,
-        number_of_agents=3,
+        number_of_agents=5,
         input_height=100,
         input_width=100,
     ):

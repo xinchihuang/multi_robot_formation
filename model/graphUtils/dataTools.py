@@ -341,7 +341,7 @@ class SourceLocalization(_dataForClassification):
         G (class): Graph on which to diffuse the process, needs an attribute
             .N with the number of nodes (int) and attribute .W with the
             adjacency matrix (np.array)
-        nTrain (int): number of training samples
+        nTrain (int): number of training_data samples
         nValid (int): number of validation samples
         nTest (int): number of testing samples
         sourceNodes (list of int): list of indices of nodes to be used as
@@ -463,7 +463,7 @@ class Authorship(_dataForClassification):
 
     Input:
         authorName (string): which is the selected author to attribute plays to
-        ratioTrain (float): ratio of the total texts to be part of the training
+        ratioTrain (float): ratio of the total texts to be part of the training_data
             set
         ratioValid (float): ratio of the train texts to be part of the
             validation set
@@ -500,7 +500,7 @@ class Authorship(_dataForClassification):
             the selected author
 
     .createGraph(): creates a graph from the WANs of the excerpt written by the
-        selected author available in the training set. The fusion of this WANs
+        selected author available in the training_data set. The fusion of this WANs
         is done in accordance with the input options following
         graphTools.createGraph().
         The resulting adjacency matrix is stored.
@@ -593,7 +593,7 @@ class Authorship(_dataForClassification):
         nValidAuthor = int(round(ratioValid * nTrainAuthor))
         nTestAuthor = nExcerpts - nTrainAuthor
         nTrainAuthor = nTrainAuthor - nValidAuthor
-        # Now, we know how many training, validation and testing samples from
+        # Now, we know how many training_data, validation and testing samples from
         # the required author. But we will also include an equal amount of
         # other authors, therefore
         self.nTrain = round(2 * nTrainAuthor)
@@ -914,7 +914,7 @@ class MovieLens(_data):
             on a user-based graph, each data sample corresponds to a movie, and
             on the movie-based graph, each data sample corresponds to a user.
         labelID (int): this specific node is selected to be interpolated;
-            this has effect in the building of the training, validation and
+            this has effect in the building of the training_data, validation and
             test sets, since only data samples that have a value
             at that node can be used
         ratioTrain (float): ratio of the total samples to be part of the
@@ -1120,7 +1120,7 @@ class MovieLens(_data):
         self.indexDataPoints["valid"] = indexValidPoints
         self.indexDataPoints["test"] = indexTestPoints
 
-        # Now the data has been loaded, and the training/test partition has been
+        # Now the data has been loaded, and the training_data/test partition has been
         # made, create the graph
         self.createGraph()
 
@@ -1257,7 +1257,7 @@ class MovieLens(_data):
     def createGraph(self):
         # Here we can choose to create the movie or the user graph.
         # Let's start with the incomplete matrix, and get randomly some of the
-        # elements from it to use as training data to build the graph.
+        # elements from it to use as training_data data to build the graph.
 
         # Recall that the datapoints that I have already split following the
         # user/movie ID selection (or 'all' for all it matters) have to be
@@ -1279,7 +1279,7 @@ class MovieLens(_data):
         # graph.
 
         # Now we need to partition the dataset into a train set, but be sure
-        # that we included the samples that were used for the training set in
+        # that we included the samples that were used for the training_data set in
         # the self.samples.
 
         # So most of what comes down here is how to select the samples that
@@ -1300,7 +1300,7 @@ class MovieLens(_data):
         # assigned to either one or the other dataset, so when we split
         # these dataloader, we cannot consider these.
 
-        # Let's start with computing how many training points we still need
+        # Let's start with computing how many training_data points we still need
         nTrainPointsAll = round(self.ratioTrain * nDataPoints)
         nTrainPointsRest = nTrainPointsAll - self.nTrain - self.nValid
         # This is the number of points we still need.
@@ -1322,20 +1322,20 @@ class MovieLens(_data):
 
         # Now, get the random permutation of these elements
         randPerm = np.random.permutation(nDataPointsRest)
-        # Pick the number needed for training
+        # Pick the number needed for training_data
         subIndexRandomRest = randPerm[0:nTrainPointsRest]
         # And select the necessary ones at random
         indexTrainPointsRest = (
             indexDataPointsRestAll[0][subIndexRandomRest],
             indexDataPointsRestAll[1][subIndexRandomRest],
         )
-        # So far, we made it to select the appropriate number of training
+        # So far, we made it to select the appropriate number of training_data
         # samples, at random, that do not include the ones we already selected
         # according to labelID.
 
-        # Now, we need to join this selected training points from the rest of
-        # the dataset, with the points from the labelID training set
-        #   Get the points from the labelID (both training and valid)
+        # Now, we need to join this selected training_data points from the rest of
+        # the dataset, with the points from the labelID training_data set
+        #   Get the points from the labelID (both training_data and valid)
         allTrainPointsID = np.concatenate(
             (self.indexDataPoints["train"], self.indexDataPoints["valid"])
         )
@@ -1351,20 +1351,20 @@ class MovieLens(_data):
             np.concatenate((indexTrainPointsRest[0], allTrainPointsID[0])),
             np.concatenate((indexTrainPointsRest[1], allTrainPointsID[1])),
         )
-        # And this is it! We got all the necessary training samples, including
+        # And this is it! We got all the necessary training_data samples, including
         # those that we were already using.
 
-        # Finally, set every other element not in the training set in the
+        # Finally, set every other element not in the training_data set in the
         # workingMatrix to zero
         workingMatrixZeroedTrain = workingMatrix.copy()
         workingMatrixZeroedTrain[indexTrainPoints] = 0
         workingMatrix = workingMatrix - workingMatrixZeroedTrain
         assert len(np.nonzero(workingMatrix)[0]) == nTrainPointsAll
         # To check that the total number of nonzero elements of the matrix are
-        # the total number of training samples that we're supposed to have.
+        # the total number of training_data samples that we're supposed to have.
 
         # Now, we finally have the incompleteMatrix only with the corresponding
-        # elements: a ratioTrain proportion of training samples that, for sure,
+        # elements: a ratioTrain proportion of training_data samples that, for sure,
         # include the ones that we will use in the graph signals dataset
 
         # Finally, on to compute the correlation matrix.
@@ -1437,7 +1437,7 @@ class MovieLens(_data):
         isolatedNodes = np.nonzero(np.abs(diagNormalizedMatrix + 1) < zeroTolerance)
         assert self.labelID not in isolatedNodes[0]
         #   It is highly likely that the labelID won't be isolated node, since
-        #   we are purposefully taking training samples that include this item,
+        #   we are purposefully taking training_data samples that include this item,
         #   but just in case.
         normalizedMatrix[isolatedNodes] = 0.0
         #   Get rid of the "quasi-zeros" that could have arrived through
@@ -1633,16 +1633,16 @@ class TwentyNews(_dataForClassification):
     .getData(dataSubset): loads the data belonging to dataSubset (i.e. 'train'
         or 'test')
 
-    .embedData(): compute the graph embedding of the training dataset after
+    .embedData(): compute the graph embedding of the training_data dataset after
         it has been loaded
 
     .normalizeData(normType): normalize the data in the embedded space following
         a normType norm.
 
-    .createValidationSet(ratio): stores ratio% of the training set as validation
+    .createValidationSet(ratio): stores ratio% of the training_data set as validation
         set.
 
-    .createGraph(): uses the word2vec embedding of the training set to compute
+    .createGraph(): uses the word2vec embedding of the training_data set to compute
         a geometric graph
 
     .getGraph(): fetches the adjacency matrix of the stored graph
@@ -1650,7 +1650,7 @@ class TwentyNews(_dataForClassification):
     .getNumberOfClasses(): fetches the number of classes
 
     .reduceDataset(nTrain, nValid, nTest): reduces the dataset by randomly
-        selected nTrain, nValid and nTest samples from the training, validation
+        selected nTrain, nValid and nTest samples from the training_data, validation
         and testing dataloader, respectively.
 
     authorData = .getAuthorData(samplesType, selectData, [, optionalArguments])
@@ -1671,7 +1671,7 @@ class TwentyNews(_dataForClassification):
             the selected author
 
     .createGraph(): creates a graph from the WANs of the excerpt written by the
-        selected author available in the training set. The fusion of this WANs
+        selected author available in the training_data set. The fusion of this WANs
         is done in accordance with the input options following
         graphTools.createGraph().
         The resulting adjacency matrix is stored.
@@ -1754,7 +1754,7 @@ class TwentyNews(_dataForClassification):
         self.adjacencyMatrix = None  # Store the graph built from the loaded
         # data
 
-        # Get the training dataset. Saves vocab, dataset, and samples
+        # Get the training_data dataset. Saves vocab, dataset, and samples
         self.getData("train")
         # Embeds the data following the N words and a word2vec approach, saves
         # the embedded vectors in graphData, and updates vocab to keep only
@@ -1812,7 +1812,7 @@ class TwentyNews(_dataForClassification):
 
     def embedData(self):
 
-        # We need to have loaded the training dataset first.
+        # We need to have loaded the training_data dataset first.
         assert "train" in self.dataset.keys()
         # Embed them (word2vec embedding)
         self.dataset["train"].embed()
@@ -1860,7 +1860,7 @@ class TwentyNews(_dataForClassification):
         self.samples["valid"]["labels"] = self.samples["train"]["labels"][
             validationIndices
         ]
-        # And update the training set
+        # And update the training_data set
         self.samples["train"]["signals"] = self.samples["train"]["signals"][
             trainIndices, :
         ]
@@ -1893,7 +1893,7 @@ class TwentyNews(_dataForClassification):
         if nTrain < self.nTrain:
             randomIndices = np.random.permutation(self.nTrain)
             trainIndices = randomIndices[0:nTrain]
-            # And update the training set
+            # And update the training_data set
             self.samples["train"]["signals"] = self.samples["train"]["signals"][
                 trainIndices, :
             ]
@@ -1904,7 +1904,7 @@ class TwentyNews(_dataForClassification):
         if nValid < self.nValid:
             randomIndices = np.random.permutation(self.nValid)
             validIndices = randomIndices[0:nValid]
-            # And update the training set
+            # And update the training_data set
             self.samples["valid"]["signals"] = self.samples["valid"]["signals"][
                 validIndices, :
             ]
@@ -1915,7 +1915,7 @@ class TwentyNews(_dataForClassification):
         if nTest < self.nTest:
             randomIndices = np.random.permutation(self.nTest)
             testIndices = randomIndices[0:nTest]
-            # And update the training set
+            # And update the training_data set
             self.samples["test"]["signals"] = self.samples["test"]["signals"][
                 testIndices, :
             ]
