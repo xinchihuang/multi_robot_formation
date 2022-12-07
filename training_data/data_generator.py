@@ -87,7 +87,7 @@ def update_adjacency_list(position_list):
                         distance,
                     )
                 )
-    return  new_adj_list
+    return new_adj_list
 def centralized_control(index, sensor_data, scene_data, desired_distance):
 
     out_put = ControlData()
@@ -137,6 +137,8 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
             global_pose_list.append([pos_x, pos_y, 0])
             self_orientation_list.append(theta)
             break
+    global_pose_list=[[-2, -2, 0], [-2, 2, 0], [2, 2, 0], [2, -2, 0], [0, 0, 0]]
+    self_orientation_list=[0,0,0,0,0]
     position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_list)
     occupancy_maps=occupancy_map_simulator.generate_maps(position_lists_local,self_orientation_list)
     ref_control_list=[]
@@ -152,7 +154,11 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
         control_i=centralized_control(i, sensor_data_i, scene_data_i,desired_distance)
         ref_control_list.append([control_i.velocity_x,control_i.velocity_y])
         #
-
+    for i in range(number_of_robot):
+        cv2.imshow(str(i), occupancy_maps[i])
+        cv2.waitKey(0)
+        print(global_pose_list[i])
+        print(ref_control_list[i],adjacency_lists[i])
     return occupancy_maps,ref_control_list,adjacency_lists
 
 present = os.getcwd()
@@ -161,13 +167,13 @@ if not os.path.exists(root):
     os.mkdir(root)
 
 i=0
-while i<10000:
+while i<1:
     if i%100==0:
         print(i)
     num_dirs = len(os.listdir(root))
     data_path = os.path.join(root, str(num_dirs))
     try:
-        occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,1)
+        occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,2)
         occupancy_maps_array=np.array(occupancy_maps)
         ref_control_array=np.array(ref_control_list)
         adjacency_lists_array=np.array(adjacency_lists)
@@ -178,3 +184,4 @@ while i<10000:
         i+=1
     except:
         continue
+generate(5,5,0.2,2)

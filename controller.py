@@ -6,7 +6,8 @@ import math
 import numpy as np
 import torch
 from model.GNN_based_model import DecentralController
-
+import cv2
+from training_data.occupancy_map_simulator import generate_map_one,global_to_local
 
 class ControlData:
     """
@@ -34,7 +35,7 @@ class Controller:
         max_velocity: Maximum linear velocity
         wheel_adjustment: Used for transform linear velocity to angular velocity
         """
-        self.desired_distance = 2.0
+        self.desired_distance = 1.0
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
@@ -190,12 +191,21 @@ class Controller:
 
         out_put = ControlData()
         if not scene_data:
+
             print("No scene data")
+            out_put.robot_index = index
             out_put.velocity_x = 0
             out_put.velocity_y = 0
             return out_put
         if not scene_data.observation_list:
             print("No observation")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.position_list or not scene_data.orientation_list:
+            print("No data")
+            out_put.robot_index = index
             out_put.velocity_x = 0
             out_put.velocity_y = 0
             return out_put
@@ -208,17 +218,22 @@ class Controller:
         ref = np.zeros((1, number_of_agents, 1))
         ### control the formation distance
         scale = np.zeros((1, number_of_agents, 1))
+        position_lists_global = scene_data.position_list
+        orientation_list = scene_data.orientation_list
+        position_lists_local, self_pose_list = global_to_local(position_lists_global)
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
-            input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
+            occupancy_map_i=generate_map_one(position_lists_local[i], orientation_list[i])
+            cv2.imshow(str(i), occupancy_map_i)
+            cv2.waitKey(1)
+            input_occupancy_maps[0, i, :, :] = occupancy_map_i
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
         ### a
         input_tensor = torch.from_numpy(input_occupancy_maps).double()
 
         for key, value in scene_data.adjacency_list.items():
-
             for n in value:
                 neighbor[key][n[0]] = 1
         neighbor = torch.from_numpy(neighbor).double()
@@ -237,13 +252,9 @@ class Controller:
 
         #### Set a threshold to eliminate small movements
         # threshold=0.05
-        control = self.GNN_model(input_tensor, ref, scale)[index]  ## model output
+        control = self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()  ## model output
 
-        # torch.where(control<threshold, 0., control)
-        # torch.where(control>-threshold, 0., control)
-        # print(control)
         out_put.robot_index = index
         out_put.velocity_x= control[0][0]
         out_put.velocity_y = control[0][1]
-
         return out_put

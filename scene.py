@@ -19,6 +19,8 @@ class SceneData:
     def __init__(self):
         self.observation_list = None
         self.adjacency_list = None
+        self.position_list = None
+        self.orientation_list = None
 
 
 class Scene:
@@ -39,9 +41,9 @@ class Scene:
         """
         self.robot_list = []
         self.adjacency_list = defaultdict(list)
+        self.position_list = None
+        self.orientation_list = None
         self.client_id = None
-
-
     def initial_vrep(self):
         """
         initial Vrep get client id
@@ -49,7 +51,6 @@ class Scene:
         """
         self.client_id = vrep_interface.init_vrep()
         return self.client_id
-
     def add_robot_vrep(self, robot_index):
         """
         Add a robot in the scene
@@ -58,19 +59,17 @@ class Scene:
         """
         new_robot = Robot()
         new_robot.index = robot_index
-        print("index",robot_index)
         new_robot.executor.initialize(robot_index,self.client_id)
         new_robot.sensor.client_id = self.client_id
         new_robot.sensor.robot_index = robot_index
         new_robot.sensor.robot_handle = new_robot.executor.robot_handle
-        print("handle",new_robot.executor.robot_handle)
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
     def initial_GNN(self, num_robot, model_path):
         for robot in self.robot_list:
             robot.controller.initialize_GNN_model(num_robot, model_path)
 
-    def update_adjacency_list(self):
+    def update_scene_data(self):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
@@ -80,11 +79,13 @@ class Scene:
         # collect robots' position in th scene
         position_list = []
         index_list = []
+        orientation_list=[]
         for i in range(node_num):
             index_list.append(self.robot_list[i].index)
-            position = self.robot_list[i].sensor_data.position[:-1]
+            position = self.robot_list[i].sensor_data.position
+            orientation = self.robot_list[i].sensor_data.orientation[-1]
+            orientation_list.append(orientation)
             position_list.append(position)
-        print(position_list)
         position_array = np.array(position_list)
 
         # Get Gabreil Graph
@@ -108,20 +109,13 @@ class Scene:
                         )
                     )
         self.adjacency_list = new_adj_list
-
+        self.position_list = position_list
+        self.orientation_list = orientation_list
         print("DISTANCE")
         for r in self.adjacency_list:
             for n in self.adjacency_list[r]:
                 print("edge:", r, n[0], "distance:", n[3])
 
-    def broadcast_adjacency_list(self):
-        """
-        Send adjacency list to all robots for centralized control
-        :return: None
-        """
-        self.update_adjacency_list()
-        for robot in self.robot_list:
-            robot.network_data = self.adjacency_list
 
     def broadcast_all(self):
         """
@@ -134,23 +128,14 @@ class Scene:
         for robot in self.robot_list:
             observation = robot.get_sensor_data()
             observation_list.append(observation)
-        self.update_adjacency_list()
+        self.update_scene_data()
+
         output.observation_list = observation_list
         output.adjacency_list = self.adjacency_list
+        output.position_list = self.position_list
+        output.orientation_list = self.orientation_list
         for robot in self.robot_list:
             robot.scene_data = output
-
-    def set_one_robot_pose(self, robot_handle, position, orientation):
-        """
-
-        :param robot_handle:
-        :param position:
-        :param orientation:
-        :return:
-        """
-        # vrep_interface.post_robot_pose(
-        #     self.client_id, robot_handle, position, orientation
-        # )
 
     def reset_pose(self, max_disp_range, min_disp_range):
         """
@@ -180,7 +165,7 @@ class Scene:
         #             continue
         #         pose_list.append([pos_x, pos_y, theta])
         #
-        pose_list = [[-4, -4, 1], [-4, 4, 1], [4, 4, 1], [4, -4, 1], [0, 0, 1]]
+        pose_list = [[-2, -2, 1], [-2, 2, 1], [2, 2, 1], [2, -2, 1], [0, 0, 1]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

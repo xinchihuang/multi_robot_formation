@@ -22,7 +22,7 @@ class Robot:
         self.scene_data = None
 
         self.platform="vrep"
-        self.controller_type = "model"
+        self.controller_type = "expert"
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
@@ -64,7 +64,7 @@ class Robot:
         Execute control from controller
         :return:
         """
-        print("orientation",self.sensor_data.orientation)
+
         if self.platform=="vrep":
             self.control_data.orientation=self.sensor_data.orientation
         self.executor.execute_control(self.control_data)

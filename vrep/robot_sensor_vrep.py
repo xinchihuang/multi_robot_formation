@@ -135,7 +135,6 @@ class Sensor:
         robot_sensor_data.angular_velocity = angular_velocity
 
         occupancy_map=self.process_raw_data(self.point_cloud)
-
         # ### fake data
         # global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
@@ -143,8 +142,7 @@ class Sensor:
         # occupancy_map = occupancy_map_simulator.generate_map(
         #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
         # )
-        robot_sensor_data.occupancy_map = occupancy_map[self.robot_index]
+        robot_sensor_data.occupancy_map = occupancy_map
 
-        # cv2.imshow(str(self.robot_index),occupancy_map)
-        # cv2.waitKey(1)
+
         return robot_sensor_data

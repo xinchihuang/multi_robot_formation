@@ -56,21 +56,9 @@ def blocking(position_lists_local,robot_size=0.2):
                 theta_k_2 = arctan(x_k2 , y_k2)
                 if max(theta_k_1,theta_k_2)-min(theta_k_1,theta_k_2)<math.pi:
                     if theta_k_1<theta<theta_k_2 or theta_k_2<theta<theta_k_1:
-                        # print(theta/math.pi)
-                        # print(theta_k_1/math.pi,theta_k_2/math.pi)
-                        # print(x,y)
-                        # print(x_k,y_k)
-                        # print(x_k1,y_k1)
-                        # print(x_k2,y_k2)
                         block=True
                 else:
                     if theta>max(theta_k_1,theta_k_2) or theta<min(theta_k_1,theta_k_2):
-                        # print(theta/math.pi)
-                        # print(theta_k_1/math.pi,theta_k_2/math.pi)
-                        # print(x,y)
-                        # print(x_k,y_k)
-                        # print(x_k1,y_k1)
-                        # print(x_k2,y_k2)
                         block=True
             if block==False:
                 position_lists_i.append(position_lists_local[self_i][robot_j])
@@ -103,7 +91,7 @@ def global_to_local(position_lists_global):
                 ]
             )
         position_lists_local.append(position_list_local_i)
-    position_lists_local=blocking(position_lists_local,robot_size=0.2)
+    # position_lists_local=blocking(position_lists_local,robot_size=0.2)
     return position_lists_local,self_pose_list
 
 
@@ -162,6 +150,50 @@ def flatten_maps(maps,map_size=100):
         out.append(map.reshape((1, map_size * map_size)))
     return out
 
+def generate_map_one(position_list_local,self_orientation, robot_size=0.2, max_height=0.3, map_size=100, max_x=10, max_y=10):
+
+    """
+    Generate occupancy map
+    :param position_list_local: All robots' map coordinate relative to the observer robot [x,y,z]
+    :param self_orientation: Observer robots' orientation (float)
+    :param robot_size: Size of robot in occupancy map
+    :param max_height: points' horizontal range
+    :param map_size: The size of occupancy map
+    :param max_x: Max world x coordinate
+    :param max_y: Max world y coordinate
+    :return: occupancy map
+    """
+
+
+    scale = min(max_x, max_y)
+    robot_range = max(1, int(math.floor(map_size * robot_size / scale / 2)))
+
+    occupancy_map = (
+        np.ones((map_size + 2 * robot_range, map_size + 2 * robot_range))*255
+    )
+    try:
+        for world_points in position_list_local:
+            world_points_filtered = data_filter(
+                world_points, max_x, max_y, max_height, 2 * robot_size
+            )
+            world_points_rotated=rotation(world_points_filtered,self_orientation)
+            map_points = world_to_map(world_points_rotated, map_size, max_x, max_y)
+            if map_points == None:
+                continue
+            x = map_points[0]
+            y = map_points[1]
+            for m in range(-robot_range, robot_range, 1):
+                for n in range(-robot_range, robot_range, 1):
+                    occupancy_map[x + m][y + n] = 0
+    except:
+        pass
+    occupancy_map = occupancy_map[
+        robot_range:-robot_range, robot_range:-robot_range
+    ]
+
+    return occupancy_map
+
+
 def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, max_height=0.3, map_size=100, max_x=10, max_y=10):
 
     """
@@ -175,51 +207,13 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
     :param max_y: Max world y coordinate
     :return: A list of occupancy maps
     """
-
     maps = []
-    scale = min(max_x, max_y)
-    robot_range = max(1, int(math.floor(map_size * robot_size / scale / 2)))
     for robot_index in range(len(position_lists_local)):
-
-        occupancy_map = (
-            np.ones((map_size + 2 * robot_range, map_size + 2 * robot_range))*255
-        )
-
-        for world_points in position_lists_local[robot_index]:
-            world_points_filtered = data_filter(
-                world_points, max_x, max_y, max_height, 2 * robot_size
-            )
-
-            world_points_rotated=rotation(world_points_filtered,self_orientation_list[robot_index])
-            map_points = world_to_map(world_points_rotated, map_size, max_x, max_y)
-            if map_points == None:
-                continue
-            x = map_points[0]
-            y = map_points[1]
-            for m in range(-robot_range, robot_range, 1):
-                for n in range(-robot_range, robot_range, 1):
-                    occupancy_map[x + m][y + n] = 0
-        occupancy_map = occupancy_map[
-            robot_range:-robot_range, robot_range:-robot_range
-        ]
+        occupancy_map = generate_map_one(position_lists_local[robot_index],self_orientation_list[robot_index],robot_size, max_height, map_size, max_x, max_y)
         maps.append(occupancy_map)
 
     return maps
 
 
-# global_positions=[[-4,-4,0],
-#                 [-4,4,0],
-#                 [4,4,0],
-#                 [4,-4,0],
-#                 [0,0,0]]
-# position_lists_local,self_pose=global_to_local(global_positions)
-# self_orientation_list=[0,0,0,0,0]
-# robot_size,map_size,max_x,max_y=0.2,100,10,10
-# max_height=0.3
-# maps=generate_maps(position_lists_local,self_orientation_list,robot_size,max_height,map_size,max_x,max_y)
-# for i in range(5):
-#     print(global_positions[i])
-#     print(position_lists_local[i])
-#     cv2.imshow("image", maps[i])
-#     cv2.waitKey(0)
-# print(arctan(-8,-0)/math.pi)
+
+
