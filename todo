@@ -9,9 +9,19 @@
     multi-robot
         hardware setting
     ROS2
+
+ """ finished"""
 2. Simple Simulator for training
      test new code
      creat data set
      Train & test
+
+
+3. Modify training
+    training data generator
+    modify the input to take in position
+    partially observed data
+
+4. Open AI simulator
 
 

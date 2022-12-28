@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from model.GNN_based_model import DecentralController
 import cv2
-from training_data.occupancy_map_simulator import generate_map_one,global_to_local
+from utils.occupancy_map_simulator import generate_map_one,global_to_local
 
 class ControlData:
     """

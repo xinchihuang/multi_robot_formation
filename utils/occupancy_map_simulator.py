@@ -92,7 +92,7 @@ def global_to_local(position_lists_global):
             )
         position_lists_local.append(position_list_local_i)
     # position_lists_local=blocking(position_lists_local,robot_size=0.2)
-    return position_lists_local,self_pose_list
+    return np.array(position_lists_local),self_pose_list
 
 
 def data_filter(world_point, max_x, max_y, max_height, min_range):

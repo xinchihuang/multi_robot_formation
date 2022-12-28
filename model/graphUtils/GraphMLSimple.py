@@ -39,7 +39,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-import utils.graphUtils.graphTools as graphTools
+from utils import gabreil_graph as graphTools
 
 zeroTolerance = 1e-9  # Values below this number are considered zero.
 infiniteNumber = 1e12  # infinity equals this number

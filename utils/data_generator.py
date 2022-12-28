@@ -1,10 +1,12 @@
-import occupancy_map_simulator
+
 import math
 import random
 import numpy as np
 from collections import defaultdict
 import cv2
 import os
+from utils.gabreil_graph import get_gabreil_graph
+from utils import occupancy_map_simulator
 
 class ControlData:
     """
@@ -38,27 +40,27 @@ class SceneData:
     def __init__(self):
         self.observation_list = None
         self.adjacency_list = None
-def get_gabreil_graph(position_array, node_num):
-    """
-    Return a gabreil graph of the scene
-    :param position_array: A numpy array contains all robots' positions
-    :param node_num: number of robots
-    :return: A gabreil graph( 2D list)
-    """
-    gabriel_graph = [[1] * node_num for _ in range(node_num)]
-    for u in range(node_num):
-        for v in range(node_num):
-            m = (position_array[u] + position_array[v]) / 2
-            for w in range(node_num):
-                if w == v:
-                    continue
-                if np.linalg.norm(position_array[w] - m) < np.linalg.norm(
-                    position_array[u] - m
-                ):
-                    gabriel_graph[u][v] = 0
-                    gabriel_graph[v][u] = 0
-                    break
-    return gabriel_graph
+# def get_gabreil_graph(position_array, node_num):
+#     """
+#     Return a gabreil graph of the scene
+#     :param position_array: A numpy array contains all robots' positions
+#     :param node_num: number of robots
+#     :return: A gabreil graph( 2D list)
+#     """
+#     gabriel_graph = [[1] * node_num for _ in range(node_num)]
+#     for u in range(node_num):
+#         for v in range(node_num):
+#             m = (position_array[u] + position_array[v]) / 2
+#             for w in range(node_num):
+#                 if w == v:
+#                     continue
+#                 if np.linalg.norm(position_array[w] - m) < np.linalg.norm(
+#                     position_array[u] - m
+#                 ):
+#                     gabriel_graph[u][v] = 0
+#                     gabriel_graph[v][u] = 0
+#                     break
+#     return gabriel_graph
 def update_adjacency_list(position_list):
     """
     Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -117,6 +119,27 @@ def centralized_control(index, sensor_data, scene_data, desired_distance):
     out_put.velocity_y = velocity_sum_y
 
     return out_put
+
+def generate_one(global_pose_array,self_orientation_array,desired_distance):
+    global_pose_array=np.array(global_pose_array)
+    self_orientation_array=np.array(self_orientation_array)
+    position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_array)
+    occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local, self_orientation_array)
+    ref_control_list = []
+    adjacency_lists = []
+    number_of_robot = global_pose_array.shape[0]
+    for robot_index in range(number_of_robot):
+        adjacency_list_i = update_adjacency_list(global_pose_array)
+        adjacency_lists.append(adjacency_list_i)
+        sensor_data_i = SensorData()
+        sensor_data_i.position = global_pose_array[robot_index]
+        sensor_data_i.orientation = [0, 0, global_pose_array[robot_index][2]]
+        scene_data_i = SceneData()
+        scene_data_i.adjacency_list = adjacency_list_i
+        control_i = centralized_control(robot_index, sensor_data_i, scene_data_i, desired_distance)
+        ref_control_list.append([control_i.velocity_x, control_i.velocity_y])
+    return np.array(occupancy_maps), np.array(ref_control_list), np.array(adjacency_lists)
+
 def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
     global_pose_list = []
     self_orientation_list=[]
@@ -137,51 +160,36 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
             global_pose_list.append([pos_x, pos_y, 0])
             self_orientation_list.append(theta)
             break
-    global_pose_list=[[-2, -2, 0], [-2, 2, 0], [2, 2, 0], [2, -2, 0], [0, 0, 0]]
-    self_orientation_list=[0,0,0,0,0]
-    position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_list)
-    occupancy_maps=occupancy_map_simulator.generate_maps(position_lists_local,self_orientation_list)
-    ref_control_list=[]
-    adjacency_lists=[]
-    for i in range(number_of_robot):
-        adjacency_list_i=update_adjacency_list(global_pose_list)
-        adjacency_lists.append(adjacency_list_i)
-        sensor_data_i=SensorData()
-        sensor_data_i.position=global_pose_list[i]
-        sensor_data_i.orientation=[0,0,global_pose_list[i][2]]
-        scene_data_i=SceneData()
-        scene_data_i.adjacency_list=adjacency_list_i
-        control_i=centralized_control(i, sensor_data_i, scene_data_i,desired_distance)
-        ref_control_list.append([control_i.velocity_x,control_i.velocity_y])
-        #
-    for i in range(number_of_robot):
-        cv2.imshow(str(i), occupancy_maps[i])
-        cv2.waitKey(0)
-        print(global_pose_list[i])
-        print(ref_control_list[i],adjacency_lists[i])
+    occupancy_maps, ref_control_list, adjacency_lists=generate_one(global_pose_list,self_orientation_list,desired_distance)
     return occupancy_maps,ref_control_list,adjacency_lists
 
-present = os.getcwd()
-root = os.path.join(present, "data")
-if not os.path.exists(root):
-    os.mkdir(root)
 
-i=0
-while i<1:
-    if i%100==0:
-        print(i)
-    num_dirs = len(os.listdir(root))
-    data_path = os.path.join(root, str(num_dirs))
-    try:
-        occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,2)
-        occupancy_maps_array=np.array(occupancy_maps)
-        ref_control_array=np.array(ref_control_list)
-        adjacency_lists_array=np.array(adjacency_lists)
-        os.mkdir(data_path)
-        np.save(os.path.join(data_path,"occupancy_maps"),occupancy_maps_array)
-        np.save(os.path.join(data_path, "reference_controls"), ref_control_array)
-        np.save(os.path.join(data_path, "adjacency_lists"), adjacency_lists_array)
-        i+=1
-    except:
-        continue
-generate(5,5,0.2,2)
+
+
+
+
+if __name__ == '__main__':
+    pass
+    # present = os.getcwd()
+    # root = os.path.join(present, "../training_data/data")
+    # if not os.path.exists(root):
+    #     os.mkdir(root)
+    #
+    # i=0
+    # while i<1:
+    #     if i%100==0:
+    #         print(i)
+    #     num_dirs = len(os.listdir(root))
+    #     data_path = os.path.join(root, str(num_dirs))
+    #     try:
+    #         occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,2)
+    #         occupancy_maps_array=np.array(occupancy_maps)
+    #         ref_control_array=np.array(ref_control_list)
+    #         adjacency_lists_array=np.array(adjacency_lists)
+    #         os.mkdir(data_path)
+    #         np.save(os.path.join(data_path,"occupancy_maps"),occupancy_maps_array)
+    #         np.save(os.path.join(data_path, "reference_controls"), ref_control_array)
+    #         np.save(os.path.join(data_path, "adjacency_lists"), adjacency_lists_array)
+    #         i+=1
+    #     except:
+    #         continue

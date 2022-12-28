@@ -7,7 +7,69 @@ import torch.nn as nn
 from tqdm import tqdm
 from model.GNN_based_model import DecentralController
 import os
-class RobotDataset(Dataset):
+from utils.data_generator import generate_one
+
+class RobotDatasetTrace(Dataset):
+
+    def __init__(self, data_path_root):
+
+        self.transform=True
+        self.desired_distance=2
+        self.number_of_agents=5
+
+        self.num_sample = len(os.listdir(data_path_root))
+        self.occupancy_maps_list=[]
+        self.pose_array=np.empty(shape=(5,1,3))
+        self.reference_control_list=[]
+        self.neighbor_list=[]
+        self.scale = np.zeros((self.number_of_agents, 1))
+        for i in range(self.number_of_agents):
+            self.scale[i, 0] = self.desired_distance
+        for sample_index in tqdm(range(self.num_sample)):
+            data_sample_path = os.path.join(data_path_root, str(sample_index))
+            pose_array_i=np.load(os.path.join(data_sample_path,"pose_array_scene.npy"))
+            if self.pose_array.shape[1]==1:
+                self.pose_array=pose_array_i
+                continue
+            self.pose_array=np.concatenate((self.pose_array,pose_array_i),axis=1)
+        print(self.pose_array.shape)
+    def __len__(self):
+        return self.pose_array.shape[1]
+
+    def __getitem__(self,idx):
+
+        if(torch.is_tensor(idx)):
+            idx = idx.tolist()
+
+        global_pose_array=self.pose_array[:,idx,:]
+        self_orientation_array = global_pose_array[:,2]
+        global_pose_array[:,2]=0
+        occupancy_maps,reference,adjacency_lists=generate_one(global_pose_array, self_orientation_array, self.desired_distance)
+
+        neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
+        for key, value in adjacency_lists[0].items():
+            for n in value:
+                neighbor[key][n[0]] = 1
+        refs = np.zeros((self.number_of_agents, 1))
+
+
+        alphas = self.scale
+
+        if(self.transform):
+            #for i in range(3):
+                #s = sample[:,i]
+                #m = np.mean(s)
+                #std = np.std(s)
+                #sample[:,i] = (s - m)/(std + .00001)
+            occupancy_maps= torch.from_numpy(occupancy_maps).double()
+            reference = torch.from_numpy(reference).double()
+            neighbor = torch.from_numpy(neighbor).double()
+            refs = torch.from_numpy(refs).double()
+            alphas = torch.from_numpy(alphas).double()
+        return {'occupancy_maps':occupancy_maps, 'neighbor': neighbor,'reference':reference, 'useless':refs, 'scale':alphas}
+
+
+class RobotDatasetMap(Dataset):
 
     def __init__(self, data_path_root):
 
@@ -24,7 +86,6 @@ class RobotDataset(Dataset):
         for i in range(self.number_of_agents):
             self.scale [i, 0] = self.desired_distance
         for sample_index in tqdm(range(self.num_sample)):
-
             data_sample_path = os.path.join(data_path_root, str(sample_index))
             occupancy_maps_i=np.load(os.path.join(data_sample_path,"occupancy_maps.npy"))
             adjacency_lists_i = np.load(os.path.join(data_sample_path, "adjacency_lists.npy"),allow_pickle=True)
@@ -45,13 +106,12 @@ class RobotDataset(Dataset):
 
         if(torch.is_tensor(idx)):
             idx = idx.tolist()
+        print(idx)
         occupancy_maps = self.occupancy_maps_list[idx]
         reference = self.reference_control_list[idx]
         neighbor = self.neighbor_list[idx]
         refs = np.zeros((self.number_of_agents, 1))
-
         alphas = self.scale
-
         if(self.transform):
             #for i in range(3):
                 #s = sample[:,i]
@@ -109,7 +169,7 @@ class Trainer:
             for g in self.optimizer.param_groups:
                 g["lr"] = self.lr_schedule[self.epoch]
 
-        trainset = RobotDataset(data_path_root)
+        trainset = RobotDatasetTrace(data_path_root)
         trainloader = DataLoader(
             trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
@@ -155,5 +215,5 @@ class Trainer:
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
 T=Trainer()
-T.train(data_path_root='/home/xinchi/data')
+T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 T.save("model_final.pth")
