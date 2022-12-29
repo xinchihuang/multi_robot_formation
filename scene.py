@@ -8,8 +8,9 @@ from collections import defaultdict
 import numpy as np
 from vrep import vrep_interface
 from robot import Robot
-from utils import get_gabreil_graph
+from utils.gabreil_graph import get_gabreil_graph
 from realrobot.robot_executor_robomaster import Executor
+
 
 class SceneData:
     """
@@ -44,6 +45,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = None
+
     def initial_vrep(self):
         """
         initial Vrep get client id
@@ -51,6 +53,7 @@ class Scene:
         """
         self.client_id = vrep_interface.init_vrep()
         return self.client_id
+
     def add_robot_vrep(self, robot_index):
         """
         Add a robot in the scene
@@ -59,12 +62,13 @@ class Scene:
         """
         new_robot = Robot()
         new_robot.index = robot_index
-        new_robot.executor.initialize(robot_index,self.client_id)
+        new_robot.executor.initialize(robot_index, self.client_id)
         new_robot.sensor.client_id = self.client_id
         new_robot.sensor.robot_index = robot_index
         new_robot.sensor.robot_handle = new_robot.executor.robot_handle
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
+
     def initial_GNN(self, num_robot, model_path):
         for robot in self.robot_list:
             robot.controller.initialize_GNN_model(num_robot, model_path)
@@ -79,7 +83,7 @@ class Scene:
         # collect robots' position in th scene
         position_list = []
         index_list = []
-        orientation_list=[]
+        orientation_list = []
         for i in range(node_num):
             index_list.append(self.robot_list[i].index)
             position = self.robot_list[i].sensor_data.position
@@ -111,11 +115,10 @@ class Scene:
         self.adjacency_list = new_adj_list
         self.position_list = position_list
         self.orientation_list = orientation_list
-        print("DISTANCE")
-        for r in self.adjacency_list:
-            for n in self.adjacency_list[r]:
-                print("edge:", r, n[0], "distance:", n[3])
-
+        # print("DISTANCE")
+        # for r in self.adjacency_list:
+        #     for n in self.adjacency_list[r]:
+        #         print("edge:", r, n[0], "distance:", n[3])
 
     def broadcast_all(self):
         """
@@ -149,6 +152,7 @@ class Scene:
         Make sure the robot is not stuck in the ground
         """
         # pose_list = []
+        # num_robot=len(self.robot_list)
         # for i in range(len(self.robot_list)):
         #     while True:
         #         alpha = math.pi * (2 * random.random())
@@ -165,7 +169,7 @@ class Scene:
         #             continue
         #         pose_list.append([pos_x, pos_y, theta])
         #
-        pose_list = [[-2, -2, 1], [-2, 2, 1], [2, 2, 1], [2, -2, 1], [0, 0, 1]]
+        pose_list = [[-4, -4, 1], [-4, 4, 1], [4, 4, 1], [4, -4, 1], [0, 0, 1]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

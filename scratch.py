@@ -12,8 +12,10 @@ import numpy as np
 # a=torch.permute(a, (2, 0, 1))
 #
 # print(a)
-test_simulation = Simulation(50, 0.2)
-test_simulation.initial_scene(5, "/home/xinchi/multi_robot_formation/model/graphUtils/model_final.pth")
+test_simulation = Simulation(1000, 0.2)
+test_simulation.initial_scene(
+    5, "/home/xinchi/multi_robot_formation/saved_model/model_12500.pth"
+)
 test_simulation.run()
 # point = np.load(
 #     "/home/xinchi/multi_robot_formation/saved_data/0/0/points.npy", allow_pickle=True

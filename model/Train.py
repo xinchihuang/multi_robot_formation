@@ -8,54 +8,56 @@ import torch.nn as nn
 from tqdm import tqdm
 from model.GNN_based_model import DecentralController
 
-class RobotDataset(Dataset):
 
-    def __init__(self, data1, data2, data3, data4, data5, nA, inW = 100, inH = 100, transform = None):
+class RobotDataset(Dataset):
+    def __init__(
+        self, data1, data2, data3, data4, data5, nA, inW=100, inH=100, transform=None
+    ):
         self.obs = data1
         self.inW = inW
         self.inH = inH
-        c1 = np.zeros((self.obs.shape[0]//nA,nA,self.inW,self.inH))
+        c1 = np.zeros((self.obs.shape[0] // nA, nA, self.inW, self.inH))
         jump = c1.shape[0]
-        print('Arranging Data')
+        print("Arranging Data")
         for i in tqdm(range(len(c1))):
             for j in range(nA):
-                c1[i,j] = self.obs[(j * jump) + i].reshape((self.inW, self.inH))
+                c1[i, j] = self.obs[(j * jump) + i].reshape((self.inW, self.inH))
         self.obs = c1.copy()
 
         self.gt = data2
-        c2 = np.zeros((self.obs.shape[0],nA,2))
+        c2 = np.zeros((self.obs.shape[0], nA, 2))
         for i in tqdm(range(len(c2))):
             for j in range(nA):
-                c2[i,j] = self.gt[(j * jump) + i]
+                c2[i, j] = self.gt[(j * jump) + i]
         self.gt = c2.copy()
         self.graphs = data3
-        c3 = np.zeros((self.obs.shape[0],nA, nA,nA))
+        c3 = np.zeros((self.obs.shape[0], nA, nA, nA))
         for i in tqdm(range(len(c3))):
             for j in range(nA):
-                c3[i,j] = self.graphs[(j * jump) + i].reshape((nA,nA))
+                c3[i, j] = self.graphs[(j * jump) + i].reshape((nA, nA))
         self.graphs = c3.copy()
 
         self.refs = data4
-        c4 = np.zeros((self.obs.shape[0],nA,1))
+        c4 = np.zeros((self.obs.shape[0], nA, 1))
         for i in tqdm(range(len(c4))):
             for j in range(nA):
-                c4[i,j,0] = self.refs[(j * jump) + i]
+                c4[i, j, 0] = self.refs[(j * jump) + i]
         self.refs = c4.copy()
 
         self.alphas = data5
-        c5 = np.zeros((self.obs.shape[0],nA,1))
+        c5 = np.zeros((self.obs.shape[0], nA, 1))
         for i in tqdm(range(len(c5))):
             for j in range(nA):
-                c5[i,j,0] = self.alphas[(j * jump) + i]
+                c5[i, j, 0] = self.alphas[(j * jump) + i]
         self.alphas = c5.copy()
         self.transform = transform
 
     def __len__(self):
         return len(self.obs)
 
-    def __getitem__(self,idx):
+    def __getitem__(self, idx):
 
-        if(torch.is_tensor(idx)):
+        if torch.is_tensor(idx):
             idx = idx.tolist()
 
         sample = self.obs[idx]
@@ -64,18 +66,24 @@ class RobotDataset(Dataset):
         refs = self.refs[idx]
         alphas = self.alphas[idx]
 
-        if(self.transform):
-            #for i in range(3):
-                #s = sample[:,i]
-                #m = np.mean(s)
-                #std = np.std(s)
-                #sample[:,i] = (s - m)/(std + .00001)
+        if self.transform:
+            # for i in range(3):
+            # s = sample[:,i]
+            # m = np.mean(s)
+            # std = np.std(s)
+            # sample[:,i] = (s - m)/(std + .00001)
             sample = torch.from_numpy(sample).double()
             gt = torch.from_numpy(gt).double()
             graph = torch.from_numpy(graph).double()
             refs = torch.from_numpy(refs).double()
             alphas = torch.from_numpy(alphas).double()
-        return {'data':sample, 'graphs':graph,'actions':gt, 'refs':refs, 'alphas':alphas}
+        return {
+            "data": sample,
+            "graphs": graph,
+            "actions": gt,
+            "refs": refs,
+            "alphas": alphas,
+        }
 
 
 class Trainer:
@@ -95,7 +103,12 @@ class Trainer:
         self.inW = inW
         self.inH = inH
         self.batch_size = batch_size
-        self.model = DecentralController(number_of_agent=self.nA, input_width=self.inW, input_height=self.inH,use_cuda=False).double()
+        self.model = DecentralController(
+            number_of_agent=self.nA,
+            input_width=self.inW,
+            input_height=self.inH,
+            use_cuda=False,
+        ).double()
         self.use_cuda = cuda
         if self.use_cuda:
             self.model = self.model.to("cuda")
@@ -111,7 +124,6 @@ class Trainer:
         self.epoch = -1
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
         self.currentAgent = -1
-
 
     def train(self, data):
         """

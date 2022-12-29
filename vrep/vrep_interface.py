@@ -24,7 +24,7 @@ def init_vrep():
         "127.0.0.1", 19997, True, True, 5000, 5
     )  # Connect to V-REP
     if client_id != -1:
-        print("Connected to remote API server",client_id)
+        print("Connected to remote API server", client_id)
         vrep.simxSynchronous(client_id, True)
         vrep.simxStartSimulation(client_id, vrep.simx_opmode_blocking)
     return client_id

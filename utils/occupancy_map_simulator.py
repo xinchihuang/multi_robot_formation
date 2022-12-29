@@ -6,45 +6,48 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-def arctan(x,y):
+
+
+def arctan(x, y):
     if x == 0 and y > 0:
         theta = math.pi / 2
     elif x == 0 and y < 0:
-        theta = math.pi*3 / 2
+        theta = math.pi * 3 / 2
     elif x == 0 and y == 0:
-        theta=0
-    elif x>0 and y==0:
-        theta=0
-    elif x<0 and y==0:
-        theta=math.pi
+        theta = 0
+    elif x > 0 and y == 0:
+        theta = 0
+    elif x < 0 and y == 0:
+        theta = math.pi
     else:
         theta = math.atan(y / x)
         if x > 0 and y > 0:
             pass
-        elif x<0 and y>0:
-            theta=theta+math.pi
-        elif x<0 and y<0:
-            theta=theta+math.pi
-        elif x>0 and y<0:
-            theta=theta+2*math.pi
+        elif x < 0 and y > 0:
+            theta = theta + math.pi
+        elif x < 0 and y < 0:
+            theta = theta + math.pi
+        elif x > 0 and y < 0:
+            theta = theta + 2 * math.pi
     return theta
-def blocking(position_lists_local,robot_size=0.2):
-    out_position_lists_local=[]
+
+
+def blocking(position_lists_local, robot_size=0.2):
+    out_position_lists_local = []
     for self_i in range(len(position_lists_local)):
-        position_lists_i=[]
+        position_lists_i = []
         for robot_j in range(len(position_lists_local[self_i])):
             x = position_lists_local[self_i][robot_j][0]
             y = position_lists_local[self_i][robot_j][1]
-            theta=arctan(x,y)
+            theta = arctan(x, y)
 
-
-            block=False
+            block = False
             for robot_k in range(len(position_lists_local[self_i])):
-                if robot_k==robot_j:
+                if robot_k == robot_j:
                     continue
                 x_k = position_lists_local[self_i][robot_k][0]
                 y_k = position_lists_local[self_i][robot_k][1]
-                if x**2+y**2<x_k**2+y_k**2:
+                if x**2 + y**2 < x_k**2 + y_k**2:
                     continue
                 x_k1 = x_k - (robot_size / 2) * math.sin(theta)
                 y_k1 = y_k + (robot_size / 2) * math.cos(theta)
@@ -52,15 +55,17 @@ def blocking(position_lists_local,robot_size=0.2):
                 x_k2 = x_k + (robot_size / 2) * math.sin(theta)
                 y_k2 = y_k - (robot_size / 2) * math.cos(theta)
 
-                theta_k_1 = arctan(x_k1 , y_k1)
-                theta_k_2 = arctan(x_k2 , y_k2)
-                if max(theta_k_1,theta_k_2)-min(theta_k_1,theta_k_2)<math.pi:
-                    if theta_k_1<theta<theta_k_2 or theta_k_2<theta<theta_k_1:
-                        block=True
+                theta_k_1 = arctan(x_k1, y_k1)
+                theta_k_2 = arctan(x_k2, y_k2)
+                if max(theta_k_1, theta_k_2) - min(theta_k_1, theta_k_2) < math.pi:
+                    if theta_k_1 < theta < theta_k_2 or theta_k_2 < theta < theta_k_1:
+                        block = True
                 else:
-                    if theta>max(theta_k_1,theta_k_2) or theta<min(theta_k_1,theta_k_2):
-                        block=True
-            if block==False:
+                    if theta > max(theta_k_1, theta_k_2) or theta < min(
+                        theta_k_1, theta_k_2
+                    ):
+                        block = True
+            if block == False:
                 position_lists_i.append(position_lists_local[self_i][robot_j])
         out_position_lists_local.append(position_lists_i)
     return out_position_lists_local
@@ -73,12 +78,12 @@ def global_to_local(position_lists_global):
     :return: A list of local observations
     """
     position_lists_local = []
-    self_pose_list=[]
+    self_pose_list = []
     for i in range(len(position_lists_global)):
         x_self = position_lists_global[i][0]
         y_self = position_lists_global[i][1]
         z_self = position_lists_global[i][2]
-        self_pose_list.append([x_self,y_self,z_self])
+        self_pose_list.append([x_self, y_self, z_self])
         position_list_local_i = []
         for j in range(len(position_lists_global)):
             if i == j:
@@ -91,8 +96,8 @@ def global_to_local(position_lists_global):
                 ]
             )
         position_lists_local.append(position_list_local_i)
-    # position_lists_local=blocking(position_lists_local,robot_size=0.2)
-    return np.array(position_lists_local),self_pose_list
+    position_lists_local = blocking(position_lists_local, robot_size=0.2)
+    return np.array(position_lists_local), self_pose_list
 
 
 def data_filter(world_point, max_x, max_y, max_height, min_range):
@@ -115,14 +120,15 @@ def data_filter(world_point, max_x, max_y, max_height, min_range):
         return None
     return [x, y, z]
 
-def rotation(world_point,self_orientation):
+
+def rotation(world_point, self_orientation):
     x = world_point[0]
     y = world_point[1]
     z = world_point[2]
-    theta=-self_orientation
-    x_relative=math.cos(theta)*x+math.sin(theta)*y
-    y_relative=-math.sin(theta)*x+math.cos(theta)*y
-    return [x_relative,y_relative,z]
+    theta = -self_orientation
+    x_relative = math.cos(theta) * x + math.sin(theta) * y
+    y_relative = -math.sin(theta) * x + math.cos(theta) * y
+    return [x_relative, y_relative, z]
 
 
 def world_to_map(world_point, map_size, max_x, max_y):
@@ -144,13 +150,24 @@ def world_to_map(world_point, map_size, max_x, max_y):
     if 0 <= x_map < map_size and 0 <= y_map < map_size:
         return [x_map, y_map]
     return None
-def flatten_maps(maps,map_size=100):
-    out=[]
+
+
+def flatten_maps(maps, map_size=100):
+    out = []
     for map in maps:
         out.append(map.reshape((1, map_size * map_size)))
     return out
 
-def generate_map_one(position_list_local,self_orientation, robot_size=0.2, max_height=0.3, map_size=100, max_x=10, max_y=10):
+
+def generate_map_one(
+    position_list_local,
+    self_orientation,
+    robot_size=0.2,
+    max_height=0.3,
+    map_size=100,
+    max_x=10,
+    max_y=10,
+):
 
     """
     Generate occupancy map
@@ -164,19 +181,18 @@ def generate_map_one(position_list_local,self_orientation, robot_size=0.2, max_h
     :return: occupancy map
     """
 
-
     scale = min(max_x, max_y)
     robot_range = max(1, int(math.floor(map_size * robot_size / scale / 2)))
 
     occupancy_map = (
-        np.ones((map_size + 2 * robot_range, map_size + 2 * robot_range))*255
+        np.ones((map_size + 2 * robot_range, map_size + 2 * robot_range)) * 255
     )
     try:
         for world_points in position_list_local:
             world_points_filtered = data_filter(
                 world_points, max_x, max_y, max_height, 2 * robot_size
             )
-            world_points_rotated=rotation(world_points_filtered,self_orientation)
+            world_points_rotated = rotation(world_points_filtered, self_orientation)
             map_points = world_to_map(world_points_rotated, map_size, max_x, max_y)
             if map_points == None:
                 continue
@@ -187,14 +203,20 @@ def generate_map_one(position_list_local,self_orientation, robot_size=0.2, max_h
                     occupancy_map[x + m][y + n] = 0
     except:
         pass
-    occupancy_map = occupancy_map[
-        robot_range:-robot_range, robot_range:-robot_range
-    ]
+    occupancy_map = occupancy_map[robot_range:-robot_range, robot_range:-robot_range]
 
     return occupancy_map
 
 
-def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, max_height=0.3, map_size=100, max_x=10, max_y=10):
+def generate_maps(
+    position_lists_local,
+    self_orientation_list,
+    robot_size=0.2,
+    max_height=0.3,
+    map_size=100,
+    max_x=10,
+    max_y=10,
+):
 
     """
     Generate occupancy map
@@ -209,11 +231,15 @@ def generate_maps(position_lists_local,self_orientation_list, robot_size=0.2, ma
     """
     maps = []
     for robot_index in range(len(position_lists_local)):
-        occupancy_map = generate_map_one(position_lists_local[robot_index],self_orientation_list[robot_index],robot_size, max_height, map_size, max_x, max_y)
+        occupancy_map = generate_map_one(
+            position_lists_local[robot_index],
+            self_orientation_list[robot_index],
+            robot_size,
+            max_height,
+            map_size,
+            max_x,
+            max_y,
+        )
         maps.append(occupancy_map)
 
     return maps
-
-
-
-

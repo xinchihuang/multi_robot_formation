@@ -9,6 +9,7 @@ import numpy as np
 from vrep import vrep_interface
 import cv2
 
+
 class SensorData:
     """
     A class for record sensor data
@@ -40,11 +41,12 @@ class Sensor:
         self.min_range = 0.2
 
         #### sensor output settings
-        self.point_cloud=[]
+        self.point_cloud = []
         self.occupancy_map_size = 100
 
-        self.sensor_buffer=[]
-        self.sensor_buffer_count=0
+        self.sensor_buffer = []
+        self.sensor_buffer_count = 0
+
     def filter_data(self, world_point):
         x = world_point[0]
         y = world_point[1]
@@ -79,7 +81,8 @@ class Sensor:
     def process_raw_data(self, point_cloud):
         sensor_points = point_cloud
         occupancy_map = (
-            np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255)
+            np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255
+        )
         # print(occupancy_map)
         # print(len(sensor_points))
         for i in range(0, len(sensor_points), 3):
@@ -118,14 +121,13 @@ class Sensor:
             self.client_id, self.robot_handle, self.robot_index
         )
 
-
         self.sensor_buffer.extend(velodyne_points[2])
-        self.sensor_buffer_count+=1
+        self.sensor_buffer_count += 1
         # print(self.sensor_buffer_count)
-        if self.sensor_buffer_count==8:
-            self.point_cloud=self.sensor_buffer.copy()
+        if self.sensor_buffer_count == 8:
+            self.point_cloud = self.sensor_buffer.copy()
             self.sensor_buffer.clear()
-            self.sensor_buffer_count=0
+            self.sensor_buffer_count = 0
 
         # print("points ",len(self.point_cloud))
         robot_sensor_data.robot_index = self.robot_index
@@ -134,7 +136,7 @@ class Sensor:
         robot_sensor_data.linear_velocity = linear_velocity
         robot_sensor_data.angular_velocity = angular_velocity
 
-        occupancy_map=self.process_raw_data(self.point_cloud)
+        occupancy_map = self.process_raw_data(self.point_cloud)
         # ### fake data
         # global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
@@ -143,6 +145,5 @@ class Sensor:
         #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
         # )
         robot_sensor_data.occupancy_map = occupancy_map
-
 
         return robot_sensor_data

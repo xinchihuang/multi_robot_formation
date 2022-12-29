@@ -4,6 +4,7 @@ author: Xinchi Huang
 """
 from vrep.robot_executor_vrep import Executor
 from vrep.robot_sensor_vrep import Sensor
+
 # from realrobot.robot_executor_robomaster import Executor
 # from realrobot.robot_sensor_realsense import Sensor
 from controller import Controller
@@ -21,11 +22,12 @@ class Robot:
         self.control_data = None
         self.scene_data = None
 
-        self.platform="vrep"
-        self.controller_type = "expert"
+        self.platform = "vrep"
+        self.controller_type = "model"
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
+
     # def executor_initialize(self):
     #     self.executor.initialize()
     # def set_up_components(self):
@@ -53,6 +55,15 @@ class Robot:
                 self.index, self.sensor_data, self.scene_data
             )
         elif self.controller_type == "model":
+            expert_data = self.controller.centralized_control(
+                self.index, self.sensor_data, self.scene_data
+            )
+            model_data = self.controller.decentralized_control(
+                self.index, self.sensor_data, self.scene_data, number_of_agents=5
+            )
+            print("robot ", self.index)
+            print("expert ", expert_data.velocity_x, expert_data.velocity_y)
+            print("model ", model_data.velocity_x, model_data.velocity_y)
             self.control_data = self.controller.decentralized_control(
                 self.index, self.sensor_data, self.scene_data, number_of_agents=5
             )
@@ -65,6 +76,6 @@ class Robot:
         :return:
         """
 
-        if self.platform=="vrep":
-            self.control_data.orientation=self.sensor_data.orientation
+        if self.platform == "vrep":
+            self.control_data.orientation = self.sensor_data.orientation
         self.executor.execute_control(self.control_data)

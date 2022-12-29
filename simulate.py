@@ -53,14 +53,13 @@ class Simulation:
             self.scene.broadcast_all()
             for robot in self.scene.robot_list:
                 # print("robot index",robot.index)
-                sensor_data=robot.get_sensor_data()
-                control_data=robot.get_control_data()
+                sensor_data = robot.get_sensor_data()
+                control_data = robot.get_control_data()
                 robot.execute_control()
                 # record data
                 data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
-
 
         data_recorder.save_to_file()
         # vrep_interface.stop(self.client_id)

@@ -7,7 +7,8 @@ import numpy as np
 import torch
 from model.GNN_based_model import DecentralController
 import cv2
-from utils.occupancy_map_simulator import generate_map_one,global_to_local
+from utils.occupancy_map_simulator import generate_map_one, global_to_local
+
 
 class ControlData:
     """
@@ -35,7 +36,7 @@ class Controller:
         max_velocity: Maximum linear velocity
         wheel_adjustment: Used for transform linear velocity to angular velocity
         """
-        self.desired_distance = 1.0
+        self.desired_distance = 2.0
         self.centralized_k = 1
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
@@ -55,7 +56,7 @@ class Controller:
             out_put.velocity_x = 0
             out_put.velocity_y = 0
             return out_put
-        print("robot index",index)
+        print("robot index", index)
         # self_robot_index = index
 
         self_position = sensor_data.position
@@ -63,7 +64,6 @@ class Controller:
         self_x = self_position[0]
         self_y = self_position[1]
         neighbors = scene_data.adjacency_list[index]
-        # print(neighbors)
         velocity_sum_x = 0
         velocity_sum_y = 0
         for neighbor in neighbors:
@@ -224,7 +224,9 @@ class Controller:
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
-            occupancy_map_i=generate_map_one(position_lists_local[i], orientation_list[i])
+            occupancy_map_i = generate_map_one(
+                position_lists_local[i], orientation_list[i]
+            )
             cv2.imshow(str(i), occupancy_map_i)
             cv2.waitKey(1)
             input_occupancy_maps[0, i, :, :] = occupancy_map_i
@@ -252,9 +254,12 @@ class Controller:
 
         #### Set a threshold to eliminate small movements
         # threshold=0.05
-        control = self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()  ## model output
+        # print(scale.shape)
+        control = (
+            self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()
+        )  ## model output
 
         out_put.robot_index = index
-        out_put.velocity_x= control[0][0]
+        out_put.velocity_x = control[0][0]
         out_put.velocity_y = control[0][1]
         return out_put

@@ -1,4 +1,3 @@
-
 import math
 import random
 import numpy as np
@@ -7,6 +6,7 @@ import cv2
 import os
 from utils.gabreil_graph import get_gabreil_graph
 from utils import occupancy_map_simulator
+
 
 class ControlData:
     """
@@ -20,6 +20,8 @@ class ControlData:
 
         self.velocity_x = 0
         self.velocity_y = 0
+
+
 class SensorData:
     """
     A class for record sensor data
@@ -32,6 +34,8 @@ class SensorData:
         self.linear_velocity = None
         self.angular_velocity = None
         self.occupancy_map = None
+
+
 class SceneData:
     """
     A class for passing data from scene
@@ -40,6 +44,8 @@ class SceneData:
     def __init__(self):
         self.observation_list = None
         self.adjacency_list = None
+
+
 # def get_gabreil_graph(position_array, node_num):
 #     """
 #     Return a gabreil graph of the scene
@@ -66,7 +72,7 @@ def update_adjacency_list(position_list):
     Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
     """
-    node_num=len(position_list)
+    node_num = len(position_list)
     position_array = np.array(position_list)
 
     # Get Gabreil Graph
@@ -90,6 +96,8 @@ def update_adjacency_list(position_list):
                     )
                 )
     return new_adj_list
+
+
 def centralized_control(index, sensor_data, scene_data, desired_distance):
 
     out_put = ControlData()
@@ -103,6 +111,7 @@ def centralized_control(index, sensor_data, scene_data, desired_distance):
     self_x = self_position[0]
     self_y = self_position[1]
     neighbors = scene_data.adjacency_list[index]
+    print(neighbors)
     # print(neighbors)
     velocity_sum_x = 0
     velocity_sum_y = 0
@@ -120,11 +129,16 @@ def centralized_control(index, sensor_data, scene_data, desired_distance):
 
     return out_put
 
-def generate_one(global_pose_array,self_orientation_array,desired_distance):
-    global_pose_array=np.array(global_pose_array)
-    self_orientation_array=np.array(self_orientation_array)
-    position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_array)
-    occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local, self_orientation_array)
+
+def generate_one(global_pose_array, self_orientation_array, desired_distance):
+    global_pose_array = np.array(global_pose_array)
+    self_orientation_array = np.array(self_orientation_array)
+    position_lists_local, self_pose = occupancy_map_simulator.global_to_local(
+        global_pose_array
+    )
+    occupancy_maps = occupancy_map_simulator.generate_maps(
+        position_lists_local, self_orientation_array
+    )
     ref_control_list = []
     adjacency_lists = []
     number_of_robot = global_pose_array.shape[0]
@@ -136,13 +150,21 @@ def generate_one(global_pose_array,self_orientation_array,desired_distance):
         sensor_data_i.orientation = [0, 0, global_pose_array[robot_index][2]]
         scene_data_i = SceneData()
         scene_data_i.adjacency_list = adjacency_list_i
-        control_i = centralized_control(robot_index, sensor_data_i, scene_data_i, desired_distance)
+        control_i = centralized_control(
+            robot_index, sensor_data_i, scene_data_i, desired_distance
+        )
         ref_control_list.append([control_i.velocity_x, control_i.velocity_y])
-    return np.array(occupancy_maps), np.array(ref_control_list), np.array(adjacency_lists)
 
-def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
+    return (
+        np.array(occupancy_maps),
+        np.array(ref_control_list),
+        np.array(adjacency_lists),
+    )
+
+
+def generate(number_of_robot, max_disp_range, min_disp_range, desired_distance):
     global_pose_list = []
-    self_orientation_list=[]
+    self_orientation_list = []
     for i in range(number_of_robot):
         while True:
             alpha = math.pi * (2 * random.random())
@@ -160,15 +182,13 @@ def generate(number_of_robot,max_disp_range,min_disp_range,desired_distance):
             global_pose_list.append([pos_x, pos_y, 0])
             self_orientation_list.append(theta)
             break
-    occupancy_maps, ref_control_list, adjacency_lists=generate_one(global_pose_list,self_orientation_list,desired_distance)
-    return occupancy_maps,ref_control_list,adjacency_lists
+    occupancy_maps, ref_control_list, adjacency_lists = generate_one(
+        global_pose_list, self_orientation_list, desired_distance
+    )
+    return occupancy_maps, ref_control_list, adjacency_lists
 
 
-
-
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
     # present = os.getcwd()
     # root = os.path.join(present, "../training_data/data")
