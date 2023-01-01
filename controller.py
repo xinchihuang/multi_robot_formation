@@ -8,7 +8,7 @@ import torch
 from model.GNN_based_model import DecentralController
 import cv2
 from utils.occupancy_map_simulator import generate_map_one, global_to_local
-
+from utils.data_generator import generate_one
 
 class ControlData:
     """
@@ -56,10 +56,11 @@ class Controller:
             out_put.velocity_x = 0
             out_put.velocity_y = 0
             return out_put
-        print("robot index", index)
-        # self_robot_index = index
 
         self_position = sensor_data.position
+        print("robot index", index)
+        # self_robot_index = index
+        print(self_position)
         # self_orientation = sensor_data.orientation
         self_x = self_position[0]
         self_y = self_position[1]
@@ -91,6 +92,7 @@ class Controller:
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
             self.GNN_model.to("cuda")
+        self.GNN_model.eval()
 
     def centralized_control_line(
         self,
@@ -219,25 +221,30 @@ class Controller:
         ### control the formation distance
         scale = np.zeros((1, number_of_agents, 1))
         position_lists_global = scene_data.position_list
+        print("robot index",index)
+        print(position_lists_global[index])
         orientation_list = scene_data.orientation_list
+        occupancy_maps, reference, adjacency_lists = generate_one(
+            np.array(position_lists_global), np.array(orientation_list), self.desired_distance
+        )
+
         position_lists_local, self_pose_list = global_to_local(position_lists_global)
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
-            occupancy_map_i = generate_map_one(
-                position_lists_local[i], orientation_list[i]
-            )
+            occupancy_map_i = occupancy_maps[i]
             cv2.imshow(str(i), occupancy_map_i)
             cv2.waitKey(1)
             input_occupancy_maps[0, i, :, :] = occupancy_map_i
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
-        ### a
+
         input_tensor = torch.from_numpy(input_occupancy_maps).double()
 
         for key, value in scene_data.adjacency_list.items():
             for n in value:
                 neighbor[key][n[0]] = 1
+
         neighbor = torch.from_numpy(neighbor).double()
         neighbor = neighbor.unsqueeze(0)
         ref = torch.from_numpy(ref).double()
@@ -251,14 +258,16 @@ class Controller:
             scale = scale.to("cuda")
         self.GNN_model.eval()
         self.GNN_model.addGSO(neighbor)
-
+        from utils.map_viewer import visualize_global_pose_array
+        # print(position_lists_global)
+        # visualize_global_pose_array(np.array(position_lists_global))
+        # print(neighbor)
         #### Set a threshold to eliminate small movements
         # threshold=0.05
         # print(scale.shape)
         control = (
             self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()
         )  ## model output
-
         out_put.robot_index = index
         out_put.velocity_x = control[0][0]
         out_put.velocity_y = control[0][1]

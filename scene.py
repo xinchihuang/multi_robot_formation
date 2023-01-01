@@ -73,6 +73,7 @@ class Scene:
         for robot in self.robot_list:
             robot.controller.initialize_GNN_model(num_robot, model_path)
 
+
     def update_scene_data(self):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -129,7 +130,10 @@ class Scene:
         output = SceneData()
         observation_list = []
         for robot in self.robot_list:
-            observation = robot.get_sensor_data()
+            # if robot.sensor_data==None:
+            #     print("None")
+            #     robot.get_sensor_data()
+            observation = robot.sensor_data
             observation_list.append(observation)
         self.update_scene_data()
 

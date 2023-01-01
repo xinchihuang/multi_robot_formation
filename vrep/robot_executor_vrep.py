@@ -97,4 +97,4 @@ class Executor:
             omega_left,
             omega_right,
         )
-        vrep_interface.synchronize(self.client_id)
+        # vrep_interface.synchronize(self.client_id)

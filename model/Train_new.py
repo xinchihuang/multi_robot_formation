@@ -8,7 +8,8 @@ from tqdm import tqdm
 from model.GNN_based_model import DecentralController
 import os
 from utils.data_generator import generate_one
-
+import math
+import random
 
 class RobotDatasetTrace(Dataset):
     def __init__(self, data_path_root):
@@ -43,10 +44,35 @@ class RobotDatasetTrace(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
+        ### random
+        # global_pose_list=[]
+        # self_orientation_list=[]
+        # while True:
+        #     alpha = math.pi * (2 * random.random())
+        #     rho = 5 * random.random()
+        #     pos_x = rho * math.cos(alpha)
+        #     pos_y = rho * math.sin(alpha)
+        #     theta = 2 * math.pi * random.random()
+        #     too_close = False
+        #     for p in global_pose_list:
+        #         if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
+        #             too_close = True
+        #             break
+        #     if too_close:
+        #         continue
+        #     global_pose_list.append([pos_x, pos_y, 0])
+        #     self_orientation_list.append(theta)
+        #     break
+        # global_pose_array=np.array(global_pose_list)
+        # self_orientation_array=np.array(self_orientation_list)
 
         global_pose_array = self.pose_array[:, idx, :]
         self_orientation_array = global_pose_array[:, 2]
+        self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
+        # print(global_pose_array)
+        # print(self_orientation_array)
+        # print(self.desired_distance)
         occupancy_maps, reference, adjacency_lists = generate_one(
             global_pose_array, self_orientation_array, self.desired_distance
         )
@@ -122,7 +148,6 @@ class RobotDatasetMap(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        print(idx)
         occupancy_maps = self.occupancy_maps_list[idx]
         reference = self.reference_control_list[idx]
         neighbor = self.neighbor_list[idx]
@@ -197,14 +222,17 @@ class Trainer:
         trainloader = DataLoader(
             trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
-
+        evaluateset=RobotDatasetTrace("/home/xinchi/gnn_data/evaluate")
+        evaluateloader = DataLoader(
+            evaluateset, batch_size=self.batch_size, shuffle=False, drop_last=True
+        )
         self.model.train()
         total_loss = 0
         total = 0
         while self.epoch < 1:
             self.epoch += 1
             iteration = 0
-            for i, batch in enumerate(tqdm(trainloader)):
+            for iter, batch in enumerate(tqdm(trainloader)):
                 occupancy_maps = batch["occupancy_maps"]
                 neighbor = batch["neighbor"]
                 reference = batch["reference"]
@@ -218,10 +246,10 @@ class Trainer:
                     scale = scale.to("cuda")
                 self.model.addGSO(neighbor)
                 self.optimizer.zero_grad()
-                print(scale.shape)
+                # print(occupancy_maps.shape)
                 outs = self.model(occupancy_maps, useless, scale)
-                # print(outs[0], actions[:, 0])
                 loss = self.criterion(outs[0], reference[:, 0])
+
                 for i in range(1, self.nA):
                     loss += self.criterion(outs[i], reference[:, i])
                 loss.backward()
@@ -230,20 +258,75 @@ class Trainer:
                 total += occupancy_maps.size(0) * self.nA
                 iteration += 1
                 # print(iteration)
-                if iteration % 100 == 0:
+                # if iter % 1000 == 0:
+                #     print("out", outs[0])
+                #     print("ref",reference[:, 0])
+                if iteration % 1000 == 0:
+
                     print(
                         "Average training_data loss at iteration "
                         + str(iteration)
                         + ":",
                         total_loss / total,
                     )
+                    print("loss ", total_loss)
+                    print("total ", total)
+                    total_loss=0
+                    total=0
                     self.save("model_" + str(iteration) + ".pth")
+                    evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
+                             iteration)
         return total_loss / total
 
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
+def evaluate(evaluateloader,use_cuda,model,optimizer,criterion,nA,iteration):
+    total_loss_eval= 0
+    total_eval = 0
+    for iter_eval, batch_eval in enumerate(evaluateloader):
+        occupancy_maps = batch_eval["occupancy_maps"]
+        neighbor = batch_eval["neighbor"]
+        reference = batch_eval["reference"]
+        useless = batch_eval["useless"]
+        scale = batch_eval["scale"]
+        if use_cuda:
+            occupancy_maps = occupancy_maps.to("cuda")
+            neighbor = neighbor.to("cuda")
+            reference = reference.to("cuda")
+            useless = useless.to("cuda")
+            scale = scale.to("cuda")
+        model.addGSO(neighbor)
+        optimizer.zero_grad()
+        # print(occupancy_maps.shape)
+
+        outs = model(occupancy_maps, useless, scale)
+        loss = criterion(outs[0], reference[:, 0])
+
+        for i in range(1, nA):
+            loss += criterion(outs[i], reference[:, i])
+        optimizer.step()
+        total_loss_eval += loss.item()
+        total_eval += occupancy_maps.size(0) * nA
+    print(
+        "Average evaluating_data loss at iteration "
+        + str(iteration)
+        + ":",
+        total_loss_eval / total_eval,
+    )
+    print("loss_eval ", total_loss_eval)
+    print("total_eval ", total_eval)
 
 
-T = Trainer()
-T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-T.save("/home/xinchi/multi_robot_formation/saved_model/model_final.pth")
+
+if __name__ == "__main__":
+
+    T = Trainer()
+    T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
+    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert.pth")
+# from utils.map_viewer import visualize_global_pose_array
+# trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
+# for i in range(99,100):
+#     data,global_pose_array=trainset.__getitem__(i)
+#     visualize_global_pose_array(global_pose_array)
+#     print(data["reference"])
+#     print(data["neighbor"])

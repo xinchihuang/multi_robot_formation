@@ -111,8 +111,6 @@ def centralized_control(index, sensor_data, scene_data, desired_distance):
     self_x = self_position[0]
     self_y = self_position[1]
     neighbors = scene_data.adjacency_list[index]
-    print(neighbors)
-    # print(neighbors)
     velocity_sum_x = 0
     velocity_sum_y = 0
     for neighbor in neighbors:

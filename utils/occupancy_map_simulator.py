@@ -24,11 +24,11 @@ def arctan(x, y):
         if x > 0 and y > 0:
             pass
         elif x < 0 and y > 0:
-            theta = theta + math.pi
+            theta = theta+math.pi
         elif x < 0 and y < 0:
-            theta = theta + math.pi
+            theta = theta-math.pi
         elif x > 0 and y < 0:
-            theta = theta + 2 * math.pi
+            theta = theta
     return theta
 
 
@@ -162,11 +162,12 @@ def flatten_maps(maps, map_size=100):
 def generate_map_one(
     position_list_local,
     self_orientation,
-    robot_size=0.2,
+    robot_size=0.5,
     max_height=0.3,
     map_size=100,
     max_x=10,
     max_y=10,
+    rotate=False
 ):
 
     """
@@ -192,7 +193,9 @@ def generate_map_one(
             world_points_filtered = data_filter(
                 world_points, max_x, max_y, max_height, 2 * robot_size
             )
-            world_points_rotated = rotation(world_points_filtered, self_orientation)
+            if rotate:
+                world_points_rotated = rotation(world_points_filtered, self_orientation)
+            world_points_rotated=world_points_filtered
             map_points = world_to_map(world_points_rotated, map_size, max_x, max_y)
             if map_points == None:
                 continue
@@ -211,7 +214,7 @@ def generate_map_one(
 def generate_maps(
     position_lists_local,
     self_orientation_list,
-    robot_size=0.2,
+    robot_size=0.5,
     max_height=0.3,
     map_size=100,
     max_x=10,
@@ -243,3 +246,5 @@ def generate_maps(
         maps.append(occupancy_map)
 
     return maps
+
+# print(math.sin(arctan(-1.732,-1)))
