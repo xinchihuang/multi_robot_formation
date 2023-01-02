@@ -10,18 +10,18 @@ from vrep import vrep_interface
 from robot import Robot
 from utils.gabreil_graph import get_gabreil_graph
 from realrobot.robot_executor_robomaster import Executor
+from comm_data import SceneData
 
-
-class SceneData:
-    """
-    A class for passing data from scene
-    """
-
-    def __init__(self):
-        self.observation_list = None
-        self.adjacency_list = None
-        self.position_list = None
-        self.orientation_list = None
+# class SceneData:
+#     """
+#     A class for passing data from scene
+#     """
+#
+#     def __init__(self):
+#         self.observation_list = None
+#         self.adjacency_list = None
+#         self.position_list = None
+#         self.orientation_list = None
 
 
 class Scene:

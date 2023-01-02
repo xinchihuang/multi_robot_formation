@@ -7,21 +7,21 @@ import numpy as np
 import torch
 from model.GNN_based_model import DecentralController
 import cv2
-from utils.occupancy_map_simulator import generate_map_one, global_to_local
-from utils.data_generator import generate_one
+from utils.occupancy_map_simulator import MapSimulator
 
-class ControlData:
-    """
-    A data structure for passing control signals to executor
-    """
-
-    def __init__(self):
-        self.robot_index = None
-        # self.omega_left = 0
-        # self.omega_right = 0
-
-        self.velocity_x = 0
-        self.velocity_y = 0
+from comm_data import ControlData
+# class ControlData:
+#     """
+#     A data structure for passing control signals to executor
+#     """
+#
+#     def __init__(self):
+#         self.robot_index = None
+#         # self.omega_left = 0
+#         # self.omega_right = 0
+#
+#         self.velocity_x = 0
+#         self.velocity_y = 0
 
 
 class Controller:
@@ -224,11 +224,15 @@ class Controller:
         print("robot index",index)
         print(position_lists_global[index])
         orientation_list = scene_data.orientation_list
-        occupancy_maps, reference, adjacency_lists = generate_one(
-            np.array(position_lists_global), np.array(orientation_list), self.desired_distance
+
+        occupancy_map_simulator=MapSimulator()
+        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(
+            np.array(position_lists_global)
+        )
+        occupancy_maps = occupancy_map_simulator.generate_maps(
+            position_lists_local, np.array(orientation_list)
         )
 
-        position_lists_local, self_pose_list = global_to_local(position_lists_global)
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
             ### need to be modified
@@ -258,13 +262,7 @@ class Controller:
             scale = scale.to("cuda")
         self.GNN_model.eval()
         self.GNN_model.addGSO(neighbor)
-        from utils.map_viewer import visualize_global_pose_array
-        # print(position_lists_global)
-        # visualize_global_pose_array(np.array(position_lists_global))
-        # print(neighbor)
-        #### Set a threshold to eliminate small movements
-        # threshold=0.05
-        # print(scale.shape)
+
         control = (
             self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()
         )  ## model output

@@ -10,7 +10,7 @@ import numpy as np
 import occupancy_map_simulator
 import pyrealsense2 as rs
 import cv2
-
+from comm_data import SensorData
 
 def get_frame():
     # Create a pipeline
@@ -114,18 +114,18 @@ def get_frame():
         pipeline.stop()
 
 
-class SensorData:
-    """
-    A class for record sensor data
-    """
-
-    def __init__(self):
-        self.robot_index = None
-        self.position = None
-        self.orientation = None
-        self.linear_velocity = None
-        self.angular_velocity = None
-        self.occupancy_map = None
+# class SensorData:
+#     """
+#     A class for record sensor data
+#     """
+#
+#     def __init__(self):
+#         self.robot_index = None
+#         self.position = None
+#         self.orientation = None
+#         self.linear_velocity = None
+#         self.angular_velocity = None
+#         self.occupancy_map = None
 
 
 class Sensor:

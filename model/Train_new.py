@@ -44,27 +44,6 @@ class RobotDatasetTrace(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        ### random
-        # global_pose_list=[]
-        # self_orientation_list=[]
-        # while True:
-        #     alpha = math.pi * (2 * random.random())
-        #     rho = 5 * random.random()
-        #     pos_x = rho * math.cos(alpha)
-        #     pos_y = rho * math.sin(alpha)
-        #     theta = 2 * math.pi * random.random()
-        #     too_close = False
-        #     for p in global_pose_list:
-        #         if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
-        #             too_close = True
-        #             break
-        #     if too_close:
-        #         continue
-        #     global_pose_list.append([pos_x, pos_y, 0])
-        #     self_orientation_list.append(theta)
-        #     break
-        # global_pose_array=np.array(global_pose_list)
-        # self_orientation_array=np.array(self_orientation_list)
 
         global_pose_array = self.pose_array[:, idx, :]
         self_orientation_array = global_pose_array[:, 2]
@@ -86,11 +65,6 @@ class RobotDatasetTrace(Dataset):
         scale = self.scale
 
         if self.transform:
-            # for i in range(3):
-            # s = sample[:,i]
-            # m = np.mean(s)
-            # std = np.std(s)
-            # sample[:,i] = (s - m)/(std + .00001)
             occupancy_maps = torch.from_numpy(occupancy_maps).double()
             reference = torch.from_numpy(reference).double()
             neighbor = torch.from_numpy(neighbor).double()
@@ -154,11 +128,6 @@ class RobotDatasetMap(Dataset):
         refs = np.zeros((self.number_of_agents, 1))
         alphas = self.scale
         if self.transform:
-            # for i in range(3):
-            # s = sample[:,i]
-            # m = np.mean(s)
-            # std = np.std(s)
-            # sample[:,i] = (s - m)/(std + .00001)
             occupancy_maps = torch.from_numpy(occupancy_maps).double()
             reference = torch.from_numpy(reference).double()
             neighbor = torch.from_numpy(neighbor).double()
@@ -212,7 +181,8 @@ class Trainer:
         self.currentAgent = -1
 
     def train(self, data_path_root):
-        """ """
+        """
+        """
         self.epoch += 1
         if self.epoch in self.lr_schedule.keys():
             for g in self.optimizer.param_groups:
