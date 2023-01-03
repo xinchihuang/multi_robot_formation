@@ -58,9 +58,6 @@ class Controller:
             return out_put
 
         self_position = sensor_data.position
-        print("robot index", index)
-        # self_robot_index = index
-        print(self_position)
         # self_orientation = sensor_data.orientation
         self_x = self_position[0]
         self_y = self_position[1]
@@ -74,7 +71,6 @@ class Controller:
             velocity_sum_x -= velocity_x
             velocity_sum_y -= velocity_y
         # transform speed to wheels speed
-        theta = sensor_data.orientation[2]
         out_put.robot_index = index
         out_put.velocity_x = velocity_sum_x
         out_put.velocity_y = velocity_sum_y
@@ -179,6 +175,7 @@ class Controller:
         number_of_agents=5,
         input_height=100,
         input_width=100,
+        local=True
     ):
         """
 
@@ -221,17 +218,13 @@ class Controller:
         ### control the formation distance
         scale = np.zeros((1, number_of_agents, 1))
         position_lists_global = scene_data.position_list
-        print("robot index",index)
-        print(position_lists_global[index])
+        # print("robot index",index)
+        # print(position_lists_global[index])
         orientation_list = scene_data.orientation_list
 
-        occupancy_map_simulator=MapSimulator()
-        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(
-            np.array(position_lists_global)
-        )
-        occupancy_maps = occupancy_map_simulator.generate_maps(
-            position_lists_local, np.array(orientation_list)
-        )
+        occupancy_map_simulator=MapSimulator(rotate=local)
+        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(np.array(position_lists_global),np.array(orientation_list))
+        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
 
         for i in range(number_of_agents):
             # print(sensor_data.occupancy_map)
@@ -266,7 +259,20 @@ class Controller:
         control = (
             self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()
         )  ## model output
+        velocity_x=control[0][0]
+        velocity_y=control[0][1]
+
+        if local:
+            theta=sensor_data.orientation[2]
+            velocity_x_global=velocity_x*math.sin(theta)+velocity_y*math.cos(theta)
+            velocity_y_global=-velocity_x*math.cos(theta)+velocity_y*math.sin(theta)
+            velocity_x=velocity_x_global
+            velocity_y=velocity_y_global
+
         out_put.robot_index = index
-        out_put.velocity_x = control[0][0]
-        out_put.velocity_y = control[0][1]
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
+
+
+
         return out_put

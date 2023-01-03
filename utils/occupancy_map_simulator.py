@@ -49,6 +49,44 @@ class MapSimulator:
                 theta = theta
         return theta
 
+    def data_filter(self,world_point):
+        """
+        Filter out the points that out of sensor range
+        :param world_point: Points in world coordinate
+        :param max_x: points' max x coordinate (left/right)
+        :param max_y: points' max y coordinate (depth/distance)
+        :param max_height: points' horizontal range
+        :param min_range: min distance between robots
+        :return: Points within sensor range
+        """
+
+        x = world_point[0]
+        y = world_point[1]
+        z = world_point[2]
+        min_range=2*self.robot_size
+        if x > self.max_x or x < -self.max_x or y > self.max_y or y < -self.max_y or z < -self.max_height:  #
+            return None
+        if x < min_range and y < min_range and x > -min_range and y > -min_range:
+            return None
+        return [x, y, z]
+
+
+    def rotation(self,world_point, self_orientation):
+        """
+        Rotate the points according to the robot orientation to transform other robot's position from global to local
+        :param world_point: Other robot's positions
+        :param self_orientation: Robot orientation
+        :return:
+        """
+        x = world_point[0]
+        y = world_point[1]
+        z = world_point[2]
+        theta = self_orientation
+        x_relative = math.cos(theta) * x + math.sin(theta) * y
+        y_relative = -math.sin(theta) * x + math.cos(theta) * y
+        return [x_relative, y_relative, z]
+
+
 
     def blocking(self,position_lists_local):
         """
@@ -94,7 +132,7 @@ class MapSimulator:
         return out_position_lists_local
 
 
-    def global_to_local(self,position_lists_global):
+    def global_to_local(self,position_lists_global,self_orientation_global):
         """
         Get each robot's observation from global absolute position
         :param position_lists_global: Global absolute position of all robots in the world
@@ -106,58 +144,25 @@ class MapSimulator:
             x_self = position_lists_global[i][0]
             y_self = position_lists_global[i][1]
             z_self = position_lists_global[i][2]
+
             self_pose_list.append([x_self, y_self, z_self])
             position_list_local_i = []
             for j in range(len(position_lists_global)):
                 if i == j:
                     continue
-                position_list_local_i.append(
-                    [
-                        position_lists_global[j][0] - x_self,
-                        position_lists_global[j][1] - y_self,
-                        position_lists_global[j][2] - z_self,
-                    ]
-                )
+                point_local_raw=[position_lists_global[j][0] - x_self,position_lists_global[j][1] - y_self,position_lists_global[j][2] - z_self]
+                if self.rotate:
+                    point_local_rotated=self.rotation(point_local_raw,self_orientation_global[i])
+                    point_local_raw=point_local_rotated
+                point_local=self.data_filter(point_local_raw)
+
+                if not point_local==None:
+                    position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
         position_lists_local = self.blocking(position_lists_local)
-        return np.array(position_lists_local), self_pose_list
+        return position_lists_local, self_pose_list
 
 
-    def data_filter(self,world_point, max_x, max_y, max_height, min_range):
-        """
-        Filter out the points that out of sensor range
-        :param world_point: Points in world coordinate
-        :param max_x: points' max x coordinate (left/right)
-        :param max_y: points' max y coordinate (depth/distance)
-        :param max_height: points' horizontal range
-        :param min_range: min distance between robots
-        :return: Points within sensor range
-        """
-
-        x = world_point[0]
-        y = world_point[1]
-        z = world_point[2]
-        if x > max_x or x < -max_x or y > max_y or y < -max_y or z < -max_height:  #
-            return None
-        if x < min_range and y < min_range and x > -min_range and y > -min_range:
-            return None
-        return [x, y, z]
-
-
-    def rotation(self,world_point, self_orientation):
-        """
-        Rotate the points according to the robot orientation to transform other robot's position from global to local
-        :param world_point: Other robot's positions
-        :param self_orientation: Robot orientation
-        :return:
-        """
-        x = world_point[0]
-        y = world_point[1]
-        z = world_point[2]
-        theta = -self_orientation
-        x_relative = math.cos(theta) * x + math.sin(theta) * y
-        y_relative = -math.sin(theta) * x + math.cos(theta) * y
-        return [x_relative, y_relative, z]
 
 
     def world_to_map(self,world_point, map_size, max_x, max_y):
@@ -183,13 +188,11 @@ class MapSimulator:
 
     def generate_map_one(self,
         position_list_local,
-        self_orientation,
         robot_size,
-        max_height,
         map_size,
         max_x,
         max_y,
-        rotate):
+        ):
 
         """
         Generate occupancy map
@@ -211,14 +214,8 @@ class MapSimulator:
         )
         try:
             for world_points in position_list_local:
-                world_points_filtered = self.data_filter(
-                    world_points, max_x, max_y, max_height, 2 * robot_size
-                )
-                if rotate:
-                    world_points_rotated = self.rotation(world_points_filtered, self_orientation)
-                else:
-                    world_points_rotated=world_points_filtered
-                map_points = self.world_to_map(world_points_rotated, map_size, max_x, max_y)
+
+                map_points = self.world_to_map(world_points, map_size, max_x, max_y)
                 if map_points == None:
                     continue
                 x = map_points[0]
@@ -235,7 +232,6 @@ class MapSimulator:
 
     def generate_maps(self,
         position_lists_local,
-        self_orientation_list,
     ):
 
         """
@@ -248,13 +244,10 @@ class MapSimulator:
         for robot_index in range(len(position_lists_local)):
             occupancy_map = self.generate_map_one(
                 position_lists_local[robot_index],
-                self_orientation_list[robot_index],
                 self.robot_size,
-                self.max_height,
                 self.map_size,
                 self.max_x,
                 self.max_y,
-                self.rotate
             )
             maps.append(occupancy_map)
         return np.array(maps)

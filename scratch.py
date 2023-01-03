@@ -14,7 +14,7 @@ from utils.data_generator import generate_one
 import cv2
 
 model=DecentralController(number_of_agent=5)
-model.load_state_dict(torch.load("/home/xinchi/multi_robot_formation/saved_model/model_final_expert.pth"))
+model.load_state_dict(torch.load("/home/xinchi/multi_robot_formation/saved_model/model_final_expert_global.pth"))
 dataset=RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 testloader = DataLoader(
             dataset, batch_size=1, shuffle=False, drop_last=False

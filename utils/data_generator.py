@@ -41,48 +41,45 @@ class DataGenerator:
                     )
         return new_adj_list
 
+    #
+    # def centralized_control(self,index, sensor_data, scene_data, desired_distance):
+    #
+    #     out_put = ControlData()
+    #     if not scene_data:
+    #         out_put.velocity_x = 0
+    #         out_put.velocity_y = 0
+    #         return out_put
+    #
+    #     self_position = sensor_data.position
+    #     # self_orientation = sensor_data.orientation
+    #     self_x = self_position[0]
+    #     self_y = self_position[1]
+    #     neighbors = scene_data.adjacency_list[index]
+    #     velocity_sum_x = 0
+    #     velocity_sum_y = 0
+    #     for neighbor in neighbors:
+    #         rate = (neighbor[3] - desired_distance) / neighbor[3]
+    #         velocity_x = rate * (self_x - neighbor[1])
+    #         velocity_y = rate * (self_y - neighbor[2])
+    #         velocity_sum_x -= velocity_x
+    #         velocity_sum_y -= velocity_y
+    #     # transform speed to wheels speed
+    #     theta = sensor_data.orientation[2]
+    #     out_put.robot_index = index
+    #     out_put.velocity_x = velocity_sum_x
+    #     out_put.velocity_y = velocity_sum_y
+    #
+    #     return out_put
 
-    def centralized_control(self,index, sensor_data, scene_data, desired_distance):
 
-        out_put = ControlData()
-        if not scene_data:
-            out_put.velocity_x = 0
-            out_put.velocity_y = 0
-            return out_put
-
-        self_position = sensor_data.position
-        # self_orientation = sensor_data.orientation
-        self_x = self_position[0]
-        self_y = self_position[1]
-        neighbors = scene_data.adjacency_list[index]
-        velocity_sum_x = 0
-        velocity_sum_y = 0
-        for neighbor in neighbors:
-            rate = (neighbor[3] - desired_distance) / neighbor[3]
-            velocity_x = rate * (self_x - neighbor[1])
-            velocity_y = rate * (self_y - neighbor[2])
-            velocity_sum_x -= velocity_x
-            velocity_sum_y -= velocity_y
-        # transform speed to wheels speed
-        theta = sensor_data.orientation[2]
-        out_put.robot_index = index
-        out_put.velocity_x = velocity_sum_x
-        out_put.velocity_y = velocity_sum_y
-
-        return out_put
-
-
-    def generate_one(self,global_pose_array, self_orientation_array, desired_distance):
+    def generate_one(self,global_pose_array, self_orientation_array,local=True):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator()
+        occupancy_map_simulator=MapSimulator(rotate=local)
 
-        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(
-            global_pose_array
-        )
-        occupancy_maps = occupancy_map_simulator.generate_maps(
-            position_lists_local, self_orientation_array
-        )
+        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
+        print(position_lists_local[2])
+        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
@@ -91,7 +88,7 @@ class DataGenerator:
             adjacency_lists.append(adjacency_list_i)
             sensor_data_i = SensorData()
             sensor_data_i.position = global_pose_array[robot_index]
-            sensor_data_i.orientation = [0, 0, global_pose_array[robot_index][2]]
+            sensor_data_i.orientation = [0, 0, self_orientation_array[robot_index]]
             scene_data_i = SceneData()
             scene_data_i.adjacency_list = adjacency_list_i
 
@@ -100,7 +97,15 @@ class DataGenerator:
             control_i = controller.centralized_control(
                 robot_index, sensor_data_i, scene_data_i,
             )
-            ref_control_list.append([control_i.velocity_x, control_i.velocity_y])
+            velocity_x,velocity_y=control_i.velocity_x, control_i.velocity_y
+            if local:
+                theta = self_orientation_array[robot_index]
+                velocity_x_global = velocity_x * math.sin(theta) - velocity_y * math.cos(theta)
+                velocity_y_global = velocity_x * math.cos(theta) + velocity_y * math.sin(theta)
+                velocity_x = velocity_x_global
+                velocity_y = velocity_y_global
+
+            ref_control_list.append([velocity_x, velocity_y])
         return (
             np.array(occupancy_maps),
             np.array(ref_control_list),
@@ -108,30 +113,28 @@ class DataGenerator:
         )
 
 
-    def generate(self,number_of_robot, max_disp_range, min_disp_range, desired_distance):
-        global_pose_list = []
-        self_orientation_list = []
-        for i in range(number_of_robot):
-            while True:
-                alpha = math.pi * (2 * random.random())
-                rho = max_disp_range * random.random()
-                pos_x = rho * math.cos(alpha)
-                pos_y = rho * math.sin(alpha)
-                theta = 2 * math.pi * random.random()
-                too_close = False
-                for p in global_pose_list:
-                    if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
-                        too_close = True
-                        break
-                if too_close:
-                    continue
-                global_pose_list.append([pos_x, pos_y, 0])
-                self_orientation_list.append(theta)
-                break
-        occupancy_maps, ref_control_list, adjacency_lists = self.generate_one(
-            global_pose_list, self_orientation_list, desired_distance
-        )
-        return occupancy_maps, ref_control_list, adjacency_lists
+    # def generate(self,number_of_robot, max_disp_range, min_disp_range, desired_distance):
+    #     global_pose_list = []
+    #     self_orientation_list = []
+    #     for i in range(number_of_robot):
+    #         while True:
+    #             alpha = math.pi * (2 * random.random())
+    #             rho = max_disp_range * random.random()
+    #             pos_x = rho * math.cos(alpha)
+    #             pos_y = rho * math.sin(alpha)
+    #             theta = 2 * math.pi * random.random()
+    #             too_close = False
+    #             for p in global_pose_list:
+    #                 if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
+    #                     too_close = True
+    #                     break
+    #             if too_close:
+    #                 continue
+    #             global_pose_list.append([pos_x, pos_y, 0])
+    #             self_orientation_list.append(theta)
+    #             break
+    #     occupancy_maps, ref_control_list, adjacency_lists = self.generate_one(global_pose_list, self_orientation_list)
+    #     return occupancy_maps, ref_control_list, adjacency_lists
 
 
 if __name__ == "__main__":

@@ -7,10 +7,10 @@ import torch.nn as nn
 from tqdm import tqdm
 from model.GNN_based_model import DecentralController
 import os
-from utils.data_generator import generate_one
+from utils.data_generator import DataGenerator
 import math
 import random
-
+import cv2
 class RobotDatasetTrace(Dataset):
     def __init__(self, data_path_root):
 
@@ -52,9 +52,17 @@ class RobotDatasetTrace(Dataset):
         # print(global_pose_array)
         # print(self_orientation_array)
         # print(self.desired_distance)
-        occupancy_maps, reference, adjacency_lists = generate_one(
-            global_pose_array, self_orientation_array, self.desired_distance
-        )
+        # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # self_orientation_array=[0,0,0,0,0]
+        data_generator=DataGenerator()
+        occupancy_maps, reference, adjacency_lists = data_generator.generate_one(global_pose_array, self_orientation_array)
+
+        # for i in range(0,5):
+        #     print(reference[i])
+        #     print(global_pose_array[i])
+        #     cv2.imshow(str(i), occupancy_maps[i])
+        #     cv2.waitKey(0)
+
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
         for key, value in adjacency_lists[0].items():
@@ -149,7 +157,7 @@ class Trainer:
         optimizer="rms",
         inW=100,
         inH=100,
-        batch_size=16,
+        batch_size=1,
         nA=5,
         lr=0.01,
         cuda=True,
@@ -246,6 +254,7 @@ class Trainer:
                     self.save("model_" + str(iteration) + ".pth")
                     evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
                              iteration)
+                break
         return total_loss / total
 
     def save(self, save_path):
@@ -292,7 +301,7 @@ if __name__ == "__main__":
 
     T = Trainer()
     T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert.pth")
+    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):
