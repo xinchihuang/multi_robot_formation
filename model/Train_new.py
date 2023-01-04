@@ -53,15 +53,15 @@ class RobotDatasetTrace(Dataset):
         # print(self_orientation_array)
         # print(self.desired_distance)
         # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        # self_orientation_array=[math.pi/2,0,0,0,0]
+        # self_orientation_array=[math.pi/3,0,0,0,0]
         data_generator=DataGenerator()
         occupancy_maps, reference, adjacency_lists = data_generator.generate_one(global_pose_array, self_orientation_array)
 
-        # for i in range(0,5):
-        #     print(reference[i])
-        # #     print(global_pose_array[i])
-        #     cv2.imshow(str(i), occupancy_maps[i])
-        #     cv2.waitKey(0)
+        for i in range(0,5):
+            print(reference[i])
+        #     print(global_pose_array[i])
+            cv2.imshow(str(i), occupancy_maps[i])
+            cv2.waitKey(0)
 
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
@@ -254,6 +254,7 @@ class Trainer:
                     self.save("model_" + str(iteration) + ".pth")
                     evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
                              iteration)
+                break
         return total_loss / total
 
     def save(self, save_path):

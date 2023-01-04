@@ -175,7 +175,7 @@ class Controller:
         number_of_agents=5,
         input_height=100,
         input_width=100,
-        local=True
+        local=False
     ):
         """
 
@@ -264,8 +264,8 @@ class Controller:
 
         if local:
             theta=sensor_data.orientation[2]
-            velocity_x_global=velocity_x*math.sin(theta)+velocity_y*math.cos(theta)
-            velocity_y_global=-velocity_x*math.cos(theta)+velocity_y*math.sin(theta)
+            velocity_x_global=velocity_x*math.cos(theta)-velocity_y*math.sin(theta)
+            velocity_y_global=velocity_x*math.sin(theta)+velocity_y*math.cos(theta)
             velocity_x=velocity_x_global
             velocity_y=velocity_y_global
 

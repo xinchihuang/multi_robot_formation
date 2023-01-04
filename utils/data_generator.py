@@ -101,7 +101,7 @@ class DataGenerator:
     def generate_one(self,global_pose_array, self_orientation_array,local=False):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator(rotate=local)
+        occupancy_map_simulator=MapSimulator(rotate=self.local)
 
         position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
@@ -109,10 +109,11 @@ class DataGenerator:
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
-            if self.local:
-                adjacency_list_i = self.update_adjacency_list_lcoal(position_lists_local[robot_index],robot_index)
-            else:
-                adjacency_list_i = self.update_adjacency_list(global_pose_array)
+            # if self.local:
+            #     print("local")
+            #     adjacency_list_i = self.update_adjacency_list_lcoal(position_lists_local[robot_index],robot_index)
+            # else:
+            adjacency_list_i = self.update_adjacency_list(global_pose_array)
             adjacency_lists.append(adjacency_list_i)
             sensor_data_i = SensorData()
             sensor_data_i.position = global_pose_array[robot_index]
@@ -127,11 +128,13 @@ class DataGenerator:
             control_i = controller.centralized_control(
                 robot_index, sensor_data_i, scene_data_i,
             )
+
             velocity_x,velocity_y=control_i.velocity_x, control_i.velocity_y
-            if local:
+            print(velocity_x,velocity_y)
+            if self.local:
                 theta = self_orientation_array[robot_index]
-                velocity_x_global = velocity_x * math.sin(theta) - velocity_y * math.cos(theta)
-                velocity_y_global = velocity_x * math.cos(theta) + velocity_y * math.sin(theta)
+                velocity_x_global = velocity_x * math.cos(theta) + velocity_y * math.sin(theta)
+                velocity_y_global = -velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
                 velocity_x = velocity_x_global
                 velocity_y = velocity_y_global
 
