@@ -4,21 +4,20 @@ import numpy as np
 from collections import defaultdict
 import cv2
 import os
-from utils.gabreil_graph import get_gabreil_graph
+from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local
 from utils.occupancy_map_simulator import MapSimulator
 from comm_data import ControlData,SensorData,SceneData
 from controller import Controller
 class DataGenerator:
     def __init__(self):
-        pass
+        self.local=True
     def update_adjacency_list(self,position_list):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
         """
-        node_num = len(position_list)
         position_array = np.array(position_list)
-
+        node_num = position_array.shape[0]
         # Get Gabreil Graph
         gabriel_graph = get_gabreil_graph(position_array, node_num)
 
@@ -41,6 +40,33 @@ class DataGenerator:
                     )
         return new_adj_list
 
+    def update_adjacency_list_lcoal(self,position_list_local,robot_index):
+        """
+        Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
+
+        """
+        position_array_local = np.array(position_list_local)
+        position_array=np.concatenate((np.array([[0,0,0]]),position_array_local),axis=0)
+        node_num=position_array.shape[0]
+        # Get Gabreil Graph
+        gabriel_graph = get_gabreil_graph(position_array, node_num)
+        # Create adjacency list
+        new_adj_list = defaultdict(list)
+        for j in range(node_num):
+            if gabriel_graph[0][j] == 1 and not 0 == j:
+                distance = (
+                    (position_array[0][0] - position_array[j][0]) ** 2
+                    + (position_array[0][1] - position_array[j][1]) ** 2
+                ) ** 0.5
+                new_adj_list[robot_index].append(
+                    (
+                        j,
+                        position_array[j][0],
+                        position_array[j][1],
+                        distance,
+                    )
+                )
+        return new_adj_list
     #
     # def centralized_control(self,index, sensor_data, scene_data, desired_distance):
     #
@@ -72,19 +98,21 @@ class DataGenerator:
     #     return out_put
 
 
-    def generate_one(self,global_pose_array, self_orientation_array,local=True):
+    def generate_one(self,global_pose_array, self_orientation_array,local=False):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator=MapSimulator(rotate=local)
 
         position_lists_local, self_pose = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
-        print(position_lists_local[2])
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
-            adjacency_list_i = self.update_adjacency_list(global_pose_array)
+            if self.local:
+                adjacency_list_i = self.update_adjacency_list_lcoal(position_lists_local[robot_index],robot_index)
+            else:
+                adjacency_list_i = self.update_adjacency_list(global_pose_array)
             adjacency_lists.append(adjacency_list_i)
             sensor_data_i = SensorData()
             sensor_data_i.position = global_pose_array[robot_index]
@@ -93,7 +121,9 @@ class DataGenerator:
             scene_data_i.adjacency_list = adjacency_list_i
 
             controller=Controller()
-
+            # print("robot_index",robot_index)
+            # print(position_lists_local[robot_index])
+            # print(adjacency_list_i)
             control_i = controller.centralized_control(
                 robot_index, sensor_data_i, scene_data_i,
             )

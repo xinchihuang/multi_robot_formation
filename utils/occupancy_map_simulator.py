@@ -25,12 +25,13 @@ class MapSimulator:
         self.max_x = max_x
         self.max_y = max_y
         self.rotate = rotate
+        self.block=True
 
     def arctan(self,x, y):
         if x == 0 and y > 0:
             theta = math.pi / 2
         elif x == 0 and y < 0:
-            theta = math.pi * 3 / 2
+            theta = -math.pi / 2
         elif x == 0 and y == 0:
             theta = 0
         elif x > 0 and y == 0:
@@ -144,7 +145,6 @@ class MapSimulator:
             x_self = position_lists_global[i][0]
             y_self = position_lists_global[i][1]
             z_self = position_lists_global[i][2]
-
             self_pose_list.append([x_self, y_self, z_self])
             position_list_local_i = []
             for j in range(len(position_lists_global)):
@@ -159,7 +159,9 @@ class MapSimulator:
                 if not point_local==None:
                     position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
-        position_lists_local = self.blocking(position_lists_local)
+        if self.block:
+
+            position_lists_local = self.blocking(position_lists_local)
         return position_lists_local, self_pose_list
 
 
@@ -179,8 +181,8 @@ class MapSimulator:
             return None
         x_world = world_point[0]
         y_world = world_point[1]
-        x_map = int((max_x - x_world) / (2 * max_x) * map_size)
-        y_map = int((max_y - y_world) / (2 * max_y) * map_size)
+        x_map = int((max_x - y_world) / (2 * max_x) * map_size)
+        y_map = int((max_y + x_world) / (2 * max_y) * map_size)
         if 0 <= x_map < map_size and 0 <= y_map < map_size:
             return [x_map, y_map]
         return None

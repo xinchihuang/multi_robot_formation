@@ -53,13 +53,13 @@ class RobotDatasetTrace(Dataset):
         # print(self_orientation_array)
         # print(self.desired_distance)
         # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        # self_orientation_array=[0,0,0,0,0]
+        # self_orientation_array=[math.pi/2,0,0,0,0]
         data_generator=DataGenerator()
         occupancy_maps, reference, adjacency_lists = data_generator.generate_one(global_pose_array, self_orientation_array)
 
         # for i in range(0,5):
         #     print(reference[i])
-        #     print(global_pose_array[i])
+        # #     print(global_pose_array[i])
         #     cv2.imshow(str(i), occupancy_maps[i])
         #     cv2.waitKey(0)
 
@@ -157,7 +157,7 @@ class Trainer:
         optimizer="rms",
         inW=100,
         inH=100,
-        batch_size=1,
+        batch_size=16,
         nA=5,
         lr=0.01,
         cuda=True,
@@ -198,7 +198,7 @@ class Trainer:
 
         trainset = RobotDatasetTrace(data_path_root)
         trainloader = DataLoader(
-            trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
+            trainset, batch_size=self.batch_size, shuffle=False, drop_last=True
         )
         evaluateset=RobotDatasetTrace("/home/xinchi/gnn_data/evaluate")
         evaluateloader = DataLoader(
@@ -254,7 +254,6 @@ class Trainer:
                     self.save("model_" + str(iteration) + ".pth")
                     evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
                              iteration)
-                break
         return total_loss / total
 
     def save(self, save_path):
@@ -301,7 +300,7 @@ if __name__ == "__main__":
 
     T = Trainer()
     T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local.pth")
+    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert_global.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):
