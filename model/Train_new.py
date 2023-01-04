@@ -254,7 +254,7 @@ class Trainer:
                     self.save("model_" + str(iteration) + ".pth")
                     evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
                              iteration)
-                break
+
         return total_loss / total
 
     def save(self, save_path):
