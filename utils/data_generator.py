@@ -98,7 +98,7 @@ class DataGenerator:
     #     return out_put
 
 
-    def generate_one(self,global_pose_array, self_orientation_array,local=False):
+    def generate_one(self,global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator=MapSimulator(rotate=self.local)
