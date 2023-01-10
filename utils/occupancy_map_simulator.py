@@ -160,9 +160,8 @@ class MapSimulator:
                     position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
         if self.block:
-
             position_lists_local = self.blocking(position_lists_local)
-        return position_lists_local, self_pose_list
+        return position_lists_local, self_orientation_global
 
 
 

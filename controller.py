@@ -5,7 +5,7 @@ import collections
 import math
 import numpy as np
 import torch
-from model.GNN_based_model import DecentralController
+from model.GNN_based_model import DecentralController,DecentralControllerPose,DummyModel
 import cv2
 from utils.occupancy_map_simulator import MapSimulator
 
@@ -41,7 +41,7 @@ class Controller:
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
         self.GNN_model = None
-        self.use_cuda = False
+        self.use_cuda = True
 
     def centralized_control(self, index, sensor_data, scene_data):
         """
@@ -84,7 +84,9 @@ class Controller:
         :param model_path: Path to pretrained model
         :return:
         """
-        self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=False)
+        self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
+        # self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=False)
+        # self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
             self.GNN_model.to("cuda")
@@ -175,7 +177,7 @@ class Controller:
         number_of_agents=5,
         input_height=100,
         input_width=100,
-        local=False
+        local=True
     ):
         """
 
@@ -223,7 +225,7 @@ class Controller:
         orientation_list = scene_data.orientation_list
 
         occupancy_map_simulator=MapSimulator(rotate=local)
-        position_lists_local, self_pose = occupancy_map_simulator.global_to_local(np.array(position_lists_global),np.array(orientation_list))
+        position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(np.array(position_lists_global),np.array(orientation_list))
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
 
         for i in range(number_of_agents):
@@ -247,6 +249,129 @@ class Controller:
         ref = torch.from_numpy(ref).double()
         scale = torch.from_numpy(scale).double()
         # print("TENSOR")
+
+
+        if self.use_cuda:
+            input_tensor = input_tensor.to("cuda")
+            neighbor = neighbor.to("cuda")
+            ref = ref.to("cuda")
+            scale = scale.to("cuda")
+        self.GNN_model.eval()
+        self.GNN_model.addGSO(neighbor)
+
+        control = (
+            self.GNN_model(input_tensor, ref, scale)[index].detach().cpu().numpy()
+        )  ## model output
+        velocity_x=control[0][0]
+        velocity_y=control[0][1]
+
+        if local:
+            theta=sensor_data.orientation[2]
+            velocity_x_global=velocity_x*math.cos(theta)-velocity_y*math.sin(theta)
+            velocity_y_global=velocity_x*math.sin(theta)+velocity_y*math.cos(theta)
+            velocity_x=velocity_x_global
+            velocity_y=velocity_y_global
+
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
+
+
+
+        return out_put
+
+
+    def decentralized_control_pose(
+        self,
+        index,
+        sensor_data,
+        scene_data,
+        number_of_agents=5,
+        input_height=100,
+        input_width=100,
+        local=True
+    ):
+        """
+
+        :param index: Robots' index
+        :param sensor_data: Sensor_data from robots' sensors or simulators
+        :param scene_data: Data from the scene
+        :param number_of_agents: The number of agent
+        :param input_height: Input occupancy map height
+        :param input_width: Input occupancy map width
+        :return:
+        """
+
+        out_put = ControlData()
+        if not scene_data:
+
+            print("No scene data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.observation_list:
+            print("No observation")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.position_list or not scene_data.orientation_list:
+            print("No data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+
+        input_occupancy_maps = np.zeros(
+            (1, number_of_agents, input_width, input_height)
+        )
+        neighbor = np.zeros((number_of_agents, number_of_agents))
+        ### need to be removed later
+        ref = np.zeros((1, number_of_agents, 1))
+        ### control the formation distance
+        scale = np.zeros((1, number_of_agents, 1))
+        position_lists_global = scene_data.position_list
+        # print("robot index",index)
+        # print(position_lists_global[index])
+        orientation_list = scene_data.orientation_list
+
+        # occupancy_map_simulator=MapSimulator(rotate=local)
+        # position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(np.array(position_lists_global),np.array(orientation_list))
+        # occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+
+        occupancy_map_simulator = MapSimulator(rotate=local)
+        position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(position_lists_global,
+                                                                                         orientation_list)
+        position_array_local = np.zeros((1,5, 4, 3))
+        try:
+            for i in range(len(position_lists_local[0])):
+                for j in range(len(position_lists_local[0][i])):
+                    position_array_local[0][i][j] = position_lists_local[i][j]
+        except:
+            return out_put
+        # for i in range(number_of_agents):
+        #     # print(sensor_data.occupancy_map)
+        #     ### need to be modified
+        #     occupancy_map_i = occupancy_maps[i]
+        #     cv2.imshow(str(i), occupancy_map_i)
+        #     cv2.waitKey(1)
+        #     input_occupancy_maps[0, i, :, :] = occupancy_map_i
+        #     ref[0, i, 0] = 0
+        #     scale[0, i, 0] = self.desired_distance
+
+        input_tensor = torch.from_numpy(position_array_local).double()
+
+        for key, value in scene_data.adjacency_list.items():
+            for n in value:
+                neighbor[key][n[0]] = 1
+
+        neighbor = torch.from_numpy(neighbor).double()
+        neighbor = neighbor.unsqueeze(0)
+        ref = torch.from_numpy(ref).double()
+        scale = torch.from_numpy(scale).double()
+        # print("TENSOR")
+
 
         if self.use_cuda:
             input_tensor = input_tensor.to("cuda")
@@ -274,5 +399,121 @@ class Controller:
         out_put.velocity_y = velocity_y
 
 
+
+        return out_put
+
+    def decentralized_control_dummy(
+            self,
+            index,
+            sensor_data,
+            scene_data,
+            number_of_agents=5,
+            input_height=100,
+            input_width=100,
+            local=True
+    ):
+        """
+
+        :param index: Robots' index
+        :param sensor_data: Sensor_data from robots' sensors or simulators
+        :param scene_data: Data from the scene
+        :param number_of_agents: The number of agent
+        :param input_height: Input occupancy map height
+        :param input_width: Input occupancy map width
+        :return:
+        """
+
+        out_put = ControlData()
+        if not scene_data:
+            print("No scene data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.observation_list:
+            print("No observation")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.position_list or not scene_data.orientation_list:
+            print("No data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+
+        input_occupancy_maps = np.zeros(
+            (1, number_of_agents, input_width, input_height)
+        )
+        neighbor = np.zeros((number_of_agents, number_of_agents))
+        ### need to be removed later
+        ref = np.zeros((1, number_of_agents, 1))
+        ### control the formation distance
+        scale = np.zeros((1, number_of_agents, 1))
+        position_lists_global = scene_data.position_list
+        # print("robot index",index)
+        # print(position_lists_global[index])
+        orientation_list = scene_data.orientation_list
+
+        # occupancy_map_simulator=MapSimulator(rotate=local)
+        # position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(np.array(position_lists_global),np.array(orientation_list))
+        # occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+
+        occupancy_map_simulator = MapSimulator(rotate=local)
+        position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(position_lists_global,
+                                                                                         orientation_list)
+        position_array_local = np.zeros((1, 5, 4, 3))
+        try:
+            for i in range(len(position_lists_local[0])):
+                for j in range(len(position_lists_local[0][i])):
+                    position_array_local[0][i][j] = position_lists_local[i][j]
+        except:
+            return out_put
+        # for i in range(number_of_agents):
+        #     # print(sensor_data.occupancy_map)
+        #     ### need to be modified
+        #     occupancy_map_i = occupancy_maps[i]
+        #     cv2.imshow(str(i), occupancy_map_i)
+        #     cv2.waitKey(1)
+        #     input_occupancy_maps[0, i, :, :] = occupancy_map_i
+        #     ref[0, i, 0] = 0
+        #     scale[0, i, 0] = self.desired_distance
+
+        input_tensor = torch.from_numpy(position_array_local).double()
+
+        for key, value in scene_data.adjacency_list.items():
+            for n in value:
+                neighbor[key][n[0]] = 1
+
+        neighbor = torch.from_numpy(neighbor).double()
+        neighbor = neighbor.unsqueeze(0)
+        ref = torch.from_numpy(ref).double()
+        scale = torch.from_numpy(scale).double()
+        # print("TENSOR")
+
+        if self.use_cuda:
+            input_tensor = input_tensor.to("cuda")
+            neighbor = neighbor.to("cuda")
+            ref = ref.to("cuda")
+            scale = scale.to("cuda")
+        self.GNN_model.eval()
+
+        control = (
+            self.GNN_model(input_tensor)[index].detach().numpy()
+        )  ## model output
+        velocity_x = control[0][0]
+        velocity_y = control[0][1]
+
+        if local:
+            theta = sensor_data.orientation[2]
+            velocity_x_global = velocity_x * math.cos(theta) - velocity_y * math.sin(theta)
+            velocity_y_global = velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
+            velocity_x = velocity_x_global
+            velocity_y = velocity_y_global
+
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
 
         return out_put
