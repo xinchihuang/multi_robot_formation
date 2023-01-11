@@ -58,7 +58,10 @@ class Robot:
             expert_data = self.controller.centralized_control(
                 self.index, self.sensor_data, self.scene_data
             )
-            model_data = self.controller.decentralized_control(
+            # model_data = self.controller.decentralized_control(
+            #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
+            # )
+            model_data = self.controller.decentralized_control_dummy(
                 self.index, self.sensor_data, self.scene_data, number_of_agents=5
             )
             # print("robot ", self.index)

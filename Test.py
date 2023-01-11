@@ -14,7 +14,7 @@ import numpy as np
 # print(a)
 test_simulation = Simulation(1000, 0.05)
 test_simulation.initial_scene(
-    5, "/home/xinchi/multi_robot_formation/saved_model/model_map_local.pth"
+    5, "/home/xinchi/multi_robot_formation/saved_model/model_dummy.pth"
 )
 test_simulation.run()
 # point = np.load(

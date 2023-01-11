@@ -57,10 +57,9 @@ class RobotDatasetTrace(Dataset):
             global_pose_array[:,2]=0
             self_orientation_array=2*math.pi*np.random.random(self.number_of_agents)-math.pi
 
-        global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        self_orientation_array=[math.pi/3,0,0,0,0]
+        # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # self_orientation_array=[math.pi/3,0,0,0,0]
         data_generator=DataGenerator(local=True)
-
         position_lists_local,self_orientation, reference, adjacency_lists = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
         # print(position_lists_local[0])
         # print(reference[0])
@@ -101,7 +100,7 @@ class Trainer:
         self,
         criterion="mse",
         optimizer="rms",
-        batch_size=1,
+        batch_size=128,
         number_of_agent=5,
         lr=0.01,
         cuda=True,
@@ -153,7 +152,7 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 1:
+        while self.epoch < 2:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):
@@ -172,14 +171,14 @@ class Trainer:
                     scale = scale.to("cuda")
                 self.optimizer.zero_grad()
                 outs = self.model(position_lists_local)
-                print("input",position_lists_local)
-                print("model",outs)
-                print("expert",reference)
+                # print("input",position_lists_local)
+                # print("model",outs)
+                # print("expert",reference)
                 loss = self.criterion(outs[0], reference[:, 0])
-                print(self.criterion(outs[0], reference[:, 0]))
-                for i in range(1, self.number_of_agent):
-                    loss += self.criterion(outs[i], reference[:, i])
-                    print(self.criterion(outs[i], reference[:, i]))
+                # print(self.criterion(outs[0], reference[:, 0]))
+                # for i in range(1, self.number_of_agent):
+                #     loss += self.criterion(outs[i], reference[:, i])
+                #     print(self.criterion(outs[i], reference[:, i]))
                 loss.backward()
                 self.optimizer.step()
                 total_loss += loss.item()
@@ -189,7 +188,7 @@ class Trainer:
                 # if iter % 1000 == 0:
                 #     print("out", outs[0])
                 #     print("ref",reference[:, 0])
-                if iteration % 1000 == 0:
+                if iteration % 500 == 0:
 
                     print(
                         "Epoch "+str(self.epoch)+":" 
@@ -205,7 +204,6 @@ class Trainer:
                     self.save("model_" + str(iteration) + ".pth")
                     evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.number_of_agent,
                              iteration)
-                break
         return total_loss / total
 
     def save(self, save_path):
@@ -253,7 +251,7 @@ if __name__ == "__main__":
 
     T = Trainer(load_model_path="/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth")
     T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth")
+    T.save("/home/xinchi/multi_robot_formation/saved_model/model_dummy.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):

@@ -52,7 +52,7 @@ class Simulation:
             print(simulation_time)
 
             for robot in self.scene.robot_list:
-                # print("robot index",robot.index)
+                self.check_stop_condition()
                 sensor_data = robot.get_sensor_data()
                 control_data = robot.get_control_data()
                 robot.execute_control()
@@ -84,5 +84,11 @@ class Simulation:
         """
         :return:
         """
+        if self.scene.adjacency_list==None:
 
-        return False
+            return False
+        else:
+            for key,value in self.scene.adjacency_list.items():
+                for r in value:
+                    print("distance between {r1:d} and {r2:d} is {r3:f}".format(r1=key,r2=r[0],r3=r[3]))
+
