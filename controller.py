@@ -85,8 +85,8 @@ class Controller:
         :return:
         """
         # self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
-        # self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=False)
-        self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
+        self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=True)
+        # self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
         self.GNN_model.load_state_dict(torch.load(model_path))
         if self.use_cuda:
             self.GNN_model.to("cuda")
@@ -382,7 +382,7 @@ class Controller:
         self.GNN_model.addGSO(neighbor)
 
         control = (
-            self.GNN_model(input_tensor, ref, scale)[index].detach().numpy()
+            self.GNN_model(input_tensor, ref, scale)[index].cpu().detach().numpy()
         )  ## model output
         velocity_x=control[0][0]
         velocity_y=control[0][1]

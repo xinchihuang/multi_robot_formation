@@ -9,8 +9,9 @@ from utils.occupancy_map_simulator import MapSimulator
 from comm_data import ControlData,SensorData,SceneData
 from controller import Controller
 class DataGenerator:
-    def __init__(self,local=True):
+    def __init__(self,local=True,partial=False):
         self.local=local
+        self.partial=partial
     def update_adjacency_list(self,position_list):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -71,7 +72,7 @@ class DataGenerator:
     def generate_map_one(self,global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator(rotate=self.local)
+        occupancy_map_simulator=MapSimulator(rotate=self.local,partial=self.partial)
 
         position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
@@ -118,10 +119,11 @@ class DataGenerator:
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator(rotate=self.local)
+        occupancy_map_simulator=MapSimulator(rotate=self.local,partial=self.partial)
 
         position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
         position_array_local=np.zeros((number_of_robot,number_of_robot-1,3))
+        position_array_local[:,:,2]=-1
         for i in range(len(position_lists_local)):
             for j in range(len(position_lists_local[i])):
                 position_array_local[i][j]=position_lists_local[i][j]

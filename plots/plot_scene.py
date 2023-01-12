@@ -132,7 +132,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
             )
             distance_dict[name] = distance_array
     plt.figure(figsize=(10, 10))
-    for key, _ in distance_dict:
+    for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key)
     # plt.legend()
     plt.title("Relative distance gabreil")
@@ -166,7 +166,7 @@ def plot_formation_gabreil(pose_array, save_path):
             distance = math.sqrt(
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
-            plt.plot(xlist, ylist, label=f"Distane: {distance:8 .2f}")
+            plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
     plt.legend()
     plt.title("Formation")
     plt.xlabel("distance(m)")
@@ -225,8 +225,8 @@ def plot_load_data(dt, root_dir):
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
     position_array = trace_array[:, :, 0, :2]
     plot_relative_distance(dt, position_array, root_dir)
-    # plot_relative_distance_gabreil(dt, position_array, root_dir)
-    # plot_formation_gabreil(position_array, root_dir)
+    plot_relative_distance_gabreil(dt, position_array, root_dir)
+    plot_formation_gabreil(position_array, root_dir)
     plot_trace(position_array, root_dir)
     velocity_array = None
     for robot_path in robot_path_list:
@@ -242,4 +242,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/2")
+    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/4")

@@ -8,7 +8,7 @@ import numpy as np
 import cv2
 
 class MapSimulator:
-    def __init__(self,robot_size=0.2,max_height=0.3,map_size=100,max_x=10,max_y=10,rotate=False):
+    def __init__(self,robot_size=0.2,max_height=0.3,map_size=100,max_x=10,max_y=10,rotate=True,block=True,partial=False):
         """
         :param robot_size: Size of robot in occupancy map
         :param max_height: points' horizontal range
@@ -25,7 +25,9 @@ class MapSimulator:
         self.max_x = max_x
         self.max_y = max_y
         self.rotate = rotate
-        self.block=True
+        self.block=block
+        self.partial=partial
+        self.observation_angle=2*math.pi/3
 
     def arctan(self,x, y):
         if x == 0 and y > 0:
@@ -69,6 +71,10 @@ class MapSimulator:
             return None
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
             return None
+        if self.partial:
+            if math.pi/6<self.arctan(x,y)<5*math.pi/6:
+                return None
+
         return [x, y, z]
 
 

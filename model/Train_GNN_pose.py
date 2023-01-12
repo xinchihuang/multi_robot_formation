@@ -51,15 +51,16 @@ class RobotDatasetTrace(Dataset):
         global_pose_array[:, 2] = 0
         use_random=random.choice([True,False])
         # print(print("use random data"),use_random)
-        if use_random:
-            global_pose_array=10*np.random.random((self.number_of_agents,3))-5
-            global_pose_array[:,2]=0
-            self_orientation_array=2*math.pi*np.random.random(self.number_of_agents)-math.pi
+        if use_random > 1:
+            global_pose_array = 4 * np.random.random((self.number_of_agents, 3)) - 2
+            global_pose_array[:, 2] = 0
+            self_orientation_array = 2 * math.pi * np.random.random(self.number_of_agents) - math.pi
         # print(self.desired_distance)
         # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         # self_orientation_array=[math.pi/3,0,0,0,0]
-        data_generator=DataGenerator(local=True)
+        data_generator=DataGenerator(local=True,partial=False)
         position_lists_local,self_orientation, reference, adjacency_lists = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
+
         # for i in range(0,5):
         #     print(reference[i])
         # #     print(global_pose_array[i])
@@ -97,7 +98,7 @@ class Trainer:
         self,
         criterion="mse",
         optimizer="rms",
-        batch_size=16,
+        batch_size=32,
         number_of_agent=5,
         lr=0.01,
         cuda=True,
@@ -143,7 +144,7 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 10:
+        while self.epoch < 2:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):

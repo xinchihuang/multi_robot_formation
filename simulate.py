@@ -43,8 +43,7 @@ class Simulation:
             # vrep_interface.synchronize(self.client_id)
             # time.sleep(0.2)
             if (
-                self.check_stop_condition()
-                or simulation_time > self.max_simulation_time
+                simulation_time > self.max_simulation_time
             ):
                 break
             simulation_time += self.time_step
@@ -52,7 +51,6 @@ class Simulation:
             print(simulation_time)
 
             for robot in self.scene.robot_list:
-                self.check_stop_condition()
                 sensor_data = robot.get_sensor_data()
                 control_data = robot.get_control_data()
                 robot.execute_control()
@@ -60,6 +58,7 @@ class Simulation:
                 data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
+            self.check_stop_condition()
             self.scene.broadcast_all()
             vrep_interface.synchronize(self.client_id)
         data_recorder.save_to_file()

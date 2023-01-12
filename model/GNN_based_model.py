@@ -264,6 +264,23 @@ class DecentralControllerPose(nn.Module):
                 bias=True,
             )
         )
+        compress_mlp.append(nn.LeakyReLU(inplace=True))
+        compress_mlp.append(
+            nn.Linear(
+                in_features=32,
+                out_features=32,
+                bias=True,
+            )
+        )
+        compress_mlp.append(nn.LeakyReLU(inplace=True))
+        compress_mlp.append(
+            nn.Linear(
+                in_features=32,
+                out_features=32,
+                bias=True,
+            )
+        )
+        compress_mlp
         # compress_mlp.append(
         #     nn.Linear(
         #         in_features=128,
@@ -413,31 +430,30 @@ class DummyModel(nn.Module):
         mlp.append(
             nn.Linear(
                 in_features=3 ,
-                out_features=128,
+                out_features=32,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         mlp.append(
             nn.Linear(
-                in_features=128,
-                out_features=128,
+                in_features=32,
+                out_features=32,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
-
         mlp.append(
             nn.Linear(
-                in_features=128,
-                out_features=2,
+                in_features=32,
+                out_features=32,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         self.MLP = nn.Sequential(*mlp).double()
         self.out_put=nn.Linear(
-                in_features=2,
+                in_features=32,
                 out_features=2,
                 bias=True,
             ).double()

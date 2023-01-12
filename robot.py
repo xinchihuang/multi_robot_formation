@@ -61,9 +61,12 @@ class Robot:
             # model_data = self.controller.decentralized_control(
             #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
             # )
-            model_data = self.controller.decentralized_control_dummy(
+            model_data = self.controller.decentralized_control_pose(
                 self.index, self.sensor_data, self.scene_data, number_of_agents=5
             )
+            # model_data = self.controller.decentralized_control_dummy(
+            #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
+            # )
             # print("robot ", self.index)
             # if not self.scene_data==None:
             #     print("position list", self.scene_data.position_list)

@@ -50,16 +50,16 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
 
-        use_random=random.choice([True,False])
+        use_random=random.uniform(0,1)
         # print(print("use random data"),use_random)
-        if use_random:
-            global_pose_array=10*np.random.random((self.number_of_agents,3))-5
+        if use_random>0.9:
+            global_pose_array=4*np.random.random((self.number_of_agents,3))-2
             global_pose_array[:,2]=0
             self_orientation_array=2*math.pi*np.random.random(self.number_of_agents)-math.pi
 
         # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         # self_orientation_array=[math.pi/3,0,0,0,0]
-        data_generator=DataGenerator(local=True)
+        data_generator=DataGenerator(local=True,partial=False)
         position_lists_local,self_orientation, reference, adjacency_lists = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
         # print(position_lists_local[0])
         # print(reference[0])
@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
     T = Trainer(load_model_path="/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth")
     T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_dummy.pth")
+    T.save("/home/xinchi/multi_robot_formation/saved_model/model_dummy_0.95.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):
