@@ -15,27 +15,18 @@ class Robot:
     A robot template. Used for handling different components and store data for components.
     """
 
-    def __init__(self):
+    def __init__(self,platform="vrep",controller_type="model"):
         self.index = None
         self.GNN_model = None
         self.sensor_data = None
         self.control_data = None
         self.scene_data = None
 
-        self.platform = "vrep"
-        self.controller_type = "model"
+        self.platform = platform
+        self.controller_type = controller_type
         self.sensor = Sensor()
         self.executor = Executor()
         self.controller = Controller()
-
-    # def executor_initialize(self):
-    #     self.executor.initialize()
-    # def set_up_components(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     pass
 
     def get_sensor_data(self):
         """
