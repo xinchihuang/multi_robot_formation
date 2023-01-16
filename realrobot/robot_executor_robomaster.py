@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 A executor template. Record simulator/physical robot information,
  and used for execute control in simulator or real robot

@@ -1,5 +1,4 @@
 
-
 class ControlData:
     """
     A data structure for passing control signals to executor

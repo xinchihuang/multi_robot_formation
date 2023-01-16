@@ -7,7 +7,7 @@ import random
 from collections import defaultdict
 import numpy as np
 from vrep import vrep_interface
-from robot import Robot
+from robot_template import Robot
 from utils.gabreil_graph import get_gabreil_graph
 from realrobot.robot_executor_robomaster import Executor
 from comm_data import SceneData

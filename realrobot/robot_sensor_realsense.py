@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 A sensor template. Get information from simulator/real-world
 author: Xinchi Huang
