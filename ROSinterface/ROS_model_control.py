@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import numpy as np
 import rospy
-from realrobot.robot_executor_robomaster import Executor
+from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData
 from multi_robot_formation import controller
 # # from robot_test import *
