@@ -1,14 +1,13 @@
-#!/usr/bin/env python
-
+#!/usr/bin/env python3
 import numpy as np
 import rospy
-from realrobot import *
-from comm_data import *
-# from robot_test import *
+from realrobot.robot_executor_robomaster import Executor
+from multi_robot_formation.comm_data import SceneData
+from multi_robot_formation import controller
+# # from robot_test import *
 from collections import defaultdict
 import time
 
-# import controller
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import PointCloud2
@@ -16,6 +15,44 @@ from sensor_msgs import point_cloud2
 from cmvision.msg import Blobs
 from cmvision_3d.msg import Blobs3d, Blob3d
 
+
+
+class ControlData:
+    """
+    A data structure for passing control signals to executor
+    """
+
+    def __init__(self):
+        self.robot_index = None
+        # self.omega_left = 0
+        # self.omega_right = 0
+
+        self.velocity_x = 0
+        self.velocity_y = 0
+
+class SensorData:
+    """
+    A class for record sensor data
+    """
+
+    def __init__(self):
+        self.robot_index = None
+        self.position = None
+        self.orientation = None
+        self.linear_velocity = None
+        self.angular_velocity = None
+        self.occupancy_map = None
+
+class SceneData:
+    """
+    A class for passing data from scene
+    """
+
+    def __init__(self):
+        self.observation_list = None
+        self.adjacency_list = None
+        self.position_list = None
+        self.orientation_list = None
 class ModelControl:
     def __init__(self, topic):
         self.topic = topic
@@ -28,8 +65,6 @@ class ModelControl:
         self.color_index = {"red":0,"yellow":1,"green":2}
         self.params = np.loadtxt("/home/xinchi/catkin_ws/src/localization/scripts/params.csv", delimiter=",")
 
-        self.robot=Robot()
-
         self.EP_DICT={}
         self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
         # self.IP_DICT={1:'172.20.10.7'}
@@ -39,9 +74,7 @@ class ModelControl:
         #     self.EP_DICT[ip] = EP(ip)
         #     self.EP_DICT[ip].start()
     def ModelControlCallback(self, data):
-
         try:
-
             scene_data = SceneData()
             sensor_data_list=[None,None,None]
             position_dict={}
@@ -50,7 +83,6 @@ class ModelControl:
             for blob in data.blobs:
                 if not blob.name in self.color_index:
                     continue
-
                 robot_index=self.color_index[blob.name]
                 if look_up_table[robot_index]==1:
                     continue
@@ -83,11 +115,10 @@ class ModelControl:
             #     self.EP_DICT[ip].command('chassis speed x '+ str(control_data.omega_right)+' y '+str(control_data.omega_left)+' z 0')
             #     # self.EP_DICT[ip].command('chassis speed x 0 y 0 z 0')
             # # self.executor.execute_control(control_data)
-
-
         except:
-
             return
+
+
 
 
 if __name__ == '__main__':
