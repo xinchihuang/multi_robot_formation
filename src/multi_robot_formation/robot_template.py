@@ -2,12 +2,12 @@
 A robot template
 author: Xinchi Huang
 """
-from vrep.robot_executor_vrep import Executor
-from vrep.robot_sensor_vrep import Sensor
+# from vrep.robot_executor_vrep import Executor
+# from vrep.robot_sensor_vrep import Sensor
 
-# from realrobot.robot_executor_robomaster import Executor
-# from realrobot.robot_sensor_realsense import Sensor
-from controller import Controller
+from .realrobot.robot_executor_robomaster import Executor
+# from .realrobot.robot_sensor_realsense import Sensor
+from .controller import Controller
 
 
 class Robot:
@@ -24,7 +24,7 @@ class Robot:
 
         self.platform = platform
         self.controller_type = controller_type
-        self.sensor = Sensor()
+        self.sensor = None
         self.executor = Executor()
         self.controller = Controller()
 
@@ -46,23 +46,26 @@ class Robot:
                 self.index, self.sensor_data, self.scene_data
             )
         elif self.controller_type == "model":
-            expert_data = self.controller.centralized_control(
-                self.index, self.sensor_data, self.scene_data
-            )
+            # expert_data = self.controller.centralized_control(
+            #     self.index, self.sensor_data, self.scene_data
+            # )
             # model_data = self.controller.decentralized_control(
             #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
             # )
-            model_data = self.controller.decentralized_control_pose(
-                self.index, self.sensor_data, self.scene_data, number_of_agents=5
-            )
-            # model_data = self.controller.decentralized_control_dummy(
+            # model_data = self.controller.decentralized_control_pose(
             #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
             # )
+            # model_data = self.controller.decentralized_control_dummy(
+            #     self.index, self.sensor_data, self.scene_data, number_of_agents=3
+            # )
+            model_data = self.controller.decentralized_control_dummy_real(
+                self.index, self.sensor_data
+            )
             # print("robot ", self.index)
             # if not self.scene_data==None:
             #     print("position list", self.scene_data.position_list)
             #     print("orientation list", self.scene_data.orientation_list)
-            print("expert ", expert_data.velocity_x, expert_data.velocity_y)
+            # print("expert ", expert_data.velocity_x, expert_data.velocity_y)
             print("model ", model_data.velocity_x, model_data.velocity_y)
             self.control_data=model_data
             # self.control_data = self.controller.decentralized_control(

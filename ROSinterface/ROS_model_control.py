@@ -2,8 +2,9 @@
 import numpy as np
 import rospy
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
-from multi_robot_formation.comm_data import SceneData
-from multi_robot_formation import controller
+from multi_robot_formation.comm_data import SceneData,SensorData
+from multi_robot_formation.controller import Controller
+from multi_robot_formation.robot_template import Robot
 # # from robot_test import *
 from collections import defaultdict
 import time
@@ -16,69 +17,34 @@ from cmvision.msg import Blobs
 from cmvision_3d.msg import Blobs3d, Blob3d
 
 
-
-class ControlData:
-    """
-    A data structure for passing control signals to executor
-    """
-
-    def __init__(self):
-        self.robot_index = None
-        # self.omega_left = 0
-        # self.omega_right = 0
-
-        self.velocity_x = 0
-        self.velocity_y = 0
-
-class SensorData:
-    """
-    A class for record sensor data
-    """
-
-    def __init__(self):
-        self.robot_index = None
-        self.position = None
-        self.orientation = None
-        self.linear_velocity = None
-        self.angular_velocity = None
-        self.occupancy_map = None
-
-class SceneData:
-    """
-    A class for passing data from scene
-    """
-
-    def __init__(self):
-        self.observation_list = None
-        self.adjacency_list = None
-        self.position_list = None
-        self.orientation_list = None
 class ModelControl:
     def __init__(self, topic):
         self.topic = topic
         # self.bridge = CvBridge()
         self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
-
         self.map_size = 100
         self.range = 5
         self.height = 2
         self.color_index = {"red":0,"yellow":1,"green":2}
-        self.params = np.loadtxt("/home/xinchi/catkin_ws/src/localization/scripts/params.csv", delimiter=",")
-
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
         self.EP_DICT={}
         self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
+        self.initialize_robot()
         # self.IP_DICT={1:'172.20.10.7'}
 
         # for index,ip in self.IP_DICT.items():
         #     print('%s connecting...' % ip)
         #     self.EP_DICT[ip] = EP(ip)
         #     self.EP_DICT[ip].start()
+    def initialize_robot(self):
+        self.robot=Robot(platform="robomaster",controller_type="model")
+        self.robot.sensor=None
+        self.robot.executor=Executor()
+        self.robot.controller = Controller()
+        self.robot.controller.initialize_GNN_model(1,self.model_path)
     def ModelControlCallback(self, data):
-        try:
-            scene_data = SceneData()
-            sensor_data_list=[None,None,None]
-            position_dict={}
-            adjacency_list= defaultdict(list)
+
+            position_list_local=[]
             look_up_table=[0,0,0]
             for blob in data.blobs:
                 if not blob.name in self.color_index:
@@ -88,15 +54,11 @@ class ModelControl:
                     continue
                 look_up_table[robot_index]=1
                 x_c, y_c, z_c = blob.center.x, blob.center.y, blob.center.z
-
                 # print(blob.name,x_w,y_w,z_w)
-                position_dict[robot_index]=[x_c,y_c,z_c]
-
-                sensor_data = SensorData()
-                sensor_data.position = [x_c,y_c,0]
-                sensor_data.orientation=[0,0,0]
-                sensor_data_list[robot_index]=sensor_data
-            print(position_dict)
+                position_list_local.append([x_c,y_c,z_c])
+            print(position_list_local)
+            model_data=self.robot.controller.decentralized_control_dummy_real(0, position_list_local)
+            self.robot.executor.execute_control(model_data)
             # for i in range(0,3):
             #     for j in range(0,3):
             #         if i==j:
@@ -115,8 +77,7 @@ class ModelControl:
             #     self.EP_DICT[ip].command('chassis speed x '+ str(control_data.omega_right)+' y '+str(control_data.omega_left)+' z 0')
             #     # self.EP_DICT[ip].command('chassis speed x 0 y 0 z 0')
             # # self.executor.execute_control(control_data)
-        except:
-            return
+
 
 
 

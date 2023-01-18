@@ -14,7 +14,7 @@ import math
 from collections import defaultdict
 import time
 import threading
-
+import serial
 class EP:
     def __init__(self, ip):
         self._IP = ip
@@ -75,59 +75,72 @@ class EP:
         return self.__ack_buf
 
 
+class UartConnector:
+
+    def __init__(self):
+
+        self.ser = serial.Serial()
+
+        # 配置串口 波特率 115200，数据位 8 位，1 个停止位，无校验位，超时时间 0.2 秒
+        self.ser.port = 'COM3'
+        self.ser.baudrate = 115200
+        self.ser.bytesize = serial.EIGHTBITS
+        self.ser.stopbits = serial.STOPBITS_ONE
+        self.ser.parity = serial.PARITY_NONE
+        self.ser.timeout = 0.2
+        # 打开串口
+        self.ser.open()
+
+        self.ser.write('command;'.encode('utf-8'))
+    def send(self,msg):
+
+        msg += ';'
+        self.ser.write(msg.encode('utf-8'))
+        recv = self.ser.readall()
+        print(recv.decode('utf-8'))
 
 
-# 直连模式下，机器人默认 IP 地址为 192.168.2.1, 控制命令端口号为 40923
-host = "192.168.2.1"
-port = 40923
 
+class WifiConnector:
+    def __init__(self):
 
-def main():
-
-    address = (host, int(port))
-
-    # 与机器人控制命令端口建立 TCP 连接
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    print("Connecting...")
-
-    s.connect(address)
-
-    print("Connected!")
-
-    while True:
-
-        # 等待用户输入控制指令
-        msg = input(">>> please input SDK cmd: ")
-
-        # 当用户输入 Q 或 q 时，退出当前程序
-        if msg.upper() == "Q":
-            break
-
-        # 添加结束符
-        msg += ";"
-
-        # 发送控制命令给机器人
-        s.send(msg.encode("utf-8"))
+        # 直连模式下，机器人默认 IP 地址为 192.168.2.1, 控制命令端口号为 40923
+        self.host = "192.168.2.1"
+        self.port = 40923
+        self.address = (self.host, int(self.port))
+        # 与机器人控制命令端口建立 TCP 连接
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.connect(self.address)
+        self.send_to_robot("command")
 
         try:
             # 等待机器人返回执行结果
-            buf = s.recv(1024)
+            buf = self.s.recv(1024)
 
-            print(buf.decode("utf-8"))
+            print(buf.decode('utf-8'))
         except socket.error as e:
             print("Error receiving :", e)
             sys.exit(1)
-        if not len(buf):
-            break
-
-    # 关闭端口连接
-    s.shutdown(socket.SHUT_WR)
-    s.close()
 
 
-if __name__ == "__main__":
-    main()
+    def send_to_robot(self,msg):
+
+        # 添加结束符
+        msg += ";"
+        print(msg)
+        # 发送控制命令给机器人
+        self.s.send(msg.encode("utf-8"))
+        try:
+            # 等待机器人返回执行结果
+            buf = self.s.recv(1024)
+
+            print(buf.decode('utf-8'))
+        except socket.error as e:
+            print("Error receiving :", e)
+            sys.exit(1)
+
+
+
 
 
 class Executor:
@@ -141,14 +154,19 @@ class Executor:
         self.motor_left_handle = None
         self.motor_right_handle = None
         self.point_cloud_handle = None
+        self.connector = WifiConnector()
 
     def execute_control(self, control_data):
         """
         Use interface/APIs to execute control in real world
-        :param control_data: Controls to be execute
+        :param control_data: Controls to be executed
         """
-        omega_left = control_data.omega_left
-        omega_right = control_data.omega_right
+        velocity_x = control_data.velocity_x*40
+        velocity_y = control_data.velocity_y*40
         print("index", control_data.robot_index)
-        print("left", omega_left)
-        print("right", omega_right)
+        print("left", velocity_x)
+        print("right", velocity_y)
+        # msg = "command"
+        # self.connector.send_to_robot(msg)
+        msg="chassis speed x {speed_x} y {speed_y} z {speed_z}".format(speed_x=velocity_x,speed_y=velocity_y,speed_z=10)
+        self.connector.send_to_robot(msg)

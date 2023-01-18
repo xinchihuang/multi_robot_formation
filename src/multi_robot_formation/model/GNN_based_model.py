@@ -4,8 +4,8 @@ author: Xinchi Huang
 """
 import torch
 import torch.nn as nn
-from model.weights_initializer import weights_init
-from model.graphUtils import graphML as gml
+from .weights_initializer import weights_init
+from .graphUtils import graphML as gml
 
 
 class DecentralController(nn.Module):
@@ -280,7 +280,7 @@ class DecentralControllerPose(nn.Module):
                 bias=True,
             )
         )
-        compress_mlp
+
         # compress_mlp.append(
         #     nn.Linear(
         #         in_features=128,
@@ -430,30 +430,30 @@ class DummyModel(nn.Module):
         mlp.append(
             nn.Linear(
                 in_features=3 ,
-                out_features=32,
+                out_features=128,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         mlp.append(
             nn.Linear(
-                in_features=32,
-                out_features=32,
+                in_features=128,
+                out_features=128,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         mlp.append(
             nn.Linear(
-                in_features=32,
-                out_features=32,
+                in_features=128,
+                out_features=2,
                 bias=True,
             )
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         self.MLP = nn.Sequential(*mlp).double()
         self.out_put=nn.Linear(
-                in_features=32,
+                in_features=2,
                 out_features=2,
                 bias=True,
             ).double()

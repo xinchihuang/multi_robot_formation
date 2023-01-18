@@ -7,11 +7,11 @@ import collections
 import math
 import numpy as np
 import torch
-from model.GNN_based_model import DecentralController,DecentralControllerPose,DummyModel
+from .model.GNN_based_model import DecentralController,DecentralControllerPose,DummyModel
 import cv2
-from utils.occupancy_map_simulator import MapSimulator
+from .utils.occupancy_map_simulator import MapSimulator
 
-from comm_data import ControlData
+from .comm_data import ControlData
 # class ControlData:
 #     """
 #     A data structure for passing control signals to executor
@@ -43,7 +43,7 @@ class Controller:
         self.max_velocity = 1.2
         self.wheel_adjustment = 10.25
         self.GNN_model = None
-        self.use_cuda = True
+        self.use_cuda = False
 
     def centralized_control(self, index, sensor_data, scene_data):
         """
@@ -87,10 +87,13 @@ class Controller:
         :return:
         """
         # self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
-        self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=True)
-        # self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
-        self.GNN_model.load_state_dict(torch.load(model_path))
-        if self.use_cuda:
+        # self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=True)
+        self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
+        print(self.use_cuda)
+        if not self.use_cuda:
+            self.GNN_model.load_state_dict(torch.load(model_path,map_location=torch.device('cpu')))
+        else:
+            self.GNN_model.load_state_dict(torch.load(model_path))
             self.GNN_model.to("cuda")
         self.GNN_model.eval()
 
@@ -445,14 +448,6 @@ class Controller:
             out_put.velocity_y = 0
             return out_put
 
-        input_occupancy_maps = np.zeros(
-            (1, number_of_agents, input_width, input_height)
-        )
-        neighbor = np.zeros((number_of_agents, number_of_agents))
-        ### need to be removed later
-        ref = np.zeros((1, number_of_agents, 1))
-        ### control the formation distance
-        scale = np.zeros((1, number_of_agents, 1))
         position_lists_global = scene_data.position_list
         # print("robot index",index)
         # print(position_lists_global[index])
@@ -484,21 +479,10 @@ class Controller:
 
         input_tensor = torch.from_numpy(position_array_local).double()
 
-        for key, value in scene_data.adjacency_list.items():
-            for n in value:
-                neighbor[key][n[0]] = 1
-
-        neighbor = torch.from_numpy(neighbor).double()
-        neighbor = neighbor.unsqueeze(0)
-        ref = torch.from_numpy(ref).double()
-        scale = torch.from_numpy(scale).double()
         # print("TENSOR")
 
         if self.use_cuda:
             input_tensor = input_tensor.to("cuda")
-            neighbor = neighbor.to("cuda")
-            ref = ref.to("cuda")
-            scale = scale.to("cuda")
         self.GNN_model.eval()
 
         control = (
@@ -513,6 +497,45 @@ class Controller:
             velocity_y_global = velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
             velocity_x = velocity_x_global
             velocity_y = velocity_y_global
+
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
+
+        return out_put
+
+    def decentralized_control_dummy_real(
+            self,
+            index,
+            position_lists_local,
+    ):
+        """"""
+
+        out_put = ControlData()
+        position_array_local = np.zeros((1, 1, len(position_lists_local), 3))
+        for i in range(len(position_lists_local)):
+            position_array_local[0][0][i] = position_lists_local[i]
+
+
+        input_tensor = torch.from_numpy(position_array_local).double()
+
+        # print("TENSOR")
+
+        if self.use_cuda:
+            input_tensor = input_tensor.to("cuda")
+        self.GNN_model.eval()
+
+        control = (
+            self.GNN_model(input_tensor)[index].detach().cpu().numpy()
+        )  ## model output
+        velocity_x = control[0][0]
+        velocity_y = control[0][1]
+
+        theta = 0
+        velocity_x_global = velocity_x * math.cos(theta) - velocity_y * math.sin(theta)
+        velocity_y_global = velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
+        velocity_x = velocity_x_global
+        velocity_y = velocity_y_global
 
         out_put.robot_index = index
         out_put.velocity_x = velocity_x
