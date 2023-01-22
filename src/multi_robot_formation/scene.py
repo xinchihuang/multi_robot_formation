@@ -9,7 +9,11 @@ import numpy as np
 from vrep import vrep_interface
 from robot_template import Robot
 from utils.gabreil_graph import get_gabreil_graph
-from realrobot.robot_executor_robomaster import Executor
+
+from .vrep.robot_executor_vrep import Executor
+from .vrep.robot_sensor_vrep import Sensor
+from .controller import Controller
+
 from comm_data import SceneData
 
 # class SceneData:
@@ -60,7 +64,7 @@ class Scene:
         :param robot_index: The robot index
         :return:
         """
-        new_robot = Robot()
+        new_robot = Robot(sensor=Sensor,controller=Controller,executor=Executor,platform="vrep",controller_type="model")
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
         new_robot.sensor.client_id = self.client_id
