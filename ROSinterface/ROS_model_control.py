@@ -40,7 +40,9 @@ class ModelControl:
         #     self.EP_DICT[ip] = EP(ip)
         #     self.EP_DICT[ip].start()
     def initialize_robot(self):
-        self.robot=Robot(sensor=None,controller=Controller,executor=Executor,platform="robomaster",controller_type="model")
+        controller=Controller()
+        executor=Executor()
+        self.robot=Robot(sensor=None,controller=controller,executor=executor,platform="robomaster",controller_type="model")
         self.robot.sensor=None
         self.robot.executor=Executor()
         self.robot.controller = Controller()
