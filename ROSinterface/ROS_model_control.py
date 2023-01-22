@@ -22,7 +22,7 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 
 class ModelControl:
     def __init__(self, topic):
-        self.robot = None
+        self.robot = Robot(sensor=None,controller=Controller(),executor=Executor(),platform="robomaster",controller_type="model")
         self.topic = topic
         # self.bridge = CvBridge()
         self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
@@ -33,7 +33,7 @@ class ModelControl:
         self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
         self.EP_DICT={}
         self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
-        self.initialize_robot()
+        self.robot.controller.initialize_GNN_model(1, self.model_path)
         # self.IP_DICT={1:'172.20.10.7'}
 
         # for index,ip in self.IP_DICT.items():
@@ -45,7 +45,7 @@ class ModelControl:
         executor=Executor()
         self.robot = Robot(sensor=None,controller=None,executor=None,platform="robomaster",controller_type="model")
         self.robot.executor = executor
-        self.robot.controller=controller
+        self.robot.controller = controller
         self.robot.controller.initialize_GNN_model(1,self.model_path)
     def ModelControlCallback(self, data):
 
