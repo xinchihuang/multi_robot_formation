@@ -42,10 +42,7 @@ class ModelControl:
     def initialize_robot(self):
         controller=Controller()
         executor=Executor()
-        self.robot=Robot(sensor=None,controller=controller,executor=executor,platform="robomaster",controller_type="model")
-        self.robot.sensor=None
-        self.robot.executor=Executor()
-        self.robot.controller = Controller()
+        self.robot = Robot(sensor=None,controller=controller,executor=executor,platform="robomaster",controller_type="model")
         self.robot.controller.initialize_GNN_model(1,self.model_path)
     def ModelControlCallback(self, data):
 
