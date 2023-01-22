@@ -9,4 +9,4 @@ setup_args = generate_distutils_setup(
 )
 
 setup(**setup_args)
-setup(**setup_args)
+
