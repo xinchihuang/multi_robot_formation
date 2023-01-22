@@ -9,10 +9,4 @@ setup_args = generate_distutils_setup(
 )
 
 setup(**setup_args)
-
-setup_args = generate_distutils_setup(
-    packages=['model'],
-    package_dir={'': 'src/multi_robot_formatio'},
-)
-
 setup(**setup_args)
