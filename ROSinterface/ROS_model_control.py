@@ -61,6 +61,7 @@ class ModelControl:
                 position_list_local.append([x_c,y_c,z_c])
             print(position_list_local)
             if len(position_list_local)==0:
+                print("no data")
                 return
             model_data=self.robot.controller.decentralized_control_dummy_real(0, position_list_local)
             self.robot.executor.execute_control(model_data)
