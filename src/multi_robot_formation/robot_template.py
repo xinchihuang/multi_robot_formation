@@ -22,6 +22,7 @@ class Robot:
         self.control_data = None
         self.scene_data = None
 
+        print("initializing")
         self.platform = platform
         self.controller_type = controller_type
         self.sensor = sensor
