@@ -32,10 +32,20 @@ class ModelControl:
         self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
         self.EP_DICT={}
         self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
-        self.robot = Robot(sensor=None, controller=Controller(), executor=Executor(), platform="robomaster",
-                           controller_type="model_dummy")
-        self.robot.controller.initialize_GNN_model(1,self.model_path)
+        self.initialize_robot()
+        # self.IP_DICT={1:'172.20.10.7'}
 
+        # for index,ip in self.IP_DICT.items():
+        #     print('%s connecting...' % ip)
+        #     self.EP_DICT[ip] = EP(ip)
+        #     self.EP_DICT[ip].start()
+    def initialize_robot(self):
+        controller=Controller()
+        executor=Executor()
+        self.robot = Robot(sensor=None,controller=None,executor=None,platform="robomaster",controller_type="model")
+        self.robot.executor = executor
+        self.robot.controller=controller
+        self.robot.controller.initialize_GNN_model(1,self.model_path)
     def ModelControlCallback(self, data):
 
             position_list_local=[]
