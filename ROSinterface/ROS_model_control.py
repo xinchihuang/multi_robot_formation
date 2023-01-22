@@ -60,6 +60,8 @@ class ModelControl:
                 # print(blob.name,x_w,y_w,z_w)
                 position_list_local.append([x_c,y_c,z_c])
             print(position_list_local)
+            if len(position_list_local)==0:
+                return
             model_data=self.robot.controller.decentralized_control_dummy_real(0, position_list_local)
             self.robot.executor.execute_control(model_data)
             # for i in range(0,3):
