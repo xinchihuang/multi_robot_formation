@@ -22,6 +22,7 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 
 class ModelControl:
     def __init__(self, topic):
+        self.robot = None
         self.topic = topic
         # self.bridge = CvBridge()
         self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
