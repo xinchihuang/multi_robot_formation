@@ -35,7 +35,7 @@ class ModelControl:
         controller = Controller()
         executor = Executor()
         self.robot = Robot(sensor=None, controller=controller, executor=executor, platform="robomaster",
-                           controller_type="model_pose_dummy")
+                           controller_type="model_dummy")
         self.initialize_robot()
         # self.IP_DICT={1:'172.20.10.7'}
 
