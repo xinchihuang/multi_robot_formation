@@ -510,7 +510,7 @@ class Controller:
             position_lists_local,
     ):
         """"""
-
+        print(position_lists_local)
         out_put = ControlData()
         position_array_local = np.zeros((1, 1, len(position_lists_local), 3))
         for i in range(len(position_lists_local)):
