@@ -161,8 +161,8 @@ class Executor:
         Use interface/APIs to execute control in real world
         :param control_data: Controls to be executed
         """
-        velocity_x = control_data.velocity_x*40
-        velocity_y = control_data.velocity_y*40
+        velocity_x = control_data.velocity_x*10
+        velocity_y = control_data.velocity_y*10
         print("index", control_data.robot_index)
         print("left", velocity_x)
         print("right", velocity_y)
