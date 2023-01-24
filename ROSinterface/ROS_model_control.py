@@ -2,7 +2,7 @@
 import numpy as np
 import rospy
 import sys
-
+import os
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData,SensorData
 from multi_robot_formation.controller import Controller
@@ -17,7 +17,7 @@ from sensor_msgs.msg import PointCloud2
 from sensor_msgs import point_cloud2
 from cmvision.msg import Blobs
 from cmvision_3d.msg import Blobs3d, Blob3d
-
+print(os.getcwd())
 
 class ModelControl:
     def __init__(self, topic):
@@ -29,7 +29,7 @@ class ModelControl:
         self.range = 5
         self.height = 2
         self.color_index = {"red":0,"yellow":1,"green":2}
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
+        self.model_path=os.path.join("/src/multi_robot_formation/saved_model/model_dummy.pth")
         self.EP_DICT={}
         self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
         self.robot.controller.initialize_GNN_model(1, self.model_path)
