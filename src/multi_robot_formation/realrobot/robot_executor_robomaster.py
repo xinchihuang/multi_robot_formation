@@ -161,12 +161,12 @@ class Executor:
         Use interface/APIs to execute control in real world
         :param control_data: Controls to be executed
         """
-        velocity_x = control_data.velocity_x*10
-        velocity_y = control_data.velocity_y*10
+        velocity_x = control_data.velocity_x*20
+        velocity_y = control_data.velocity_y*20
         print("index", control_data.robot_index)
         print("left", velocity_x)
         print("right", velocity_y)
         # msg = "command"
         # self.connector.send_to_robot(msg)
-        msg="chassis speed x {speed_x} y {speed_y} z {speed_z}".format(speed_x=velocity_x,speed_y=velocity_y,speed_z=10)
+        msg="chassis speed x {speed_x} y {speed_y} z {speed_z}".format(speed_x=velocity_x,speed_y=velocity_y,speed_z=0)
         self.connector.send_to_robot(msg)
