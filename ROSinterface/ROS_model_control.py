@@ -2,7 +2,6 @@
 import numpy as np
 import rospy
 import sys
-print(sys.path)
 
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData,SensorData

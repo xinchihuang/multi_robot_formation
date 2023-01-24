@@ -113,14 +113,14 @@ class WifiConnector:
         self.s.connect(self.address)
         self.send_to_robot("command")
 
-        try:
-            # 等待机器人返回执行结果
-            buf = self.s.recv(1024)
-
-            print(buf.decode('utf-8'))
-        except socket.error as e:
-            print("Error receiving :", e)
-            sys.exit(1)
+        # try:
+        #     # 等待机器人返回执行结果
+        #     buf = self.s.recv(1024)
+        #
+        #     print(buf.decode('utf-8'))
+        # except socket.error as e:
+        #     print("Error receiving :", e)
+        #     sys.exit(1)
 
 
     def send_to_robot(self,msg):
@@ -130,14 +130,14 @@ class WifiConnector:
         print(msg)
         # 发送控制命令给机器人
         self.s.send(msg.encode("utf-8"))
-        try:
-            # 等待机器人返回执行结果
-            buf = self.s.recv(1024)
-
-            print(buf.decode('utf-8'))
-        except socket.error as e:
-            print("Error receiving :", e)
-            sys.exit(1)
+        # try:
+        #     # 等待机器人返回执行结果
+        #     buf = self.s.recv(1024)
+        #
+        #     print(buf.decode('utf-8'))
+        # except socket.error as e:
+        #     print("Error receiving :", e)
+        #     sys.exit(1)
 
 
 
