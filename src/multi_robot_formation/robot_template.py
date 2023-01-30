@@ -51,7 +51,10 @@ class Robot:
                 self.index, self.sensor_data, self.scene_data
             )
         elif self.controller_type == "model":
-            model_data = self.controller.decentralized_control(
+            # model_data = self.controller.decentralized_control(
+            #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
+            # )
+            model_data = self.controller.decentralized_control_real(
                 self.index, self.sensor_data, self.scene_data, number_of_agents=5
             )
             # mode
@@ -71,7 +74,7 @@ class Robot:
             #     print("position list", self.scene_data.position_list)
             #     print("orientation list", self.scene_data.orientation_list)
             # print("expert ", expert_data.velocity_x, expert_data.velocity_y)
-        print("model ", model_data.velocity_x, model_data.velocity_y)
+        print(self.controller_type, model_data.velocity_x, model_data.velocity_y)
         self.control_data = model_data
 
         return self.control_data

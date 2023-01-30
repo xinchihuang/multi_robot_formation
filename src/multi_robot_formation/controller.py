@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from model.GNN_based_model import (
     DecentralController,
+    DecentralControllerReal,
     DecentralControllerPose,
     DummyModel,
 )
@@ -91,7 +92,8 @@ class Controller:
         :param model_path: Path to pretrained model
         :return:
         """
-        self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
+        # self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
+        self.GNN_model = DecentralControllerReal(number_of_agent=num_robot, use_cuda=True)
         # self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=True)
         # self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
         if not self.use_cuda:
@@ -118,8 +120,8 @@ class Controller:
         :param index: Robot index
         :param sensor_data: Sensor_data from robots' sensors or simulators
         :param scene_data: Data from the scene
-        :param separation: Distance between each robots
-        :param angle: Desired line angle to the positive part of x axis
+        :param separation: Distance between each robot
+        :param angle: Desired line angle to the positive part of x-axis
         :param max_distance: Robots only interact within this region
         :return: Control data
         """
@@ -280,6 +282,133 @@ class Controller:
 
         control = (
             self.GNN_model(input_tensor, ref, scale)[index].detach().cpu().numpy()
+        )  ## model output
+        velocity_x = control[0][0]
+        velocity_y = control[0][1]
+
+        if local:
+            theta = sensor_data.orientation[2]
+            velocity_x_global = velocity_x * math.cos(theta) - velocity_y * math.sin(
+                theta
+            )
+            velocity_y_global = velocity_x * math.sin(theta) + velocity_y * math.cos(
+                theta
+            )
+            velocity_x = velocity_x_global
+            velocity_y = velocity_y_global
+
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
+
+        return out_put
+
+    def decentralized_control_real(
+        self,
+        index,
+        sensor_data,
+        scene_data,
+        number_of_agents=5,
+        input_height=100,
+        input_width=100,
+        local=True,
+    ):
+        """
+
+        :param index: Robots' index
+        :param sensor_data: Sensor_data from robots' sensors or simulators
+        :param scene_data: Data from the scene
+        :param number_of_agents: The number of agent
+        :param input_height: Input occupancy map height
+        :param input_width: Input occupancy map width
+        :return:
+        """
+
+        out_put = ControlData()
+        if not scene_data:
+
+            print("No scene data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.observation_list:
+            print("No observation")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        if not scene_data.position_list or not scene_data.orientation_list:
+            print("No data")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+
+        self_input_occupancy_maps = np.zeros(
+            (1, number_of_agents, input_width, input_height)
+        )
+        neighbor = np.zeros((number_of_agents, number_of_agents))
+        ### need to be removed later
+        ref = np.zeros((1, number_of_agents, 1))
+        ### control the formation distance
+        scale = np.zeros((1, number_of_agents, 1))
+        position_lists_global = scene_data.position_list
+        # print("robot index",index)
+        # print(position_lists_global[index])
+        orientation_list = scene_data.orientation_list
+        # print(scene_data.observation_list[index].occupancy_map)
+        # cv2.imshow(str(index), scene_data.observation_list[index].occupancy_map)
+        # cv2.waitKey(1)
+
+        occupancy_map_simulator = MapSimulator(local=local)
+        (
+            position_lists_local,
+            self_orientation,
+        ) = occupancy_map_simulator.global_to_local(
+            np.array(position_lists_global), np.array(orientation_list)
+        )
+        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+
+
+        outer_msg=collections.defaultdict(int)
+
+        for i in range(number_of_agents):
+            # print(sensor_data.occupancy_map)
+            ### need to be modified
+            occupancy_map_i = occupancy_maps[i]
+            cv2.imshow(str(i), occupancy_map_i)
+            cv2.waitKey(1)
+            if index==i:
+                self_input_occupancy_maps[0, i, :, :] = occupancy_map_i
+            # input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
+            ref[0, i, 0] = 0
+            scale[0, i, 0] = self.desired_distance
+
+        self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
+
+
+
+        for key, value in scene_data.adjacency_list.items():
+            for n in value:
+                neighbor[key][n[0]] = 1
+
+        neighbor = torch.from_numpy(neighbor).double()
+        neighbor = neighbor.unsqueeze(0)
+        ref = torch.from_numpy(ref).double()
+        scale = torch.from_numpy(scale).double()
+        # print("TENSOR")
+
+        if self.use_cuda:
+            self_input_tensor = self_input_tensor.to("cuda")
+            neighbor = neighbor.to("cuda")
+            ref = ref.to("cuda")
+            scale = scale.to("cuda")
+        self.GNN_model.eval()
+        self.GNN_model.addGSO(neighbor)
+
+        control = (
+            self.GNN_model(self_input_tensor,outer_msg,index, ref, scale)[index].detach().cpu().numpy()
         )  ## model output
         velocity_x = control[0][0]
         velocity_y = control[0][1]
