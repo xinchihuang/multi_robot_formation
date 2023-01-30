@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append("..")
+
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -11,12 +15,23 @@ from utils.data_generator import DataGenerator
 import math
 import random
 import cv2
+
+
 class RobotDatasetTrace(Dataset):
-    def __init__(self, data_path_root):
+    def __init__(
+        self,
+        data_path_root,
+        local=True,
+        partial=True,
+        desired_distance=2,
+        number_of_agents=5,
+    ):
 
         self.transform = True
-        self.desired_distance = 2
-        self.number_of_agents = 5
+        self.local = local
+        self.partial = partial
+        self.desired_distance = desired_distance
+        self.number_of_agents = number_of_agents
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
@@ -50,17 +65,24 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
 
-        use_random=random.uniform(0,1)
+        use_random = random.uniform(0, 1)
         # print(print("use random data"),use_random)
-        if use_random>0.9:
-            global_pose_array=4*np.random.random((self.number_of_agents,3))-2
-            global_pose_array[:,2]=0
-            self_orientation_array=2*math.pi*np.random.random(self.number_of_agents)-math.pi
+        if use_random > 0.9:
+            global_pose_array = 4 * np.random.random((self.number_of_agents, 3)) - 2
+            global_pose_array[:, 2] = 0
+            self_orientation_array = (
+                2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+            )
 
         # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
         # self_orientation_array=[math.pi/3,0,0,0,0]
-        data_generator=DataGenerator(local=True,partial=False)
-        position_lists_local,self_orientation, reference, adjacency_lists = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
+        data_generator = DataGenerator(local=self.local, partial=self.partial)
+        (
+            position_lists_local,
+            self_orientation,
+            reference,
+            adjacency_lists,
+        ) = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
         # print(position_lists_local[0])
         # print(reference[0])
         # for i in range(0,5):
@@ -68,7 +90,6 @@ class RobotDatasetTrace(Dataset):
         # #     print(global_pose_array[i])
         #     cv2.imshow(str(i), occupancy_maps[i])
         #     cv2.waitKey(0)
-
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
         for key, value in adjacency_lists[0].items():
@@ -79,15 +100,15 @@ class RobotDatasetTrace(Dataset):
         scale = self.scale
 
         if self.transform:
-            position_lists_local=torch.from_numpy(position_lists_local).double()
-            self_orientation=torch.from_numpy(self_orientation).double()
+            position_lists_local = torch.from_numpy(position_lists_local).double()
+            self_orientation = torch.from_numpy(self_orientation).double()
             reference = torch.from_numpy(reference).double()
             neighbor = torch.from_numpy(neighbor).double()
             refs = torch.from_numpy(refs).double()
             scale = torch.from_numpy(scale).double()
         return {
             "position_lists_local": position_lists_local,
-            "self_orientation":self_orientation,
+            "self_orientation": self_orientation,
             "neighbor": neighbor,
             "reference": reference,
             "useless": refs,
@@ -103,9 +124,10 @@ class Trainer:
         batch_size=128,
         number_of_agent=5,
         lr=0.01,
+        partial=True,
         cuda=True,
         if_continue=False,
-        load_model_path=None
+        load_model_path=None,
     ):
         self.points_per_ep = None
         self.number_of_agent = number_of_agent
@@ -114,7 +136,7 @@ class Trainer:
             number_of_agent=self.number_of_agent,
             use_cuda=cuda,
         ).double()
-        self.if_continue=if_continue
+        self.if_continue = if_continue
         if self.if_continue:
             self.model.load_state_dict(torch.load(load_model_path))
 
@@ -132,20 +154,24 @@ class Trainer:
         self.epoch = -1
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
         self.currentAgent = -1
+        self.partial = partial
 
     def train(self, data_path_root):
-        """
-        """
+        """ """
         self.epoch += 1
         if self.epoch in self.lr_schedule.keys():
             for g in self.optimizer.param_groups:
                 g["lr"] = self.lr_schedule[self.epoch]
 
-        trainset = RobotDatasetTrace(data_path_root)
+        trainset = RobotDatasetTrace(
+            os.path.join(data_path_root, "training"), partial=self.partial
+        )
         trainloader = DataLoader(
             trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
-        evaluateset=RobotDatasetTrace("/home/xinchi/gnn_data/evaluate")
+        evaluateset = RobotDatasetTrace(
+            os.path.join(data_path_root, "evaluating"), partial=self.partial
+        )
         evaluateloader = DataLoader(
             evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
@@ -156,15 +182,15 @@ class Trainer:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):
-                position_lists_local=batch["position_lists_local"]
-                self_orientation=batch["self_orientation"]
-                neighbor=batch["neighbor"]
+                position_lists_local = batch["position_lists_local"]
+                self_orientation = batch["self_orientation"]
+                neighbor = batch["neighbor"]
                 reference = batch["reference"]
                 useless = batch["useless"]
                 scale = batch["scale"]
                 if self.use_cuda:
                     position_lists_local = position_lists_local.to("cuda")
-                    self_orientation=self_orientation.to("cuda")
+                    self_orientation = self_orientation.to("cuda")
                     neighbor = neighbor.to("cuda")
                     reference = reference.to("cuda")
                     useless = useless.to("cuda")
@@ -191,7 +217,7 @@ class Trainer:
                 if iteration % 500 == 0:
 
                     print(
-                        "Epoch "+str(self.epoch)+":" 
+                        "Epoch " + str(self.epoch) + ":"
                         "Average training_data loss at iteration "
                         + str(iteration)
                         + ":",
@@ -199,17 +225,26 @@ class Trainer:
                     )
                     print("loss ", total_loss)
                     print("total ", total)
-                    total_loss=0
-                    total=0
+                    total_loss = 0
+                    total = 0
                     self.save("model_" + str(iteration) + ".pth")
-                    evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.number_of_agent,
-                             iteration)
+                    evaluate(
+                        evaluateloader,
+                        self.use_cuda,
+                        self.model,
+                        self.optimizer,
+                        self.criterion,
+                        self.number_of_agent,
+                        iteration,
+                    )
         return total_loss / total
 
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
-def evaluate(evaluateloader,use_cuda,model,optimizer,criterion,nA,iteration):
-    total_loss_eval= 0
+
+
+def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteration):
+    total_loss_eval = 0
     total_eval = 0
     for iter_eval, batch_eval in enumerate(evaluateloader):
         position_lists_local = batch_eval["position_lists_local"]
@@ -237,19 +272,18 @@ def evaluate(evaluateloader,use_cuda,model,optimizer,criterion,nA,iteration):
         total_loss_eval += loss.item()
         total_eval += position_lists_local.size(0) * nA
     print(
-        "Average evaluating_data loss at iteration "
-        + str(iteration)
-        + ":",
+        "Average evaluating_data loss at iteration " + str(iteration) + ":",
         total_loss_eval / total_eval,
     )
     print("loss_eval ", total_loss_eval)
     print("total_eval ", total_eval)
 
 
-
 if __name__ == "__main__":
 
-    T = Trainer(load_model_path="/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth")
+    T = Trainer(
+        load_model_path="/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth"
+    )
     T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
     T.save("/home/xinchi/multi_robot_formation/saved_model/model_dummy_0.95.pth")
 # from utils.map_viewer import visualize_global_pose_array

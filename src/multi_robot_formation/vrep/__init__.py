@@ -1,2 +1,2 @@
-import robot_executor_vrep
-import robot_sensor_vrep
+#!/usr/bin/env python3
+print("vrep")

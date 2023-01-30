@@ -2,6 +2,10 @@
 author: Xinchi Huang
 """
 
+import os
+import sys
+sys.path.append("model")
+
 from simulate import Simulation
 import numpy as np
 
@@ -13,9 +17,7 @@ import numpy as np
 #
 # print(a)
 test_simulation = Simulation(50, 0.05)
-test_simulation.initial_scene(
-    5, "/home/xinchi/multi_robot_formation/saved_model/model_pose_local.pth"
-)
+test_simulation.initial_scene(5, "saved_model/model_map_local_partial.pth")
 test_simulation.run()
 # point = np.load(
 #     "/home/xinchi/multi_robot_formation/saved_data/0/0/points.npy", allow_pickle=True

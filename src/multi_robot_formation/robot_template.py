@@ -7,7 +7,10 @@ author: Xinchi Huang
 
 # from .realrobot.robot_executor_robomaster import Executor
 # from .realrobot.robot_sensor_realsense import Sensor
-from .controller import Controller
+import os
+
+print(os.getcwd())
+from controller import Controller
 
 
 class Robot:
@@ -15,7 +18,9 @@ class Robot:
     A robot template. Used for handling different components and store data for components.
     """
 
-    def __init__(self,sensor,executor,controller,platform="vrep",controller_type="model"):
+    def __init__(
+        self, sensor, executor, controller, platform="vrep", controller_type="model"
+    ):
         self.index = None
         self.GNN_model = None
         self.sensor_data = None
@@ -27,6 +32,7 @@ class Robot:
         self.sensor = sensor
         self.executor = executor
         self.controller = controller
+
     def get_sensor_data(self):
         """
         Read sensor data from sensor in simulator/realworld
@@ -66,7 +72,7 @@ class Robot:
             #     print("orientation list", self.scene_data.orientation_list)
             # print("expert ", expert_data.velocity_x, expert_data.velocity_y)
         print("model ", model_data.velocity_x, model_data.velocity_y)
-        self.control_data=model_data
+        self.control_data = model_data
 
         return self.control_data
 

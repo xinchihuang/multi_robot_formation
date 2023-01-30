@@ -4,8 +4,8 @@ author: Xinchi Huang
 """
 import torch
 import torch.nn as nn
-from .weights_initializer import weights_init
-from .graphUtils import graphML as gml
+from weights_initializer import weights_init
+from graphUtils import graphML as gml
 
 
 class DecentralController(nn.Module):
@@ -192,17 +192,16 @@ class DecentralController(nn.Module):
             feature_map_flatten = feature_map.view(feature_map.size(0), -1)
             # extract_feature_map[:, :, id_agent] = feature_mapFlatten
 
-
             compressed_feature = self.compressMLP(feature_map_flatten)
             extract_feature_map[:, :, id_agent] = compressed_feature  # B x F x N
 
         # DCP
-        for l in range(self.L):
-            # \\ Graph filtering stage:
-            # There is a 3*l below here, because we have three elements per
-            # layer: graph filter, nonlinearity and pooling, so after each layer
-            # we're actually adding elements to the (sequential) list.
-            self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
+        # for l in range(self.L):
+        #     # \\ Graph filtering stage:
+        #     # There is a 3*l below here, because we have three elements per
+        #     # layer: graph filter, nonlinearity and pooling, so after each layer
+        #     # we're actually adding elements to the (sequential) list.
+        #     self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
 
         # B x F x N - > B x G x N,
         shared_feature = self.GFL(extract_feature_map)
@@ -232,10 +231,10 @@ class DecentralController(nn.Module):
             action_predict.append(action_current)  # N x 5
 
         return action_predict
+
+
 class DecentralControllerPose(nn.Module):
-    def __init__(
-        self, number_of_agent=3, use_cuda=False
-    ):
+    def __init__(self, number_of_agent=3, use_cuda=False):
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
@@ -376,11 +375,14 @@ class DecentralControllerPose(nn.Module):
             B, self.numFeatures2Share, self.number_of_agent
         ).to(self.device)
         for id_agent in range(self.number_of_agent):
-            position_input=input_tensor[:, id_agent, :, :]
+            position_input = input_tensor[:, id_agent, :, :]
             compressed_feature = self.compressMLP(position_input)
-            compressed_feature=torch.sum(compressed_feature, 1)
+            compressed_feature = torch.sum(compressed_feature, 1)
 
             extract_feature_map[:, :, id_agent] = compressed_feature  # B x F x N
+
+
+
 
         # DCP
         for l in range(self.L):
@@ -418,18 +420,18 @@ class DecentralControllerPose(nn.Module):
             action_predict.append(action_current)  # N x 5
 
         return action_predict
+
+
 class DummyModel(nn.Module):
-    def __init__(
-        self, number_of_agent=3, use_cuda=False
-    ):
-        self.use_cuda=use_cuda
-        self.number_of_agent=number_of_agent
+    def __init__(self, number_of_agent=3, use_cuda=False):
+        self.use_cuda = use_cuda
+        self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
         super().__init__()
         mlp = []
         mlp.append(
             nn.Linear(
-                in_features=3 ,
+                in_features=3,
                 out_features=128,
                 bias=True,
             )
@@ -452,20 +454,21 @@ class DummyModel(nn.Module):
         )
         mlp.append(nn.LeakyReLU(inplace=True))
         self.MLP = nn.Sequential(*mlp).double()
-        self.out_put=nn.Linear(
-                in_features=2,
-                out_features=2,
-                bias=True,
-            ).double()
+        self.out_put = nn.Linear(
+            in_features=2,
+            out_features=2,
+            bias=True,
+        ).double()
 
         self.apply(weights_init)
         # nn.Dropout(0.25)
+
     def forward(self, input_tensor):
         action_predict = []
         for id_agent in range(self.number_of_agent):
             position_input = input_tensor[:, id_agent, :, :]
             features = self.MLP(position_input)
-            features = torch.sum(features , 1)
-            action_current=self.out_put(features)
+            features = torch.sum(features, 1)
+            action_current = self.out_put(features)
             action_predict.append(action_current)
         return action_predict

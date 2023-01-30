@@ -215,6 +215,7 @@ def plot_load_data(dt, root_dir):
     for _, dirs, _ in os.walk(root_dir, topdown=False):
         for name in dirs:
             robot_path_list.append(name)
+
     trace_array = None
     for robot_path in robot_path_list:
         trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"))
@@ -242,4 +243,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/multi_robot_formation/saved_data/4")
+    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data/0")

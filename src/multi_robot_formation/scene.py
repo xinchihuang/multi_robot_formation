@@ -10,9 +10,9 @@ from vrep import vrep_interface
 from robot_template import Robot
 from utils.gabreil_graph import get_gabreil_graph
 
-from .vrep.robot_executor_vrep import Executor
-from .vrep.robot_sensor_vrep import Sensor
-from .controller import Controller
+from vrep.robot_executor_vrep import Executor
+from vrep.robot_sensor_vrep import Sensor
+from controller import Controller
 
 from comm_data import SceneData
 
@@ -64,7 +64,13 @@ class Scene:
         :param robot_index: The robot index
         :return:
         """
-        new_robot = Robot(sensor=Sensor,controller=Controller,executor=Executor,platform="vrep",controller_type="model")
+        new_robot = Robot(
+            sensor=Sensor(),
+            controller=Controller(),
+            executor=Executor(),
+            platform="vrep",
+            controller_type="model",
+        )
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
         new_robot.sensor.client_id = self.client_id
@@ -76,7 +82,6 @@ class Scene:
     def initial_GNN(self, num_robot, model_path):
         for robot in self.robot_list:
             robot.controller.initialize_GNN_model(num_robot, model_path)
-
 
     def update_scene_data(self):
         """

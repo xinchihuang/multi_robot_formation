@@ -7,29 +7,39 @@ import math
 import numpy as np
 import cv2
 
+
 class MapSimulator:
-    def __init__(self,robot_size=0.2,max_height=0.3,map_size=100,max_x=10,max_y=10,rotate=True,block=True,partial=False):
+    def __init__(
+        self,
+        robot_size=0.2,
+        max_height=0.3,
+        map_size=100,
+        max_x=10,
+        max_y=10,
+        local=True,
+        block=True,
+        partial=False,
+    ):
         """
         :param robot_size: Size of robot in occupancy map
         :param max_height: points' horizontal range
         :param map_size: The size of occupancy map
         :param max_x: Max world x coordinate
         :param max_y: Max world y coordinate
-        :param rotate: Control whether to rotate the occupancy map or not(True: local map, False: global map)
+        :param local: Control whether to rotate the occupancy map or not(True: local map, False: global map)
         """
 
-
-        self.robot_size=robot_size
+        self.robot_size = robot_size
         self.max_height = max_height
         self.map_size = map_size
         self.max_x = max_x
         self.max_y = max_y
-        self.rotate = rotate
-        self.block=block
-        self.partial=partial
-        self.observation_angle=2*math.pi/3
+        self.local = local
+        self.block = block
+        self.partial = partial
+        self.observation_angle = 2 * math.pi / 3
 
-    def arctan(self,x, y):
+    def arctan(self, x, y):
         if x == 0 and y > 0:
             theta = math.pi / 2
         elif x == 0 and y < 0:
@@ -45,14 +55,14 @@ class MapSimulator:
             if x > 0 and y > 0:
                 pass
             elif x < 0 and y > 0:
-                theta = theta+math.pi
+                theta = theta + math.pi
             elif x < 0 and y < 0:
-                theta = theta-math.pi
+                theta = theta - math.pi
             elif x > 0 and y < 0:
                 theta = theta
         return theta
 
-    def data_filter(self,world_point):
+    def data_filter(self, world_point):
         """
         Filter out the points that out of sensor range
         :param world_point: Points in world coordinate
@@ -66,19 +76,24 @@ class MapSimulator:
         x = world_point[0]
         y = world_point[1]
         z = world_point[2]
-        min_range=2*self.robot_size
-        if x > self.max_x or x < -self.max_x or y > self.max_y or y < -self.max_y or z < -self.max_height:  #
+        min_range = 2 * self.robot_size
+        if (
+            x > self.max_x
+            or x < -self.max_x
+            or y > self.max_y
+            or y < -self.max_y
+            or z < -self.max_height
+        ):  #
             return None
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
             return None
         if self.partial:
-            if math.pi/6<self.arctan(x,y)<5*math.pi/6:
+            if math.pi / 6 < self.arctan(x, y) < 5 * math.pi / 6:
                 return None
 
         return [x, y, z]
 
-
-    def rotation(self,world_point, self_orientation):
+    def rotation(self, world_point, self_orientation):
         """
         Rotate the points according to the robot orientation to transform other robot's position from global to local
         :param world_point: Other robot's positions
@@ -93,9 +108,7 @@ class MapSimulator:
         y_relative = -math.sin(theta) * x + math.cos(theta) * y
         return [x_relative, y_relative, z]
 
-
-
-    def blocking(self,position_lists_local):
+    def blocking(self, position_lists_local):
         """
         Handle the blocking case, Remove the f
         :param position_lists_local:
@@ -126,7 +139,10 @@ class MapSimulator:
                     theta_k_1 = self.arctan(x_k1, y_k1)
                     theta_k_2 = self.arctan(x_k2, y_k2)
                     if max(theta_k_1, theta_k_2) - min(theta_k_1, theta_k_2) < math.pi:
-                        if theta_k_1 < theta < theta_k_2 or theta_k_2 < theta < theta_k_1:
+                        if (
+                            theta_k_1 < theta < theta_k_2
+                            or theta_k_2 < theta < theta_k_1
+                        ):
                             block = True
                     else:
                         if theta > max(theta_k_1, theta_k_2) or theta < min(
@@ -138,8 +154,7 @@ class MapSimulator:
             out_position_lists_local.append(position_lists_i)
         return out_position_lists_local
 
-
-    def global_to_local(self,position_lists_global,self_orientation_global):
+    def global_to_local(self, position_lists_global, self_orientation_global):
         """
         Get each robot's observation from global absolute position
         :param position_lists_global: Global absolute position of all robots in the world
@@ -156,23 +171,26 @@ class MapSimulator:
             for j in range(len(position_lists_global)):
                 if i == j:
                     continue
-                point_local_raw=[position_lists_global[j][0] - x_self,position_lists_global[j][1] - y_self,position_lists_global[j][2] - z_self]
-                if self.rotate:
-                    point_local_rotated=self.rotation(point_local_raw,self_orientation_global[i])
-                    point_local_raw=point_local_rotated
-                point_local=self.data_filter(point_local_raw)
+                point_local_raw = [
+                    position_lists_global[j][0] - x_self,
+                    position_lists_global[j][1] - y_self,
+                    position_lists_global[j][2] - z_self,
+                ]
+                if self.local:
+                    point_local_rotated = self.rotation(
+                        point_local_raw, self_orientation_global[i]
+                    )
+                    point_local_raw = point_local_rotated
+                point_local = self.data_filter(point_local_raw)
 
-                if not point_local==None:
+                if not point_local == None:
                     position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
         if self.block:
             position_lists_local = self.blocking(position_lists_local)
         return position_lists_local, self_orientation_global
 
-
-
-
-    def world_to_map(self,world_point, map_size, max_x, max_y):
+    def world_to_map(self, world_point, map_size, max_x, max_y):
         """
         Transform points from world coordinate to map coordinate
         :param world_point: points' world coordinate
@@ -192,14 +210,14 @@ class MapSimulator:
             return [x_map, y_map]
         return None
 
-
-    def generate_map_one(self,
+    def generate_map_one(
+        self,
         position_list_local,
         robot_size,
         map_size,
         max_x,
         max_y,
-        ):
+    ):
 
         """
         Generate occupancy map
@@ -232,12 +250,14 @@ class MapSimulator:
                         occupancy_map[x + m][y + n] = 0
         except:
             pass
-        occupancy_map = occupancy_map[robot_range:-robot_range, robot_range:-robot_range]
+        occupancy_map = occupancy_map[
+            robot_range:-robot_range, robot_range:-robot_range
+        ]
 
         return occupancy_map
 
-
-    def generate_maps(self,
+    def generate_maps(
+        self,
         position_lists_local,
     ):
 
@@ -258,5 +278,6 @@ class MapSimulator:
             )
             maps.append(occupancy_map)
         return np.array(maps)
+
 
 # print(math.sin(arctan(-1.732,-1)))

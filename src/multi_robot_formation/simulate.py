@@ -42,9 +42,7 @@ class Simulation:
         while True:
             # vrep_interface.synchronize(self.client_id)
             # time.sleep(0.2)
-            if (
-                simulation_time > self.max_simulation_time
-            ):
+            if simulation_time > self.max_simulation_time:
                 break
             simulation_time += self.time_step
             print("robot control at time")
@@ -83,11 +81,14 @@ class Simulation:
         """
         :return:
         """
-        if self.scene.adjacency_list==None:
+        if self.scene.adjacency_list == None:
 
             return False
         else:
-            for key,value in self.scene.adjacency_list.items():
+            for key, value in self.scene.adjacency_list.items():
                 for r in value:
-                    print("distance between {r1:d} and {r2:d} is {r3:f}".format(r1=key,r2=r[0],r3=r[3]))
-
+                    print(
+                        "distance between {r1:d} and {r2:d} is {r3:f}".format(
+                            r1=key, r2=r[0], r3=r[3]
+                        )
+                    )

@@ -4,15 +4,18 @@ import numpy as np
 from collections import defaultdict
 import cv2
 import os
-from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local
+from utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
 from utils.occupancy_map_simulator import MapSimulator
-from comm_data import ControlData,SensorData,SceneData
+from comm_data import ControlData, SensorData, SceneData
 from controller import Controller
+
+
 class DataGenerator:
-    def __init__(self,local=True,partial=False):
-        self.local=local
-        self.partial=partial
-    def update_adjacency_list(self,position_list):
+    def __init__(self, local=True, partial=False):
+        self.local = local
+        self.partial = partial
+
+    def update_adjacency_list(self, position_list):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
@@ -41,14 +44,16 @@ class DataGenerator:
                     )
         return new_adj_list
 
-    def update_adjacency_list_lcoal(self,position_list_local,robot_index):
+    def update_adjacency_list_lcoal(self, position_list_local, robot_index):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
 
         """
         position_array_local = np.array(position_list_local)
-        position_array=np.concatenate((np.array([[0,0,0]]),position_array_local),axis=0)
-        node_num=position_array.shape[0]
+        position_array = np.concatenate(
+            (np.array([[0, 0, 0]]), position_array_local), axis=0
+        )
+        node_num = position_array.shape[0]
         # Get Gabreil Graph
         gabriel_graph = get_gabreil_graph(position_array, node_num)
         # Create adjacency list
@@ -69,12 +74,17 @@ class DataGenerator:
                 )
         return new_adj_list
 
-    def generate_map_one(self,global_pose_array, self_orientation_array):
+    def generate_map_one(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator(rotate=self.local,partial=self.partial)
+        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
 
-        position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
+        (
+            position_lists_local,
+            self_orientation,
+        ) = occupancy_map_simulator.global_to_local(
+            global_pose_array, self_orientation_array
+        )
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []
@@ -92,20 +102,26 @@ class DataGenerator:
             scene_data_i = SceneData()
             scene_data_i.adjacency_list = adjacency_list_i
 
-            controller=Controller()
+            controller = Controller()
             # print("robot_index",robot_index)
             # print(position_lists_local[robot_index])
             # print(adjacency_list_i)
             control_i = controller.centralized_control(
-                robot_index, sensor_data_i, scene_data_i,
+                robot_index,
+                sensor_data_i,
+                scene_data_i,
             )
 
-            velocity_x,velocity_y=control_i.velocity_x, control_i.velocity_y
+            velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
             # print(velocity_x,velocity_y)
             if self.local:
                 theta = self_orientation_array[robot_index]
-                velocity_x_global = velocity_x * math.cos(theta) + velocity_y * math.sin(theta)
-                velocity_y_global = -velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
+                velocity_x_global = velocity_x * math.cos(
+                    theta
+                ) + velocity_y * math.sin(theta)
+                velocity_y_global = -velocity_x * math.sin(
+                    theta
+                ) + velocity_y * math.cos(theta)
                 velocity_x = velocity_x_global
                 velocity_y = velocity_y_global
 
@@ -115,18 +131,24 @@ class DataGenerator:
             np.array(ref_control_list),
             np.array(adjacency_lists),
         )
-    def generate_pose_one(self,global_pose_array, self_orientation_array):
+
+    def generate_pose_one(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator=MapSimulator(rotate=self.local,partial=self.partial)
+        occupancy_map_simulator = MapSimulator(rotate=self.local, partial=self.partial)
 
-        position_lists_local, self_orientation = occupancy_map_simulator.global_to_local(global_pose_array,self_orientation_array)
-        position_array_local=np.zeros((number_of_robot,number_of_robot-1,3))
-        position_array_local[:,:,2]=-1
+        (
+            position_lists_local,
+            self_orientation,
+        ) = occupancy_map_simulator.global_to_local(
+            global_pose_array, self_orientation_array
+        )
+        position_array_local = np.zeros((number_of_robot, number_of_robot - 1, 3))
+        position_array_local[:, :, 2] = -1
         for i in range(len(position_lists_local)):
             for j in range(len(position_lists_local[i])):
-                position_array_local[i][j]=position_lists_local[i][j]
+                position_array_local[i][j] = position_lists_local[i][j]
         ref_control_list = []
         adjacency_lists = []
 
@@ -140,20 +162,26 @@ class DataGenerator:
             scene_data_i = SceneData()
             scene_data_i.adjacency_list = adjacency_list_i
 
-            controller=Controller()
+            controller = Controller()
             # print("robot_index",robot_index)
             # print(position_lists_local[robot_index])
             # print(adjacency_list_i)
             control_i = controller.centralized_control(
-                robot_index, sensor_data_i, scene_data_i,
+                robot_index,
+                sensor_data_i,
+                scene_data_i,
             )
 
-            velocity_x,velocity_y=control_i.velocity_x, control_i.velocity_y
+            velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
             if self.local:
 
                 theta = self_orientation_array[robot_index]
-                velocity_x_global = velocity_x * math.cos(theta) + velocity_y * math.sin(theta)
-                velocity_y_global = -velocity_x * math.sin(theta) + velocity_y * math.cos(theta)
+                velocity_x_global = velocity_x * math.cos(
+                    theta
+                ) + velocity_y * math.sin(theta)
+                velocity_y_global = -velocity_x * math.sin(
+                    theta
+                ) + velocity_y * math.cos(theta)
                 velocity_x = velocity_x_global
                 velocity_y = velocity_y_global
 
@@ -164,7 +192,6 @@ class DataGenerator:
             np.array(ref_control_list),
             np.array(adjacency_lists),
         )
-
 
     # def generate(self,number_of_robot, max_disp_range, min_disp_range, desired_distance):
     #     global_pose_list = []

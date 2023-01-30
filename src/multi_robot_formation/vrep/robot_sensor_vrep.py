@@ -124,7 +124,7 @@ class Sensor:
         self.sensor_buffer.extend(velodyne_points[2])
         self.sensor_buffer_count += 1
         # print(self.sensor_buffer_count)
-        if self.sensor_buffer_count == 8:
+        if self.sensor_buffer_count == 4:
             self.point_cloud = self.sensor_buffer.copy()
             self.sensor_buffer.clear()
             self.sensor_buffer_count = 0

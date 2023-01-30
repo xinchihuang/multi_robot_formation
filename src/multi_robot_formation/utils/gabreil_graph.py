@@ -29,7 +29,7 @@ def get_gabreil_graph(position_array, node_num):
     return gabriel_graph
 
 
-def get_gabreil_graph_local(position_array_local, node_num,robot_index):
+def get_gabreil_graph_local(position_array_local, node_num, robot_index):
     """
     Return a gabreil graph of the scene
     :param position_array_local: A numpy array contains all other robots' positions reative  to the given robot
@@ -37,7 +37,7 @@ def get_gabreil_graph_local(position_array_local, node_num,robot_index):
     :param robot_index: Self robot index
     :return: A gabreil graph( 2D list)
     """
-    position_array=np.insert(position_array_local,np.array([0,0,0]),robot_index)
+    position_array = np.insert(position_array_local, np.array([0, 0, 0]), robot_index)
     gabriel_graph = [[1] * node_num for _ in range(node_num)]
     for u in range(node_num):
         for v in range(node_num):

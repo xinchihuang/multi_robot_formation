@@ -1,4 +1,3 @@
-
 class ControlData:
     """
     A data structure for passing control signals to executor
@@ -12,6 +11,7 @@ class ControlData:
         self.velocity_x = 0
         self.velocity_y = 0
 
+
 class SensorData:
     """
     A class for record sensor data
@@ -24,6 +24,7 @@ class SensorData:
         self.linear_velocity = None
         self.angular_velocity = None
         self.occupancy_map = None
+
 
 class SceneData:
     """

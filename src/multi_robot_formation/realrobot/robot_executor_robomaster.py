@@ -15,6 +15,8 @@ from collections import defaultdict
 import time
 import threading
 import serial
+
+
 class EP:
     def __init__(self, ip):
         self._IP = ip
@@ -24,20 +26,20 @@ class EP:
         self.__thread_ctrl_recv = threading.Thread(target=self.__ctrl_recv)
         self.__seq = 0
         self.__ack_list = []
-        self.__ack_buf = 'ok'
+        self.__ack_buf = "ok"
 
     def __ctrl_recv(self):
         while self.__socket_isConnect and not self.__socket_isRelease:
             try:
-                buf = self.__socket_ctrl.recv(1024).decode('utf-8')
-                print('%s:%s' % (self._IP, buf))
-                buf_list = buf.strip(";").split(' ')
-                if 'seq' in buf_list:
-                    print(buf_list[buf_list.index('seq') + 1])
-                    self.__ack_list.append(int(buf_list[buf_list.index('seq') + 1]))
+                buf = self.__socket_ctrl.recv(1024).decode("utf-8")
+                print("%s:%s" % (self._IP, buf))
+                buf_list = buf.strip(";").split(" ")
+                if "seq" in buf_list:
+                    print(buf_list[buf_list.index("seq") + 1])
+                    self.__ack_list.append(int(buf_list[buf_list.index("seq") + 1]))
                 self.__ack_buf = buf
             except socket.error as msg:
-                print('ctrl %s: %s' % (self._IP, msg))
+                print("ctrl %s: %s" % (self._IP, msg))
 
     def start(self):
         try:
@@ -45,27 +47,27 @@ class EP:
             self.__socket_isConnect = True
             self.__socket_isRelease = False
             self.__thread_ctrl_recv.start()
-            self.command('command')
-            self.command('robot mode free')
+            self.command("command")
+            self.command("robot mode free")
         except socket.error as msg:
-            print('%s: %s' % (self._IP, msg))
+            print("%s: %s" % (self._IP, msg))
 
     def exit(self):
         if self.__socket_isConnect and not self.__socket_isRelease:
-            self.command('quit')
+            self.command("quit")
         self.__socket_isRelease = True
         try:
             self.__socket_ctrl.shutdown(socket.SHUT_RDWR)
             self.__socket_ctrl.close()
             self.__thread_ctrl_recv.join()
         except socket.error as msg:
-            print('%s: %s' % (self._IP, msg))
+            print("%s: %s" % (self._IP, msg))
 
     def command(self, cmd):
         self.__seq += 1
-        cmd = cmd + ' seq %d;' % self.__seq
-        print('%s:%s' % (self._IP, cmd))
-        self.__socket_ctrl.send(cmd.encode('utf-8'))
+        cmd = cmd + " seq %d;" % self.__seq
+        print("%s:%s" % (self._IP, cmd))
+        self.__socket_ctrl.send(cmd.encode("utf-8"))
         timeout = 2
         # while self.__seq not in self.__ack_list and timeout > 0:
         #     time.sleep(0.01)
@@ -76,13 +78,12 @@ class EP:
 
 
 class UartConnector:
-
     def __init__(self):
 
         self.ser = serial.Serial()
 
         # 配置串口 波特率 115200，数据位 8 位，1 个停止位，无校验位，超时时间 0.2 秒
-        self.ser.port = 'COM3'
+        self.ser.port = "COM3"
         self.ser.baudrate = 115200
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_ONE
@@ -91,14 +92,14 @@ class UartConnector:
         # 打开串口
         self.ser.open()
 
-        self.ser.write('command;'.encode('utf-8'))
-    def send(self,msg):
+        self.ser.write("command;".encode("utf-8"))
 
-        msg += ';'
-        self.ser.write(msg.encode('utf-8'))
+    def send(self, msg):
+
+        msg += ";"
+        self.ser.write(msg.encode("utf-8"))
         recv = self.ser.readall()
-        print(recv.decode('utf-8'))
-
+        print(recv.decode("utf-8"))
 
 
 class WifiConnector:
@@ -117,13 +118,12 @@ class WifiConnector:
             # 等待机器人返回执行结果
             buf = self.s.recv(1024)
 
-            print(buf.decode('utf-8'))
+            print(buf.decode("utf-8"))
         except socket.error as e:
             print("Error receiving :", e)
             sys.exit(1)
 
-
-    def send_to_robot(self,msg):
+    def send_to_robot(self, msg):
 
         # 添加结束符
         msg += ";"
@@ -138,9 +138,6 @@ class WifiConnector:
         # except socket.error as e:
         #     print("Error receiving :", e)
         #     sys.exit(1)
-
-
-
 
 
 class Executor:
@@ -161,12 +158,14 @@ class Executor:
         Use interface/APIs to execute control in real world
         :param control_data: Controls to be executed
         """
-        velocity_x = control_data.velocity_x*20
-        velocity_y = control_data.velocity_y*20
+        velocity_x = control_data.velocity_x * 20
+        velocity_y = control_data.velocity_y * 20
         print("index", control_data.robot_index)
         print("left", velocity_x)
         print("right", velocity_y)
         # msg = "command"
         # self.connector.send_to_robot(msg)
-        msg="chassis speed x {speed_x} y {speed_y} z {speed_z}".format(speed_x=velocity_x,speed_y=velocity_y,speed_z=0)
+        msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
+            speed_x=velocity_x, speed_y=velocity_y, speed_z=0
+        )
         self.connector.send_to_robot(msg)

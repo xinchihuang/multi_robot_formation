@@ -1,3 +1,7 @@
+import os
+import sys
+sys.path.append("..")
+
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -5,18 +9,29 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch.nn as nn
 from tqdm import tqdm
-from model.GNN_based_model import DecentralController
-import os
+from GNN_based_model import DecentralController
+
 from utils.data_generator import DataGenerator
 import math
 import random
 import cv2
+
+
 class RobotDatasetTrace(Dataset):
-    def __init__(self, data_path_root):
+    def __init__(
+        self,
+        data_path_root,
+        local=True,
+        partial=True,
+        desired_distance=2,
+        number_of_agents=5,
+    ):
 
         self.transform = True
-        self.desired_distance = 2
-        self.number_of_agents = 5
+        self.local = local
+        self.partial = partial
+        self.desired_distance = desired_distance
+        self.number_of_agents = number_of_agents
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
@@ -45,23 +60,21 @@ class RobotDatasetTrace(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-
-        
-
         global_pose_array = self.pose_array[:, idx, :]
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
 
-        data_generator=DataGenerator(local=True)
-        occupancy_maps, reference, adjacency_lists = data_generator.generate_map_one(global_pose_array, self_orientation_array)
+        data_generator = DataGenerator(local=self.local, partial=self.partial)
+        occupancy_maps, reference, adjacency_lists = data_generator.generate_map_one(
+            global_pose_array, self_orientation_array
+        )
 
         # for i in range(0,5):
         #     print(reference[i])
         # #     print(global_pose_array[i])
         #     cv2.imshow(str(i), occupancy_maps[i])
         #     cv2.waitKey(0)
-
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
         for key, value in adjacency_lists[0].items():
@@ -159,6 +172,7 @@ class Trainer:
         batch_size=16,
         nA=5,
         lr=0.01,
+        partial=True,
         cuda=True,
     ):
         self.points_per_ep = None
@@ -186,22 +200,26 @@ class Trainer:
         self.epoch = -1
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
         self.currentAgent = -1
+        self.partial = partial
 
     def train(self, data_path_root):
-        """
-        """
+        """ """
         self.epoch += 1
         if self.epoch in self.lr_schedule.keys():
             for g in self.optimizer.param_groups:
                 g["lr"] = self.lr_schedule[self.epoch]
 
-        trainset = RobotDatasetTrace(data_path_root)
-        trainloader = DataLoader(
-            trainset, batch_size=self.batch_size, shuffle=False, drop_last=True
+        trainset = RobotDatasetTrace(
+            os.path.join(data_path_root, "training"), partial=self.partial
         )
-        evaluateset=RobotDatasetTrace("/home/xinchi/gnn_data/evaluate")
+        trainloader = DataLoader(
+            trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
+        )
+        evaluateset = RobotDatasetTrace(
+            os.path.join(data_path_root, "evaluating"), partial=self.partial
+        )
         evaluateloader = DataLoader(
-            evaluateset, batch_size=self.batch_size, shuffle=False, drop_last=True
+            evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
         self.model.train()
         total_loss = 0
@@ -248,18 +266,27 @@ class Trainer:
                     )
                     print("loss ", total_loss)
                     print("total ", total)
-                    total_loss=0
-                    total=0
+                    total_loss = 0
+                    total = 0
                     self.save("model_" + str(iteration) + ".pth")
-                    evaluate(evaluateloader, self.use_cuda, self.model, self.optimizer, self.criterion, self.nA,
-                             iteration)
+                    evaluate(
+                        evaluateloader,
+                        self.use_cuda,
+                        self.model,
+                        self.optimizer,
+                        self.criterion,
+                        self.nA,
+                        iteration,
+                    )
 
         return total_loss / total
 
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
-def evaluate(evaluateloader,use_cuda,model,optimizer,criterion,nA,iteration):
-    total_loss_eval= 0
+
+
+def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteration):
+    total_loss_eval = 0
     total_eval = 0
     for iter_eval, batch_eval in enumerate(evaluateloader):
         occupancy_maps = batch_eval["occupancy_maps"]
@@ -286,21 +313,18 @@ def evaluate(evaluateloader,use_cuda,model,optimizer,criterion,nA,iteration):
         total_loss_eval += loss.item()
         total_eval += occupancy_maps.size(0) * nA
     print(
-        "Average evaluating_data loss at iteration "
-        + str(iteration)
-        + ":",
+        "Average evaluating_data loss at iteration " + str(iteration) + ":",
         total_loss_eval / total_eval,
     )
     print("loss_eval ", total_loss_eval)
     print("total_eval ", total_eval)
 
 
-
 if __name__ == "__main__":
 
     T = Trainer()
-    T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_map_local.pth")
+    T.train(data_path_root="/home/xinchi/GNN_data")
+    T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_partial.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):

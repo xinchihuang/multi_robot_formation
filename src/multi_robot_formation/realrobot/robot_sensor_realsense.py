@@ -14,6 +14,7 @@ import pyrealsense2 as rs
 import cv2
 from comm_data import SensorData
 
+
 def get_frame():
     # Create a pipeline
     pipeline = rs.pipeline()
