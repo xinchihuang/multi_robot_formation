@@ -257,8 +257,8 @@ class Controller:
             occupancy_map_i = occupancy_maps[i]
             cv2.imshow(str(i), occupancy_map_i)
             cv2.waitKey(1)
-            input_occupancy_maps[0, i, :, :] = occupancy_map_i
-            # input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
+            # input_occupancy_maps[0, i, :, :] = occupancy_map_i
+            input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
 
@@ -360,8 +360,8 @@ class Controller:
         # print(position_lists_global[index])
         orientation_list = scene_data.orientation_list
         # print(scene_data.observation_list[index].occupancy_map)
-        # cv2.imshow(str(index), scene_data.observation_list[index].occupancy_map)
-        # cv2.waitKey(1)
+        cv2.imshow(str(index)+"r", scene_data.observation_list[index].occupancy_map)
+        cv2.waitKey(1)
 
         occupancy_map_simulator = MapSimulator(local=local)
         (
@@ -382,8 +382,8 @@ class Controller:
             cv2.imshow(str(i), occupancy_map_i)
             cv2.waitKey(1)
             if index==i:
-                self_input_occupancy_maps[0, i, :, :] = occupancy_map_i
-            # input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
+                # self_input_occupancy_maps[0, i, :, :] = occupancy_map_i
+                self_input_occupancy_maps[0, i, :, :] = scene_data.observation_list[i].occupancy_map
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
 

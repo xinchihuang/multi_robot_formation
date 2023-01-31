@@ -224,7 +224,7 @@ def plot_load_data(dt, root_dir):
             trace_array = trace_array_single
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
-    position_array = trace_array[:, :, 0, :2]
+    position_array = trace_array[:, :-200, 0, :2]
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array, root_dir)
@@ -243,4 +243,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data/1")
+    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data/0")
