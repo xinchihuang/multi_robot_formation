@@ -162,6 +162,7 @@ class Controller:
                         target_position[index][1] - target_position[ri][1],
                     )
                 )
+
         #### get speed
         velocity_index_x = 0
         velocity_index_y = 0
