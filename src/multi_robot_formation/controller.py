@@ -163,6 +163,7 @@ class Controller:
                     )
                 )
         #### get speed
+
         velocity_index_x = 0
         velocity_index_y = 0
         self_position = sensor_data.position[:2]
