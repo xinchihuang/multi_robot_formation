@@ -223,6 +223,7 @@ class Controller:
             out_put.velocity_y = 0
             return out_put
 
+
         input_occupancy_maps = np.zeros(
             (1, number_of_agents, input_width, input_height)
         )
