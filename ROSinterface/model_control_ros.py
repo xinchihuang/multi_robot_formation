@@ -86,7 +86,7 @@ class ModelControl:
             print("no data")
             return
         print(position_list_local)
-        model_data = self.robot.controller.decentralized_control_dummy_real(
+        model_data = self.robot.controller.decentralized_control_real(
             index=0, position_lists_local=position_list_local
         )
         self.robot.executor.execute_control(model_data)
