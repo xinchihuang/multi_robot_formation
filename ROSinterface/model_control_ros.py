@@ -41,7 +41,7 @@ class ModelControl:
         self.color_index = {"red": 0, "yellow": 1, "green": 2}
         self.model_path = os.path.join(
             os.getcwd()
-            + "/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
+            + "/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
         )
         self.EP_DICT = {}
         self.IP_DICT = {0: "172.20.10.6", 1: "172.20.10.7", 2: "172.20.10.8"}
