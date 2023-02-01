@@ -10,7 +10,7 @@ author: Xinchi Huang
 import os
 
 print(os.getcwd())
-from controller import Controller
+from .controller import Controller
 
 
 class Robot:
