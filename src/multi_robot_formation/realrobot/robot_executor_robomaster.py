@@ -94,7 +94,7 @@ class UartConnector:
     def send_to_robot(self, msg):
         msg += ";"
         print(msg)
-        self.s.send(msg.encode("utf-8"))
+        self.ser.send(msg.encode("utf-8"))
 
 
 class WifiConnector:
