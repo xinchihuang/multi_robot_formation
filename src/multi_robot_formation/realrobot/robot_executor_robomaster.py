@@ -151,7 +151,7 @@ class Executor:
         self.motor_left_handle = None
         self.motor_right_handle = None
         self.point_cloud_handle = None
-        self.connector = WifiConnector()
+        self.connector = UartConnector()
 
     def execute_control(self, control_data):
         """
@@ -165,7 +165,8 @@ class Executor:
         print("right", velocity_y)
         # msg = "command"
         # self.connector.send_to_robot(msg)
+
         msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-            speed_x=velocity_x, speed_y=velocity_y, speed_z=0
+            speed_x=velocity_x, speed_y=velocity_y, speed_z=1
         )
         self.connector.send_to_robot(msg)

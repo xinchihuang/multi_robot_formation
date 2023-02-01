@@ -68,7 +68,7 @@ class ModelControl:
         self.robot.controller.initialize_GNN_model(1, self.model_path)
 
     def ModelControlCallback(self, data):
-
+        print("ros_initialized")
         position_list_local = []
         look_up_table = [0, 0, 0]
         for blob in data.blobs:

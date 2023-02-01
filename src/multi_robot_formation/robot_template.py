@@ -19,7 +19,7 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor, controller, platform="vrep", controller_type="model"
+        self, sensor, executor, controller, platform="robomaster", controller_type="model"
     ):
         self.index = None
         self.GNN_model = None
