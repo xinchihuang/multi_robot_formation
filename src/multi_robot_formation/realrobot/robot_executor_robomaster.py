@@ -83,7 +83,7 @@ class UartConnector:
         self.ser = serial.Serial()
 
         # 配置串口 波特率 115200，数据位 8 位，1 个停止位，无校验位，超时时间 0.2 秒
-        self.ser.port = "COM3"
+        self.ser.port = "/dev/ttyUSB0"
         self.ser.baudrate = 115200
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_ONE
