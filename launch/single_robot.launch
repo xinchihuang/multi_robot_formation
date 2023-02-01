@@ -1,0 +1,29 @@
+<launch>
+  <arg name="first_rm"  default="rm_0"/>
+  <arg name="second_rm" default="rm_1"/>
+  <arg name="third_rm"  default="rm_2"/>
+
+  <arg name="first_rm_x_pos" default="1.0"/>
+  <arg name="first_rm_y_pos" default="0.0"/>
+  <arg name="first_rm_z_pos" default=" 0.0"/>
+  <arg name="first_rm_yaw"   default=" 0.0"/>
+
+  <arg name="second_rm_x_pos" default="-2.0"/>
+  <arg name="second_rm_y_pos" default="0.0"/>
+  <arg name="second_rm_z_pos" default=" 0.0"/>
+  <arg name="second_rm_yaw"   default="0.0"/>
+
+  <arg name="third_rm_x_pos" default=" 0.0"/>
+  <arg name="third_rm_y_pos" default=" -2.0"/>
+  <arg name="third_rm_z_pos" default=" 0.0"/>
+  <arg name="third_rm_yaw"   default=" 1.507"/>
+
+  <!--arg name="x_pos" default="0.0"/>
+  <arg name="y_pos" default="0.0"/>
+  <arg name="z_pos" default="0.0"/-->
+
+  <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"></include>
+  <include file="$(find cmvision_3d)/launch/color_tracker.launch"></include>
+  <node name="model_control_ros" pkg="multi_robot_formation" type="model_control_ros.py"></node>
+  </launch>
+
