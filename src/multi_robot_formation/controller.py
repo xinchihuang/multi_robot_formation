@@ -93,9 +93,9 @@ class Controller:
         :return:
         """
         # self.GNN_model = DecentralController(number_of_agent=num_robot, use_cuda=True)
-        self.GNN_model = DecentralControllerReal(number_of_agent=num_robot, use_cuda=True)
+        # self.GNN_model = DecentralControllerReal(number_of_agent=num_robot, use_cuda=True)
         # self.GNN_model=DecentralControllerPose(number_of_agent=num_robot, use_cuda=True)
-        # self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
+        self.GNN_model = DummyModel(number_of_agent=num_robot, use_cuda=False)
         if not self.use_cuda:
             self.GNN_model.load_state_dict(
                 torch.load(model_path, map_location=torch.device("cpu"))

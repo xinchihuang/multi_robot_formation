@@ -41,7 +41,7 @@ class ModelControl:
         self.color_index = {"red": 0, "yellow": 1, "green": 2}
         self.model_path = os.path.join(
             os.getcwd()
-            + "/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_partial.pth"
+            + "/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
         )
         self.EP_DICT = {}
         self.IP_DICT = {0: "172.20.10.6", 1: "172.20.10.7", 2: "172.20.10.8"}
@@ -86,7 +86,7 @@ class ModelControl:
             print("no data")
             return
         print(position_list_local)
-        model_data = self.robot.controller.decentralized_control_real(
+        model_data = self.robot.controller.decentralized_control_dummy_real(
             index=0, position_lists_local=position_list_local
         )
         self.robot.executor.execute_control(model_data)
