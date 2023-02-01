@@ -81,10 +81,8 @@ class ModelControl:
             x_c, y_c, z_c = blob.center.x, blob.center.y, blob.center.z
             # print(blob.name,x_w,y_w,z_w)
             position_list_local.append([x_c, y_c, z_c])
-
         if len(position_list_local) == 0:
             print("no data")
-            return
         print(position_list_local)
         model_data = self.robot.controller.decentralized_control_dummy_real(
             index=0, position_lists_local=position_list_local
