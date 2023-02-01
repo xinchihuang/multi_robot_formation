@@ -81,25 +81,20 @@ class UartConnector:
     def __init__(self):
 
         self.ser = serial.Serial()
-
-        # 配置串口 波特率 115200，数据位 8 位，1 个停止位，无校验位，超时时间 0.2 秒
         self.ser.port = "/dev/ttyUSB0"
         self.ser.baudrate = 115200
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_ONE
         self.ser.parity = serial.PARITY_NONE
         self.ser.timeout = 0.2
-        # 打开串口
         self.ser.open()
 
         self.ser.write("command;".encode("utf-8"))
 
-    def send(self, msg):
-
+    def send_to_robot(self, msg):
         msg += ";"
-        self.ser.write(msg.encode("utf-8"))
-        recv = self.ser.readall()
-        print(recv.decode("utf-8"))
+        print(msg)
+        self.s.send(msg.encode("utf-8"))
 
 
 class WifiConnector:
