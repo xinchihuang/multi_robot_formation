@@ -4,10 +4,10 @@ import numpy as np
 from collections import defaultdict
 import cv2
 import os
-from utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
-from utils.occupancy_map_simulator import MapSimulator
-from comm_data import ControlData, SensorData, SceneData
-from controller import Controller
+from ..utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
+from ..utils.occupancy_map_simulator import MapSimulator
+from ..comm_data import ControlData, SensorData, SceneData
+from ..controller import Controller
 
 
 class DataGenerator:

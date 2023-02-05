@@ -15,7 +15,6 @@ from .model.GNN_based_model import (
 )
 import cv2
 from .utils.occupancy_map_simulator import MapSimulator
-
 from .comm_data import ControlData
 
 # class ControlData:
@@ -45,11 +44,9 @@ class Controller:
         wheel_adjustment: Used for transform linear velocity to angular velocity
         """
         self.desired_distance = 2.0
-        self.centralized_k = 1
-        self.max_velocity = 1.2
-        self.wheel_adjustment = 10.25
         self.GNN_model = None
         self.use_cuda = True
+
 
     def centralized_control(self, index, sensor_data, scene_data):
         """
@@ -70,6 +67,7 @@ class Controller:
         self_x = self_position[0]
         self_y = self_position[1]
         neighbors = scene_data.adjacency_list[index]
+        print(neighbors)
         velocity_sum_x = 0
         velocity_sum_y = 0
         for neighbor in neighbors:
@@ -82,6 +80,7 @@ class Controller:
         out_put.robot_index = index
         out_put.velocity_x = velocity_sum_x
         out_put.velocity_y = velocity_sum_y
+
 
         return out_put
 

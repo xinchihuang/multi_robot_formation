@@ -16,17 +16,6 @@ from controller import Controller
 
 from comm_data import SceneData
 
-# class SceneData:
-#     """
-#     A class for passing data from scene
-#     """
-#
-#     def __init__(self):
-#         self.observation_list = None
-#         self.adjacency_list = None
-#         self.position_list = None
-#         self.orientation_list = None
-
 
 class Scene:
     """
