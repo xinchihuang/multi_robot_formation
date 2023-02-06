@@ -85,6 +85,8 @@ class ModelControl:
         model_data = self.robot.controller.decentralized_control_dummy_real(
             index=0, position_lists_local=position_list_local
         )
+        model_data.velocity_x=1
+        model_data.velocity_y=1
         self.robot.executor.execute_control(model_data)
         # for i in range(0,3):
         #     for j in range(0,3):
