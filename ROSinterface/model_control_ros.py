@@ -82,7 +82,7 @@ class ModelControl:
         if len(position_list_local) == 0:
             print("no data")
         print(position_list_local)
-        model_data = self.robot.controller.decentralized_control_dummy_real(
+        model_data = self.robot.controller.decentralized_control_real(
             index=0, position_lists_local=position_list_local
         )
         # model_data.velocity_x=1
