@@ -92,7 +92,7 @@ class ModelControl:
             if look_up_table[robot_index] == 1:
                 continue
             look_up_table[robot_index] = 1
-            x_c, y_c, z_c = blob.center.x, blob.center.y, blob.center.z
+            x_c, z_c, y_c = blob.center.x, -blob.center.y, blob.center.z
             # print(blob.name,x_w,y_w,z_w)
             position_list_local.append([x_c, y_c, z_c])
         if len(position_list_local) == 0:
