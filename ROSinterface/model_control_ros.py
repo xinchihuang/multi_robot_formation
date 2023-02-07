@@ -63,7 +63,7 @@ class ModelControl:
         )
         self.robot.executor = executor
         self.robot.controller = controller
-        self.robot.controller.initialize_GNN_model(1, self.model_path)
+        # self.robot.controller.initialize_GNN_model(1, self.model_path)
     def simple_control(self,position_list,index,desired_distance):
         out_put = ControlData()
         velocity_sum_x=0
