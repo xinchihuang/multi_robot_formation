@@ -13,17 +13,18 @@ import cv2
 import os
 import message_filters
 import collections
+from squaternion import Quaternion
 
 from multi_robot_formation.controller import Controller
 from multi_robot_formation.comm_data import SceneData,SensorData,ControlData
 from multi_robot_formation.utils.data_generator import DataGenerator
 class DataCollector:
-    def __init__(self, robot_id):
-        self.robot_num=3
+    def __init__(self, robot_num):
+        self.robot_num=robot_num
         self.sub_topic_list = []
         self.pub_topic_dict = collections.defaultdict()
         for index in range(self.robot_num):
-            point_topic=f"D435_camera_{robot_id}/depth/color/points"
+            point_topic=f"D435_camera_{index}/depth/color/points"
             self.sub_topic_list.append(message_filters.Subscriber(point_topic, PointCloud2))
         for index in range(self.robot_num):
             pose_topic=f'rm_{index}/odom'
@@ -31,10 +32,10 @@ class DataCollector:
         for index in range(self.robot_num):
             pub_topic=f'rm_{index}/cmd_vel'
             self.pub_topic_dict[index]=rospy.Publisher(pub_topic, Twist, queue_size=10)
-        ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, 100,0.05)
+        ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, 10,0.1,allow_headerless=True)
         ts.registerCallback(self.DataCollectorCallback)
         self.save_data_root="/home/xinchi/gazebo_data"
-        self.upper_bound=0.176
+        self.upper_bound=0.05
         self.lower_bound=0
         self.map_size = 100
         self.range = 5
@@ -45,7 +46,6 @@ class DataCollector:
         self.observation_list=[]
         self.reference_control=[]
         self.time_step=0
-
 
 
 
@@ -71,8 +71,7 @@ class DataCollector:
         np.save(os.path.join(data_path,"observation.npy"),observation_array)
         np.save(os.path.join(data_path, "trace.npy"), trace_array)
         np.save(os.path.join(data_path, "reference.npy"), reference_control_array)
-    def expert_control(self,pose_list,robot_id,local):
-        print(pose_list)
+    def expert_control_gazebo(self,pose_list,robot_id,local):
         data_generator=DataGenerator()
         controller=Controller()
         sensor_data=SensorData()
@@ -86,10 +85,10 @@ class DataCollector:
         velocity_x,velocity_y=control_data.velocity_x, control_data.velocity_y
         if local:
             theta = sensor_data.orientation[2]
-            velocity_x_global = velocity_x * math.cos(theta) - velocity_y * math.sin(
+            velocity_x_global = velocity_x * math.cos(theta) + velocity_y * math.sin(
                 theta
             )
-            velocity_y_global = velocity_x * math.sin(theta) + velocity_y * math.cos(
+            velocity_y_global = -velocity_x * math.sin(theta) + velocity_y * math.cos(
                 theta
             )
             velocity_x = velocity_x_global
@@ -99,7 +98,6 @@ class DataCollector:
 
 
     def DataCollectorCallback(self, *argv):
-        # print(argv)
         occupancy_map_list = []
         pose_list = []
         control_list=[]
@@ -113,8 +111,7 @@ class DataCollector:
 
                 if self.lower_bound< pt_y < self.upper_bound:
                     # print([pt_x, pt_y, pt_z])
-                    points.append([pt_x, pt_y, pt_z])
-            print(points)
+                    points.append([pt_x, pt_z, -pt_y])
             occupancy_map = self.point_to_map(points)
             cv2.imshow(f"Example occupancy_map{index}", occupancy_map)
             key = cv2.waitKey(1)
@@ -123,26 +120,24 @@ class DataCollector:
 
 
         for index in range(3,2*self.robot_num):
-            pose_index=[argv[index].pose.pose.position.x,argv[index].pose.pose.position.y,argv[index].pose.pose.orientation.z]
+            q=Quaternion(argv[index].pose.pose.orientation.x,argv[index].pose.pose.orientation.y,argv[index].pose.pose.orientation.z,argv[index].pose.pose.orientation.w)
+            pose_index=[argv[index].pose.pose.position.x,argv[index].pose.pose.position.y,q.to_euler(degrees=False)[0]]
             pose_list.append(pose_index)
         self.trace.append(pose_list)
-
-        print(pose_list)
         for index in range(0, self.robot_num):
-            control_list.append(self.expert_control(pose_list,index,True))
+            control_list.append(self.expert_control_gazebo(pose_list,index,True))
 
         for index in range(0,self.robot_num):
             msg=Twist()
-            # msg.linear.x = control_list[index][0] if abs(control_list[index][0])<0.1 else 0.1*abs(control_list[index][0])/control_list[index][0]
-            # msg.linear.y = control_list[index][1] if abs(control_list[index][1])<0.1 else 0.1*abs(control_list[index][1])/control_list[index][1]
-            msg.linear.x = 0
-            msg.linear.y = 0
+            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<0.1 else 0.1*abs(control_list[index][0])/control_list[index][0]
+            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<0.1 else 0.1*abs(control_list[index][1])/control_list[index][1]
+            # msg.linear.x = 1
+            # msg.linear.y = 0
             msg.linear.z = 0
-            msg.angular.z = 0.5
+            msg.angular.z = 0.1
             self.pub_topic_dict[index].publish(msg)
-            self.time_step+=1
-            print(msg.linear.x,msg.linear.y)
-            print(time.asctime())
+        self.time_step+=1
+        print(self.time_step)
         if self.time_step>self.max_time_step:
             self.save_to_file()
             rospy.signal_shutdown(f"Stop after {self.time_step} steps")
@@ -156,25 +151,28 @@ if __name__ == "__main__":
 
     state_msg = ModelState()
     state_msg.model_name = 'rm_0'
-    state_msg.pose.position.x = 1
-    state_msg.pose.position.y = 1
+    state_msg.pose.position.x = 4
+    state_msg.pose.position.y = 4
     state_msg.pose.position.z = 0
-    state_msg.pose.orientation.x = 0
-    state_msg.pose.orientation.y = 0
-    state_msg.pose.orientation.z = 0
-    state_msg.pose.orientation.w = 0
+
+    q=Quaternion.from_euler(0, 0, 0, degrees=True)
+    state_msg.pose.orientation.x = q.x
+    state_msg.pose.orientation.y = q.y
+    state_msg.pose.orientation.z = q.z
+    state_msg.pose.orientation.w = q.w
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     resp = set_state(state_msg)
     state_msg = ModelState()
     state_msg.model_name = 'rm_1'
-    state_msg.pose.position.x = 1
-    state_msg.pose.position.y = -1
+    state_msg.pose.position.x = 10
+    state_msg.pose.position.y = 10
     state_msg.pose.position.z = 0
-    state_msg.pose.orientation.x = 0
-    state_msg.pose.orientation.y = 0
-    state_msg.pose.orientation.z = 0
-    state_msg.pose.orientation.w = 0
+    q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    state_msg.pose.orientation.x = q.x
+    state_msg.pose.orientation.y = q.y
+    state_msg.pose.orientation.z = q.z
+    state_msg.pose.orientation.w = q.w
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     set_state(state_msg)
@@ -183,17 +181,16 @@ if __name__ == "__main__":
     state_msg.pose.position.x = 0
     state_msg.pose.position.y = 0
     state_msg.pose.position.z = 0
-    state_msg.pose.orientation.x = 0
-    state_msg.pose.orientation.y = 0
-    state_msg.pose.orientation.z = 0
-    state_msg.pose.orientation.w = 0
+    q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    state_msg.pose.orientation.x = q.x
+    state_msg.pose.orientation.y = q.y
+    state_msg.pose.orientation.z = q.z
+    state_msg.pose.orientation.w = q.w
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     set_state(state_msg)
-
-
     rospy.init_node("collect_data")
-    robot_id = 0
-    listener = DataCollector(robot_id)
+    robot_num = 3
+    listener = DataCollector(robot_num)
     rospy.spin()
 
