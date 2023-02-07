@@ -64,7 +64,23 @@ class ModelControl:
         self.robot.executor = executor
         self.robot.controller = controller
         self.robot.controller.initialize_GNN_model(1, self.model_path)
-
+    def simple_control(self,position_list,index,desired_distance):
+        out_put = ControlData()
+        velocity_sum_x=0
+        velocity_sum_y=0
+        for i in range(len(position_list)):
+            x=position_list[i][0]
+            y=position_list[i][1]
+            distance=(x**2+y**2)**0.5
+            rate = (distance - desired_distance) / distance
+            velocity_x = rate * x
+            velocity_y = rate * y
+            velocity_sum_x -= velocity_x
+            velocity_sum_y -= velocity_y
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_sum_x
+        out_put.velocity_y = velocity_sum_y
+        return out_put
     def ModelControlCallback(self, data):
         print("ros_initialized")
         position_list_local = []
@@ -82,9 +98,11 @@ class ModelControl:
         if len(position_list_local) == 0:
             print("no data")
         print(position_list_local)
-        model_data = self.robot.controller.decentralized_control_real(
-            index=0, position_lists_local=position_list_local
-        )
+        model_data=self.simple_control(position_list_local,0,1)
+
+        # model_data = self.robot.controller.decentralized_control_real(
+        #     index=0, position_lists_local=position_list_local
+        # )
         # model_data.velocity_x=1
         # model_data.velocity_y=1
         self.robot.executor.execute_control(model_data)
