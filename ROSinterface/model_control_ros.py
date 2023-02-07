@@ -4,7 +4,7 @@ import rospy
 import sys
 import os
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
-from multi_robot_formation.comm_data import SceneData, SensorData
+from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from multi_robot_formation.controller import Controller
 from multi_robot_formation.robot_template import Robot
 
