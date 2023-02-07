@@ -72,7 +72,7 @@ class ModelControl:
             x=position_list[i][0]
             y=position_list[i][1]
             distance=(x**2+y**2)**0.5
-            rate = (distance - desired_distance) / distance
+            rate = (distance - desired_distance) / desired_distance
             velocity_x = rate * x
             velocity_y = rate * y
             velocity_sum_x -= velocity_x
