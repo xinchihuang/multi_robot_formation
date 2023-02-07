@@ -43,7 +43,7 @@ class ModelControl:
         )
         self.EP_DICT = {}
         self.IP_DICT = {0: "172.20.10.6", 1: "172.20.10.7", 2: "172.20.10.8"}
-        self.robot.controller.initialize_GNN_model(1, self.model_path)
+        # self.robot.controller.initialize_GNN_model(1, self.model_path)
         # self.IP_DICT={1:'172.20.10.7'}
 
         # for index,ip in self.IP_DICT.items():
@@ -63,7 +63,7 @@ class ModelControl:
         )
         self.robot.executor = executor
         self.robot.controller = controller
-        # self.robot.controller.initialize_GNN_model(1, self.model_path)
+        self.robot.controller.initialize_GNN_model(1, self.model_path)
     def simple_control(self,position_list,index,desired_distance):
         out_put = ControlData()
         velocity_sum_x=0
