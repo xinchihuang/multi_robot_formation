@@ -72,12 +72,12 @@ class ModelControl:
             x=position_list[i][0]
             y=position_list[i][1]
             distance=(x**2+y**2)**0.5
-            rate = (distance - desired_distance) / desired_distance
+            rate = (distance - desired_distance) / distance
             print(rate)
-            velocity_x = rate * x
-            velocity_y = rate * y
-            velocity_sum_x += velocity_x
-            velocity_sum_y += velocity_y
+            velocity_x = rate * (-x)
+            velocity_y = rate * (-y)
+            velocity_sum_x -= velocity_x
+            velocity_sum_y -= velocity_y
         out_put.robot_index = index
         out_put.velocity_x = velocity_sum_x
         out_put.velocity_y = velocity_sum_y
