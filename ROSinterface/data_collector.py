@@ -32,11 +32,12 @@ class DataCollector:
         for index in range(self.robot_num):
             pub_topic=f'rm_{index}/cmd_vel'
             self.pub_topic_dict[index]=rospy.Publisher(pub_topic, Twist, queue_size=10)
-        ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, 10,0.1,allow_headerless=True)
+        ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, 100,1,allow_headerless=True)
         ts.registerCallback(self.DataCollectorCallback)
+
         self.save_data_root="/home/xinchi/gazebo_data"
-        self.upper_bound=0.05
-        self.lower_bound=0
+        self.upper_bound=0.12
+        self.lower_bound=-0.12
         self.map_size = 100
         self.range = 5
         self.height = 2
@@ -151,8 +152,8 @@ if __name__ == "__main__":
 
     state_msg = ModelState()
     state_msg.model_name = 'rm_0'
-    state_msg.pose.position.x = 4
-    state_msg.pose.position.y = 4
+    state_msg.pose.position.x = 1
+    state_msg.pose.position.y = 1
     state_msg.pose.position.z = 0
 
     q=Quaternion.from_euler(0, 0, 0, degrees=True)
@@ -165,8 +166,8 @@ if __name__ == "__main__":
     resp = set_state(state_msg)
     state_msg = ModelState()
     state_msg.model_name = 'rm_1'
-    state_msg.pose.position.x = 10
-    state_msg.pose.position.y = 10
+    state_msg.pose.position.x = 1
+    state_msg.pose.position.y = -1
     state_msg.pose.position.z = 0
     q = Quaternion.from_euler(0, 0, 0, degrees=True)
     state_msg.pose.orientation.x = q.x
