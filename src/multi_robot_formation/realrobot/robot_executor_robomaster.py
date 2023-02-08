@@ -159,8 +159,8 @@ class Executor:
         print("x", velocity_x)
         print("y", velocity_y)
 
-        velocity_x= 1*abs(velocity_x)/velocity_x if abs(velocity_x)>1 else velocity_x
-        velocity_y = 1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 1 else velocity_y
+        velocity_x= 0.1*abs(velocity_x)/velocity_x if abs(velocity_x)>0.1 else velocity_x
+        velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
         # msg = "command"
         # self.connector.send_to_robot(msg)
 
