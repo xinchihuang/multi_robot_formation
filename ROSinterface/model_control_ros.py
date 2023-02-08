@@ -76,8 +76,8 @@ class ModelControl:
             print(rate)
             velocity_x = rate * x
             velocity_y = rate * y
-            velocity_sum_x -= velocity_x
-            velocity_sum_y -= velocity_y
+            velocity_sum_x += velocity_x
+            velocity_sum_y += velocity_y
         out_put.robot_index = index
         out_put.velocity_x = velocity_sum_x
         out_put.velocity_y = velocity_sum_y
