@@ -12,6 +12,7 @@ class DecentralController(nn.Module):
     def __init__(
         self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
     ):
+        print("using GNN model controller (map)")
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
@@ -237,6 +238,7 @@ class DecentralControllerReal(nn.Module):
     def __init__(
         self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
     ):
+        print("using GNN model controller (map no communication)")
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
@@ -465,6 +467,7 @@ class DecentralControllerReal(nn.Module):
 class DecentralControllerPose(nn.Module):
     def __init__(self, number_of_agent=3, use_cuda=False):
         super().__init__()
+        print("using GNN model controller (Pose)")
         self.S = None
         self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
@@ -650,9 +653,9 @@ class DecentralControllerPose(nn.Module):
 
         return action_predict
 
-
 class DummyModel(nn.Module):
     def __init__(self, number_of_agent=3, use_cuda=False):
+        print("using dummy model controller")
         self.use_cuda = use_cuda
         self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
