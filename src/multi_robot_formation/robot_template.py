@@ -12,7 +12,7 @@ import os
 print(os.getcwd())
 # from .controller import Controller
 from .controller_new import *
-from comm_data import ControlData,SceneData,SensorData
+from .comm_data import ControlData,SceneData,SensorData
 
 
 
