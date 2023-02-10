@@ -25,7 +25,6 @@ class ModelControl:
     def __init__(self, topic):
         self.robot = Robot(
             sensor=None,
-            controller=Controller(),
             executor=Executor(),
             platform="robomaster",
             controller_type="model",
