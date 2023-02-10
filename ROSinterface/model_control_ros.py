@@ -56,7 +56,6 @@ class ModelControl:
         executor = Executor()
         self.robot = Robot(
             sensor=None,
-            controller=None,
             executor=None,
             platform="robomaster",
             controller_type="model",
