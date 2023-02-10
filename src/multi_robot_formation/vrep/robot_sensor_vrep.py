@@ -73,8 +73,8 @@ class Sensor:
             return None
         x_world = world_point[0]
         y_world = world_point[1]
-        x_map = int((self.max_x - x_world) / (2 * self.max_x) * self.occupancy_map_size)
-        y_map = self.occupancy_map_size-int((self.max_y - y_world) / (2 * self.max_y) * self.occupancy_map_size)
+        x_map = min(int((self.max_x - x_world) / (2 * self.max_x) * self.occupancy_map_size),99)
+        y_map = min(self.occupancy_map_size-int((self.max_y - y_world) / (2 * self.max_y) * self.occupancy_map_size),99)
 
         return [x_map, y_map]
 

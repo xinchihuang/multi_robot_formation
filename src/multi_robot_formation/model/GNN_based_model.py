@@ -8,7 +8,7 @@ from .weights_initializer import weights_init
 from .graphUtils import graphML as gml
 
 
-class DecentralController(nn.Module):
+class GnnMapBasic(nn.Module):
     def __init__(
         self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
     ):
@@ -234,7 +234,7 @@ class DecentralController(nn.Module):
             action_predict.append(action_current)  # N x 5
 
         return action_predict
-class DecentralControllerReal(nn.Module):
+class GnnMapDecentralized(nn.Module):
     def __init__(
         self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
     ):
@@ -464,8 +464,11 @@ class DecentralControllerReal(nn.Module):
 
         return action_predict
 
-class DecentralControllerPose(nn.Module):
+
+
+class GnnPoseBasic(nn.Module):
     def __init__(self, number_of_agent=3, use_cuda=False):
+
         super().__init__()
         print("using GNN model controller (Pose)")
         self.S = None

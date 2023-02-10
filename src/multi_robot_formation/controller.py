@@ -7,7 +7,7 @@ import collections
 import math
 import numpy as np
 import torch
-from .model.GNN_based_model import (
+from model.GNN_based_model import (
     DecentralController,
     DecentralControllerReal,
     DecentralControllerPose,

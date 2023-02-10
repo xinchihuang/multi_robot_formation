@@ -73,7 +73,7 @@ class ModelControl:
             y=position_list[i][1]
             distance=(x**2+y**2)**0.5
             rate = (distance - desired_distance) / distance
-            print(rate)
+
             velocity_x = rate * (-x)
             velocity_y = rate * (-y)
             velocity_sum_x -= velocity_x
@@ -102,7 +102,7 @@ class ModelControl:
         # model_data=self.simple_control(position_list_local,0,1)
 
         model_data = self.robot.controller.decentralized_control_real(
-            index=0, position_lists_local=position_list_local
+            index=0,
         )
         # model_data.velocity_x=1
         # model_data.velocity_y=1

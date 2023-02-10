@@ -12,7 +12,6 @@ from utils.gabreil_graph import get_gabreil_graph
 
 from vrep.robot_executor_vrep import Executor
 from vrep.robot_sensor_vrep import Sensor
-from controller import Controller
 
 from comm_data import SceneData
 
@@ -55,10 +54,8 @@ class Scene:
         """
         new_robot = Robot(
             sensor=Sensor(),
-            controller=Controller(),
             executor=Executor(),
             platform="vrep",
-            controller_type="model",
         )
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)

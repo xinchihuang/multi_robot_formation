@@ -10,7 +10,9 @@ author: Xinchi Huang
 import os
 
 print(os.getcwd())
-from .controller import Controller
+# from .controller import Controller
+from controller_new import *
+
 
 
 class Robot:
@@ -19,7 +21,7 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor, controller, platform="robomaster", controller_type="model"
+        self, sensor, executor,model_path="saved_model/model_map_local_partial.pth", platform="robomaster", controller_type="model_decentralized",sensor_type="real"
     ):
         self.index = None
         self.GNN_model = None
@@ -31,9 +33,28 @@ class Robot:
         self.controller_type = controller_type
         self.sensor = sensor
         self.executor = executor
-        self.controller = controller
+
+        self.model_path=model_path
+
+        if self.controller_type == "expert":
+            self.controller=CentralizedController()
+        elif self.controller_type == "model_basic":
+            if sensor_type == "real":
+                self.controller=GnnMapBasicControllerSensor(self.model_path)
+            if sensor_type == "synthesise":
+                self.controller = GnnMapBasicControllerSynthesise(self.model_path)
+        elif self.controller_type == "model_decentralized":
+            if sensor_type == "real":
+                self.controller=GnnMapDecentralizedControllerSensor(self.model_path)
+            if sensor_type == "synthesise":
+                self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path)
+        elif self.controller_type == "model_dummy":
+            self.controller=DummyController(self.model_path)
+
+
 
     def get_sensor_data(self):
+
         """
         Read sensor data from sensor in simulator/realworld
         :return: Sensor data
@@ -41,7 +62,7 @@ class Robot:
         self.sensor_data = self.sensor.get_sensor_data()
         return self.sensor_data
 
-    def get_control_data(self):
+    def get_control_data_old(self):
         """
         Get controls
         :return: Control data
@@ -77,6 +98,15 @@ class Robot:
         print(self.controller_type, model_data.velocity_x, model_data.velocity_y)
         self.control_data = model_data
 
+        return self.control_data
+
+    def get_control_data(self):
+        """
+        Get controls
+        :return: Control data
+        """
+
+        self.control_data=self.controller.get_control(self.index,self.scene_data)
         return self.control_data
 
     def execute_control(self):
