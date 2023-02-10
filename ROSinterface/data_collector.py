@@ -135,7 +135,7 @@ class DataCollector:
             # msg.linear.x = 1
             # msg.linear.y = 0
             msg.linear.z = 0
-            msg.angular.z = 0.1
+            msg.angular.z = 0.2
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
         print(self.time_step)
