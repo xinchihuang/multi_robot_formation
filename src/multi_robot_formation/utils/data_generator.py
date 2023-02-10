@@ -4,14 +4,18 @@ import numpy as np
 from collections import defaultdict
 import cv2
 import os
-from ..utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
-from ..utils.occupancy_map_simulator import MapSimulator
-from ..comm_data import ControlData, SensorData, SceneData
-from ..controller import Controller
+import sys
+sys.path.append("..")
+sys.path.append("../model")
+from utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
+from utils.occupancy_map_simulator import MapSimulator
+from comm_data import ControlData, SensorData, SceneData
+# from controller import Controller
+from controller_new import *
 
 
 class DataGenerator:
-    def __init__(self, local=True, partial=False):
+    def __init__(self, local=True, partial=True):
         self.local = local
         self.partial = partial
 
@@ -74,7 +78,7 @@ class DataGenerator:
                 )
         return new_adj_list
 
-    def generate_map_one(self, global_pose_array, self_orientation_array):
+    def generate_one(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
@@ -102,15 +106,17 @@ class DataGenerator:
             scene_data_i = SceneData()
             scene_data_i.adjacency_list = adjacency_list_i
 
-            controller = Controller()
+            controller = CentralizedController()
             # print("robot_index",robot_index)
             # print(position_lists_local[robot_index])
             # print(adjacency_list_i)
-            control_i = controller.centralized_control(
-                robot_index,
-                sensor_data_i,
-                scene_data_i,
-            )
+            # control_i = controller.centralized_control(
+            #     robot_index,
+            #     sensor_data_i,
+            #     scene_data_i,
+            # )
+
+            control_i=controller.get_control(robot_index,adjacency_list_i[robot_index],global_pose_array[robot_index])
 
             velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
             # print(velocity_x,velocity_y)
@@ -218,27 +224,12 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
+    self_pose_array=[[0,0,0],[-2,-2,0]]
+    self_orientation_array=[math.pi,0]
+    data_generator=DataGenerator(partial=True)
+    occupancy_maps,ref_control_lists,adjacency_lists=data_generator.generate_one(self_pose_array,self_orientation_array)
+    cv2.imshow("robot view (Synthesise)", occupancy_maps[0])
+    cv2.waitKey(0)
+    print(ref_control_lists)
     pass
-    # present = os.getcwd()
-    # root = os.path.join(present, "../training_data/data")
-    # if not os.path.exists(root):
-    #     os.mkdir(root)
-    #
-    # i=0
-    # while i<1:
-    #     if i%100==0:
-    #         print(i)
-    #     num_dirs = len(os.listdir(root))
-    #     data_path = os.path.join(root, str(num_dirs))
-    #     try:
-    #         occupancy_maps, ref_control_list,adjacency_lists=generate(5,5,0.2,2)
-    #         occupancy_maps_array=np.array(occupancy_maps)
-    #         ref_control_array=np.array(ref_control_list)
-    #         adjacency_lists_array=np.array(adjacency_lists)
-    #         os.mkdir(data_path)
-    #         np.save(os.path.join(data_path,"occupancy_maps"),occupancy_maps_array)
-    #         np.save(os.path.join(data_path, "reference_controls"), ref_control_array)
-    #         np.save(os.path.join(data_path, "adjacency_lists"), adjacency_lists_array)
-    #         i+=1
-    #     except:
-    #         continue
+

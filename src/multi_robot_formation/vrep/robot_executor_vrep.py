@@ -81,11 +81,13 @@ class Executor:
         """
         velocity_x = control_data.velocity_x
         velocity_y = control_data.velocity_y
-        theta = control_data.orientation[2]
 
+        theta = control_data.orientation[2]
+        print("velocity", velocity_x, velocity_y)
         omega_left, omega_right = self.velocity_transform(velocity_x, velocity_y, theta)
         omega_left = omega_left * self.wheel_adjustment
         omega_right = omega_right * self.wheel_adjustment
+
         # print("index", control_data.robot_index)
         # print("left", omega_left)
         # print("right", omega_right)

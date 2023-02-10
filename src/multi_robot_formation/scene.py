@@ -168,7 +168,7 @@ class Scene:
         #             continue
         #         pose_list.append([pos_x, pos_y, theta])
         #
-        pose_list = [[-4, -3, 1], [-4, 3, 1], [3, 3, 1], [3, -3, 1], [0, 0, 1]]
+        pose_list = [[-2, -2, 0], [-2, 2, 0], [2, 2, 0], [2, -2, 0], [0, 0, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

@@ -14,8 +14,8 @@ class MapSimulator:
         robot_size=0.2,
         max_height=0.3,
         map_size=100,
-        max_x=10,
-        max_y=10,
+        max_x=5,
+        max_y=5,
         local=True,
         block=True,
         partial=False,
@@ -66,10 +66,6 @@ class MapSimulator:
         """
         Filter out the points that out of sensor range
         :param world_point: Points in world coordinate
-        :param max_x: points' max x coordinate (left/right)
-        :param max_y: points' max y coordinate (depth/distance)
-        :param max_height: points' horizontal range
-        :param min_range: min distance between robots
         :return: Points within sensor range
         """
 
@@ -88,8 +84,20 @@ class MapSimulator:
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
             return None
         if self.partial:
-            if math.pi / 6 < self.arctan(x, y) < 5 * math.pi / 6:
+
+            if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
+            # if -2*math.pi/3<theta<2*math.pi/3:
+            #     if theta+math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / 3:
+            #         return None
+            # elif theta>0:
+            #     if self.arctan(x, y)>-(2*math.pi-(theta+math.pi / 3)) or self.arctan(x, y) < theta -  math.pi / 3:
+            #         return None
+            # elif theta<0:
+            #     print(self.arctan(x, y),(theta+math.pi / 3))
+            #     if self.arctan(x, y)<2*math.pi-(-theta+math.pi / 3) or self.arctan(x, y) > (theta+math.pi / 3):
+            #         return None
+
 
         return [x, y, z]
 

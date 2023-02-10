@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch.nn as nn
 from tqdm import tqdm
-from GNN_based_model import DecentralController
+from GNN_based_model import GnnMapDecentralized,GnnMapBasic
 
 from utils.data_generator import DataGenerator
 import math
@@ -23,7 +23,7 @@ class RobotDatasetTrace(Dataset):
         data_path_root,
         local=True,
         partial=True,
-        desired_distance=2,
+        desired_distance=1,
         number_of_agents=5,
     ):
 
@@ -66,7 +66,7 @@ class RobotDatasetTrace(Dataset):
         global_pose_array[:, 2] = 0
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
-        occupancy_maps, reference, adjacency_lists = data_generator.generate_map_one(
+        occupancy_maps, reference, adjacency_lists = data_generator.generate_one(
             global_pose_array, self_orientation_array
         )
 
@@ -180,7 +180,7 @@ class Trainer:
         self.inW = inW
         self.inH = inH
         self.batch_size = batch_size
-        self.model = DecentralController(
+        self.model = GnnMapBasic(
             number_of_agent=self.nA,
             input_width=self.inW,
             input_height=self.inH,

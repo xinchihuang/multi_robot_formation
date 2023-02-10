@@ -12,6 +12,7 @@ import os
 print(os.getcwd())
 # from .controller import Controller
 from controller_new import *
+from comm_data import ControlData,SceneData,SensorData
 
 
 
@@ -21,16 +22,17 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,model_path="saved_model/model_map_local_partial.pth", platform="robomaster", controller_type="model_decentralized",sensor_type="real"
+        self, sensor, executor,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="model_decentralized",sensor_type="synthesise"
     ):
         self.index = None
         self.GNN_model = None
-        self.sensor_data = None
-        self.control_data = None
-        self.scene_data = None
+        self.sensor_data = SensorData()
+        self.control_data = ControlData()
+        self.scene_data = SceneData()
 
         self.platform = platform
         self.controller_type = controller_type
+        self.sensor_type=sensor_type
         self.sensor = sensor
         self.executor = executor
 
@@ -39,14 +41,14 @@ class Robot:
         if self.controller_type == "expert":
             self.controller=CentralizedController()
         elif self.controller_type == "model_basic":
-            if sensor_type == "real":
+            if self.sensor_type == "real":
                 self.controller=GnnMapBasicControllerSensor(self.model_path)
-            if sensor_type == "synthesise":
+            if self.sensor_type == "synthesise":
                 self.controller = GnnMapBasicControllerSynthesise(self.model_path)
         elif self.controller_type == "model_decentralized":
-            if sensor_type == "real":
+            if self.sensor_type == "real":
                 self.controller=GnnMapDecentralizedControllerSensor(self.model_path)
-            if sensor_type == "synthesise":
+            if self.sensor_type == "synthesise":
                 self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path)
         elif self.controller_type == "model_dummy":
             self.controller=DummyController(self.model_path)
@@ -105,8 +107,23 @@ class Robot:
         Get controls
         :return: Control data
         """
+        if self.controller_type == "expert":
+            if not self.scene_data==None and not self.sensor_data==None and not self.scene_data.adjacency_list==None:
+                self.control_data=self.controller.get_control(self.index,self.scene_data.adjacency_list[self.index],self.sensor_data.position)
 
-        self.control_data=self.controller.get_control(self.index,self.scene_data)
+        elif self.controller_type == "model_basic":
+            if self.sensor_type == "real":
+                self.control_data=self.controller.get_control(self.index,self.scene_data)
+            if self.sensor_type == "synthesise":
+                self.control_data=self.controller.get_control(self.index,self.scene_data)
+        elif self.controller_type == "model_decentralized":
+            if self.sensor_type == "real":
+                self.control_data = self.controller.get_control(self.index, self.scene_data)
+            if self.sensor_type == "synthesise":
+                self.control_data=self.controller.get_control(self.index,self.scene_data)
+        elif self.controller_type == "model_dummy":
+            self.control_data=self.controller.get_control(self.index,self.scene_data)
+
         return self.control_data
 
     def execute_control(self):
@@ -116,5 +133,9 @@ class Robot:
         """
 
         if self.platform == "vrep":
-            self.control_data.orientation = self.sensor_data.orientation
+            if self.sensor_data==None:
+                self.control_data.orientation=[0,0,0]
+            else:
+
+                self.control_data.orientation = self.sensor_data.orientation
         self.executor.execute_control(self.control_data)

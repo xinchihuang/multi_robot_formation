@@ -45,7 +45,23 @@ class CentralizedController(Controller):
         :param self_position: Robot's self position (type: 1D iterator)
         :return: Control data (type: ControlData)
         """
+
         out_put = ControlData()
+
+        if neighbors == None:
+            print("No neighbor")
+            out_put.robot_index = index
+            out_put.velocity_x = 0
+            out_put.velocity_y = 0
+            return out_put
+        # if self_pose==None:
+        #     print("self pose")
+        #     out_put.robot_index = index
+        #     out_put.velocity_x = 0
+        #     out_put.velocity_y = 0
+        #     return out_put
+
+
         self_x = self_pose[0]
         self_y = self_pose[1]
         theta=self_pose[2]
@@ -484,8 +500,6 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         for i in range(self.num_robot):
 
             occupancy_map_i = occupancy_maps[i]
-            cv2.imshow(str(i), occupancy_map_i)
-            cv2.waitKey(1)
             if index == i:
                 self_input_occupancy_maps[0, i, :, :] = occupancy_map_i
                 cv2.imshow("robot view " + str(i) + "(Synthesise)", self_input_occupancy_maps[0, i, :, :])
