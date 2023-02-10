@@ -7,12 +7,12 @@ import collections
 import math
 import numpy as np
 import torch
-from model.GNN_based_model import (
-    DecentralController,
-    DecentralControllerReal,
-    DecentralControllerPose,
-    DummyModel,
-)
+# from .model.GNN_based_model import (
+#     DecentralController,
+#     DecentralControllerReal,
+#     DecentralControllerPose,
+#     DummyModel,
+# )
 import cv2
 from .utils.occupancy_map_simulator import MapSimulator
 from .comm_data import ControlData
