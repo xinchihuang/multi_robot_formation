@@ -99,11 +99,11 @@ class ModelControl:
         if len(position_list_local) == 0:
             print("no data")
         print(position_list_local)
-        # model_data=self.simple_control(position_list_local,0,1)
+        model_data=self.simple_control(position_list_local,0,1)
 
-        model_data = self.robot.controller.decentralized_control_real(
-            index=0,
-        )
+        # model_data = self.robot.controller.decentralized_control_real(
+        #     index=0,
+        # )
         # model_data.velocity_x=1
         # model_data.velocity_y=1
         self.robot.executor.execute_control(model_data)
