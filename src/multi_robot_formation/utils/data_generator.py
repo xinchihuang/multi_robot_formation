@@ -7,11 +7,11 @@ import os
 import sys
 sys.path.append("..")
 sys.path.append("../model")
-from ..utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
-from ..utils.occupancy_map_simulator import MapSimulator
-from ..comm_data import ControlData, SensorData, SceneData
+from src.multi_robot_formation.utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
+from src.multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
+from src.multi_robot_formation.comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
-from ..controller_new import *
+from src.multi_robot_formation.controller_new import *
 
 
 class DataGenerator:

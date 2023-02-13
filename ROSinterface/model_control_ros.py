@@ -19,7 +19,6 @@ from sensor_msgs import point_cloud2
 from cmvision.msg import Blobs
 from cmvision_3d.msg import Blobs3d, Blob3d
 
-print(os.getcwd())
 
 class ModelControl:
     def __init__(self, topic):

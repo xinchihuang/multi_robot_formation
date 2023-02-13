@@ -9,10 +9,9 @@ author: Xinchi Huang
 # from .realrobot.robot_sensor_realsense import Sensor
 import os
 
-print(os.getcwd())
 # from .controller import Controller
-from .controller_new import *
-from .comm_data import ControlData,SceneData,SensorData
+from src.multi_robot_formation.controller_new import *
+from src.multi_robot_formation.comm_data import ControlData,SceneData,SensorData
 
 
 
@@ -22,7 +21,7 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="model_decentralized",sensor_type="synthesise"
+        self, sensor, executor,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="expert",sensor_type="synthesise"
     ):
         self.index = None
         self.GNN_model = None
@@ -64,44 +63,6 @@ class Robot:
         self.sensor_data = self.sensor.get_sensor_data()
         return self.sensor_data
 
-    def get_control_data_old(self):
-        """
-        Get controls
-        :return: Control data
-        """
-        if self.controller_type == "expert":
-            model_data = self.controller.centralized_control(
-                self.index, self.sensor_data, self.scene_data
-            )
-        elif self.controller_type == "model":
-            # model_data = self.controller.decentralized_control(
-            #     self.index, self.sensor_data, self.scene_data, number_of_agents=5
-            # )
-            model_data = self.controller.decentralized_control_real(
-                self.index, self.sensor_data, self.scene_data, number_of_agents=5
-            )
-            # mode
-        elif self.controller_type == "model_pose":
-            model_data = self.controller.decentralized_control_pose(
-                self.index, self.sensor_data, self.scene_data, number_of_agents=5
-            )
-        elif self.controller_type == "model_dummy":
-            # model_data = self.controller.decentralized_control_dummy(
-            #     self.index, self.sensor_data, self.scene_data, number_of_agents=3
-            # )
-            model_data = self.controller.decentralized_control_dummy_real(
-                self.index, self.sensor_data
-            )
-            # print("robot ", self.index)
-            # if not self.scene_data==None:
-            #     print("position list", self.scene_data.position_list)
-            #     print("orientation list", self.scene_data.orientation_list)
-            # print("expert ", expert_data.velocity_x, expert_data.velocity_y)
-        print(self.controller_type, model_data.velocity_x, model_data.velocity_y)
-        self.control_data = model_data
-
-        return self.control_data
-
     def get_control_data(self):
         """
         Get controls
@@ -110,7 +71,6 @@ class Robot:
         if self.controller_type == "expert":
             if not self.scene_data==None and not self.sensor_data==None and not self.scene_data.adjacency_list==None:
                 self.control_data=self.controller.get_control(self.index,self.scene_data.adjacency_list[self.index],self.sensor_data.position)
-
         elif self.controller_type == "model_basic":
             if self.sensor_type == "real":
                 self.control_data=self.controller.get_control(self.index,self.scene_data)

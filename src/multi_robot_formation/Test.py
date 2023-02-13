@@ -4,8 +4,7 @@ author: Xinchi Huang
 
 import os
 import sys
-sys.path.append("model")
-
+sys.path.append("controller_new.py")
 from simulate import Simulation
 import numpy as np
 

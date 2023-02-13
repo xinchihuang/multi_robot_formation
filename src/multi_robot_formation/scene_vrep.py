@@ -14,7 +14,7 @@ from vrep.robot_executor_vrep import Executor
 from vrep.robot_sensor_vrep import Sensor
 
 from comm_data import SceneData
-
+from recorder import Recorder
 
 class Scene:
     """
@@ -37,14 +37,20 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = None
+        self.num_robot=5
+        self.initial_max_range=10
+        self.initial_min_range=1
+        self.platform = "vrep"
+        self.controller_type = "model_decentralized"
+        self.sensor_type = "synthesise"
+        self.model_path="saved_model/model_12000.pth"
 
-    def initial_vrep(self):
-        """
-        initial Vrep get client id
-        :return: A Verp client id
-        """
         self.client_id = vrep_interface.init_vrep()
-        return self.client_id
+        for i in range(self.num_robot):
+            self.add_robot_vrep(i)
+        self.reset_pose(self.initial_max_range, self.initial_min_range)
+
+
 
     def add_robot_vrep(self, robot_index):
         """
@@ -55,7 +61,10 @@ class Scene:
         new_robot = Robot(
             sensor=Sensor(),
             executor=Executor(),
-            platform="vrep",
+            platform=self.platform,
+            controller_type=self.controller_type,
+            sensor_type=self.sensor_type,
+            model_path = self.model_path
         )
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
@@ -65,9 +74,6 @@ class Scene:
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
 
-    def initial_GNN(self, num_robot, model_path):
-        for robot in self.robot_list:
-            robot.controller.initialize_GNN_model(num_robot, model_path)
 
     def update_scene_data(self):
         """
@@ -150,24 +156,6 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        # pose_list = []
-        # num_robot=len(self.robot_list)
-        # for i in range(len(self.robot_list)):
-        #     while True:
-        #         alpha = math.pi * (2 * random.random())
-        #         rho = max_disp_range * random.random()
-        #         pos_x = rho * math.cos(alpha)
-        #         pos_y = rho * math.sin(alpha)
-        #         theta = 2 * math.pi * random.random()
-        #         too_close = False
-        #         for p in pose_list:
-        #             if (pos_x - p[0]) ** 2 + (pos_y - p[1]) ** 2 <= min_disp_range**2:
-        #                 too_close = True
-        #                 break
-        #         if too_close:
-        #             continue
-        #         pose_list.append([pos_x, pos_y, theta])
-        #
         pose_list = [[-2, -2, 0], [-2, 2, 0], [2, 2, 0], [2, -2, 0], [0, 0, 0]]
         num_robot = len(self.robot_list)
 
@@ -182,3 +170,55 @@ class Scene:
             vrep_interface.post_robot_pose(
                 self.client_id, robot_handle, position, orientation
             )
+
+
+
+    ### sumilation related
+    def simulate(self,max_simulation_time,time_step=0.05):
+        simulation_time = 0
+        data_recorder = Recorder()
+        data_recorder.root_dir = "saved_data"
+
+        while True:
+            # vrep_interface.synchronize(self.client_id)
+            # time.sleep(0.2)
+            if simulation_time > max_simulation_time:
+                break
+            simulation_time += time_step
+            print("robot control at time")
+            print(simulation_time)
+
+            for robot in self.robot_list:
+                sensor_data = robot.get_sensor_data()
+                control_data = robot.get_control_data()
+
+                robot.execute_control()
+                # record data
+                data_recorder.record_sensor_data(sensor_data)
+                data_recorder.record_robot_trace(sensor_data)
+                data_recorder.record_controller_output(control_data)
+            self.check_stop_condition()
+            self.broadcast_all()
+            vrep_interface.synchronize(self.client_id)
+        data_recorder.save_to_file()
+        # vrep_interface.stop(self.client_id)
+        return 1
+    def check_stop_condition(self):
+        """
+        :return:
+        """
+        if self.adjacency_list == None:
+
+            return False
+        else:
+            for key, value in self.adjacency_list.items():
+                for r in value:
+                    print(
+                        "distance between {r1:d} and {r2:d} is {r3:f}".format(
+                            r1=key, r2=r[0], r3=r[3]
+                        )
+                    )
+
+if __name__ == "__main__":
+    simulate_scene=Scene()
+    simulate_scene.simulate(100)

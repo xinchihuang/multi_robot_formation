@@ -4,7 +4,7 @@ author: Xinchi Huang
 """
 import time
 
-from scene import Scene
+from scene_vrep import Scene
 from recorder import Recorder
 from vrep import vrep_interface
 
