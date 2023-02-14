@@ -10,8 +10,9 @@ author: Xinchi Huang
 import os
 
 # from .controller import Controller
-from src.multi_robot_formation.controller_new import *
-from src.multi_robot_formation.comm_data import ControlData,SceneData,SensorData
+print(os.getcwd())
+from multi_robot_formation.controller_new import *
+from multi_robot_formation.comm_data import ControlData,SceneData,SensorData
 
 
 

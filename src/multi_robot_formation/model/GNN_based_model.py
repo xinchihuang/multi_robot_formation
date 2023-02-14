@@ -4,8 +4,8 @@ author: Xinchi Huang
 """
 import torch
 import torch.nn as nn
-from src.multi_robot_formation.model.weights_initializer import weights_init
-from src.multi_robot_formation.model.graphUtils import graphML as gml
+from multi_robot_formation.model.weights_initializer import weights_init
+from multi_robot_formation.model.graphUtils import graphML as gml
 
 
 class GnnMapBasic(nn.Module):

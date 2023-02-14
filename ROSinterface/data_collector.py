@@ -15,9 +15,9 @@ import message_filters
 import collections
 from squaternion import Quaternion
 
-from multi_robot_formation.controller import Controller
-from multi_robot_formation.comm_data import SceneData,SensorData,ControlData
-from multi_robot_formation.utils.data_generator import DataGenerator
+from src.multi_robot_formation.controller import Controller
+from src.multi_robot_formation.comm_data import SceneData,SensorData,ControlData
+from src.multi_robot_formation.utils.data_generator import DataGenerator
 class DataCollector:
     def __init__(self, robot_num):
         self.robot_num=robot_num
