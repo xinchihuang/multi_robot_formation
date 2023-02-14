@@ -21,8 +21,9 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="expert",sensor_type="synthesise"
+        self, sensor, executor,desired_distance=1.0,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="expert",sensor_type="synthesise"
     ):
+        self.desired_distance=desired_distance
         self.index = None
         self.GNN_model = None
         self.sensor_data = SensorData()
@@ -41,14 +42,14 @@ class Robot:
             self.controller=CentralizedController()
         elif self.controller_type == "model_basic":
             if self.sensor_type == "real":
-                self.controller=GnnMapBasicControllerSensor(self.model_path)
+                self.controller=GnnMapBasicControllerSensor(self.model_path,desired_distance=self.desired_distance)
             if self.sensor_type == "synthesise":
-                self.controller = GnnMapBasicControllerSynthesise(self.model_path)
+                self.controller = GnnMapBasicControllerSynthesise(self.model_path,desired_distance=self.desired_distance)
         elif self.controller_type == "model_decentralized":
             if self.sensor_type == "real":
-                self.controller=GnnMapDecentralizedControllerSensor(self.model_path)
+                self.controller=GnnMapDecentralizedControllerSensor(self.model_path,desired_distance=self.desired_distance)
             if self.sensor_type == "synthesise":
-                self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path)
+                self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path,desired_distance=self.desired_distance)
         elif self.controller_type == "model_dummy":
             self.controller=DummyController(self.model_path)
 

@@ -61,9 +61,18 @@ class RobotDatasetTrace(Dataset):
             idx = idx.tolist()
 
         global_pose_array = self.pose_array[:, idx, :]
+
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
+
+        use_random = random.uniform(0, 1)
+        if use_random > 0.9:
+            global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
+            global_pose_array[:, 2] = 0
+            self_orientation_array = (
+                    2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+            )
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
         occupancy_maps, reference, adjacency_lists = data_generator.generate_one(
@@ -172,10 +181,9 @@ class Trainer:
         batch_size=16,
         nA=5,
         lr=0.01,
-        partial=True,
+        partial=False,
         cuda=True,
     ):
-        self.points_per_ep = None
         self.nA = nA
         self.inW = inW
         self.inH = inH
@@ -324,7 +332,7 @@ if __name__ == "__main__":
 
     T = Trainer()
     T.train(data_path_root="/home/xinchi/GNN_data")
-    T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_partial.pth")
+    T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):
