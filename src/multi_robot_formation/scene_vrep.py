@@ -4,6 +4,8 @@ author: Xinchi Huang
 """
 import math
 import random
+import sys
+sys.path.append("..")
 from collections import defaultdict
 import numpy as np
 from vrep import vrep_interface
