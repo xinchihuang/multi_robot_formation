@@ -24,13 +24,6 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 class ModelControl:
     def __init__(self, topic):
 
-        self.topic = topic
-        # self.bridge = CvBridge()
-        self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
-        self.map_size = 100
-        self.range = 5
-        self.height = 2
-        self.color_index = {"green": 0}
         self.model_path = os.path.join(
             os.getcwd()
             + "/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full.pth"
@@ -44,6 +37,13 @@ class ModelControl:
             model_path=self.model_path
         )
 
+        self.topic = topic
+        # self.bridge = CvBridge()
+        self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
+        self.map_size = 100
+        self.range = 5
+        self.height = 2
+        self.color_index = {"green": 0}
         self.EP_DICT = {}
         self.IP_DICT = {0: "172.20.10.6", 1: "172.20.10.7", 2: "172.20.10.8"}
         # self.robot.controller.initialize_GNN_model(1, self.model_path)
