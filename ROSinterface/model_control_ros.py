@@ -93,7 +93,7 @@ class ModelControl:
         occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
 
         # model_data=self.simple_control(position_list_local,0,1)
-        self.robot.controller.num_robot=3
+        # self.robot.controller.num_robot=3
         model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
