@@ -15,9 +15,10 @@ import message_filters
 import collections
 from squaternion import Quaternion
 
-from src.multi_robot_formation.controller import Controller
-from src.multi_robot_formation.comm_data import SceneData,SensorData,ControlData
-from src.multi_robot_formation.utils.data_generator import DataGenerator
+from multi_robot_formation.controller import Controller
+from multi_robot_formation.controller_new import CentralizedController,GnnMapDecentralizedControllerSynthesise
+from multi_robot_formation.comm_data import SceneData,SensorData,ControlData
+from multi_robot_formation.utils.data_generator import DataGenerator
 class DataCollector:
     def __init__(self, robot_num):
         self.robot_num=robot_num
@@ -72,30 +73,15 @@ class DataCollector:
         np.save(os.path.join(data_path,"observation.npy"),observation_array)
         np.save(os.path.join(data_path, "trace.npy"), trace_array)
         np.save(os.path.join(data_path, "reference.npy"), reference_control_array)
-    def expert_control_gazebo(self,pose_list,robot_id,local):
+    def expert_control_gazebo(self,pose_list,robot_id):
         data_generator=DataGenerator()
-        controller=Controller()
-        sensor_data=SensorData()
-        scene_data=SceneData()
-        controller.desired_distance=1.0
+        controller=CentralizedController(desired_distance=1.0)
         adjacency_list=data_generator.update_adjacency_list(pose_list)
-        sensor_data.position=pose_list[robot_id]
-        sensor_data.orientation=[0,0,pose_list[robot_id][2]]
-        scene_data.adjacency_list=adjacency_list
-        control_data=controller.centralized_control(robot_id,sensor_data,scene_data)
-        velocity_x,velocity_y=control_data.velocity_x, control_data.velocity_y
-        if local:
-            theta = sensor_data.orientation[2]
-            velocity_x_global = velocity_x * math.cos(theta) + velocity_y * math.sin(
-                theta
-            )
-            velocity_y_global = -velocity_x * math.sin(theta) + velocity_y * math.cos(
-                theta
-            )
-            velocity_x = velocity_x_global
-            velocity_y = velocity_y_global
-        return velocity_x,velocity_y
-
+        print(pose_list[robot_id][2]+math.pi/2)
+        control_data=controller.get_control(robot_id,adjacency_list[robot_id],pose_list[robot_id])
+        velocity_x,velocity_y=control_data.velocity_y, -control_data.velocity_x
+        print(velocity_x,velocity_y)
+        return 0,0
 
 
     def DataCollectorCallback(self, *argv):
@@ -126,7 +112,7 @@ class DataCollector:
             pose_list.append(pose_index)
         self.trace.append(pose_list)
         for index in range(0, self.robot_num):
-            control_list.append(self.expert_control_gazebo(pose_list,index,True))
+            control_list.append(self.expert_control_gazebo(pose_list,index))
 
         for index in range(0,self.robot_num):
             msg=Twist()
@@ -135,7 +121,7 @@ class DataCollector:
             # msg.linear.x = 1
             # msg.linear.y = 0
             msg.linear.z = 0
-            msg.angular.z = 0.2
+            msg.angular.z = 1
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
         print(self.time_step)

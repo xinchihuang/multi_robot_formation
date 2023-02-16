@@ -448,7 +448,7 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
             self.GNN_model.to("cuda")
         self.GNN_model.eval()
 
-    def get_control(self, index, scene_data):
+    def get_control(self, index, occupancy_map):
         """
 
         :param index: Robots' index (type: int)
@@ -457,61 +457,23 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         """
 
         out_put = ControlData()
-        if not scene_data:
-            print("No scene data")
-            out_put.robot_index = index
-            out_put.velocity_x = 0
-            out_put.velocity_y = 0
-            return out_put
-        if not scene_data.observation_list:
-            print("No observation")
-            out_put.robot_index = index
-            out_put.velocity_x = 0
-            out_put.velocity_y = 0
-            return out_put
-        if not scene_data.position_list or not scene_data.orientation_list:
-            print("No data")
-            out_put.robot_index = index
-            out_put.velocity_x = 0
-            out_put.velocity_y = 0
-            return out_put
-
         self_input_occupancy_maps = np.zeros(
             (1, self.num_robot, self.input_width, self.input_height)
         )
         neighbor = np.zeros((self.num_robot, self.num_robot))
         ref = np.zeros((1, self.num_robot, 1))
         scale = np.zeros((1, self.num_robot, 1))
-
-        position_lists_global = scene_data.position_list
-        orientation_list = scene_data.orientation_list
-
-        occupancy_map_simulator = MapSimulator(local=True)
-        (
-            position_lists_local,
-            self_orientation,
-        ) = occupancy_map_simulator.global_to_local(
-            np.array(position_lists_global), np.array(orientation_list)
-        )
-        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
-
         outer_msg = collections.defaultdict(int)
 
+        self_input_occupancy_maps[0, index, :, :] = occupancy_map
+        cv2.imshow("robot view " + str(index) + "(Synthesise)", self_input_occupancy_maps[0, index, :, :])
+        cv2.waitKey(1)
         for i in range(self.num_robot):
-
-            occupancy_map_i = occupancy_maps[i]
-            if index == i:
-                self_input_occupancy_maps[0, i, :, :] = occupancy_map_i
-                cv2.imshow("robot view " + str(i) + "(Synthesise)", self_input_occupancy_maps[0, i, :, :])
-                cv2.waitKey(1)
             ref[0, i, 0] = 0
             scale[0, i, 0] = self.desired_distance
-
         self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
-
-        for key, value in scene_data.adjacency_list.items():
-            for n in value:
-                neighbor[key][n[0]] = 1
+        for i in range(self.num_robot):
+                neighbor[index][i] = 1
 
         neighbor = torch.from_numpy(neighbor).double()
         neighbor = neighbor.unsqueeze(0)
@@ -529,8 +491,6 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         )
         velocity_x = control[0][0]
         velocity_y = control[0][1]
-
-
         out_put.robot_index = index
         out_put.velocity_x = velocity_x
         out_put.velocity_y = velocity_y

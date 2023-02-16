@@ -10,11 +10,10 @@ author: Xinchi Huang
 import os
 
 # from .controller import Controller
-
+import numpy as np
 from multi_robot_formation.controller_new import *
 from multi_robot_formation.comm_data import ControlData,SceneData,SensorData
-
-
+from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 
 class Robot:
     """
@@ -70,22 +69,37 @@ class Robot:
         Get controls
         :return: Control data
         """
-        if self.controller_type == "expert":
-            if not self.scene_data==None and not self.sensor_data==None and not self.scene_data.adjacency_list==None:
-                self.control_data=self.controller.get_control(self.index,self.scene_data.adjacency_list[self.index],self.sensor_data.position)
-        elif self.controller_type == "model_basic":
-            if self.sensor_type == "real":
-                self.control_data=self.controller.get_control(self.index,self.scene_data)
-            if self.sensor_type == "synthesise":
-                self.control_data=self.controller.get_control(self.index,self.scene_data)
-        elif self.controller_type == "model_decentralized":
-            if self.sensor_type == "real":
-                self.control_data = self.controller.get_control(self.index, self.scene_data)
-            if self.sensor_type == "synthesise":
-                self.control_data=self.controller.get_control(self.index,self.scene_data)
-        elif self.controller_type == "model_dummy":
-            self.control_data=self.controller.get_control(self.index,self.scene_data)
-
+        if self.platform=="vrep":
+            if not self.scene_data == None and not self.sensor_data == None and not self.scene_data.adjacency_list == None:
+                if self.controller_type == "expert":
+                        self.control_data=self.controller.get_control(self.index,self.scene_data.adjacency_list[self.index],self.sensor_data.position)
+                elif self.controller_type == "model_basic":
+                    if self.sensor_type == "real":
+                        self.control_data=self.controller.get_control(self.index,self.scene_data)
+                    if self.sensor_type == "synthesise":
+                        self.control_data=self.controller.get_control(self.index,self.scene_data)
+                elif self.controller_type == "model_decentralized":
+                    if self.sensor_type == "real":
+                        self.control_data = self.controller.get_control(self.index, self.scene_data)
+                    if self.sensor_type == "synthesise":
+                        position_lists_global = self.scene_data.position_list
+                        orientation_list = self.scene_data.orientation_list
+                        occupancy_map_simulator = MapSimulator(local=True)
+                        (
+                            position_lists_local,
+                            self_orientation,
+                        ) = occupancy_map_simulator.global_to_local(
+                            np.array(position_lists_global), np.array(orientation_list)
+                        )
+                        occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                        self.sensor_data.occupancy_map=occupancy_map
+                        self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
+                elif self.controller_type == "model_dummy":
+                    self.control_data=self.controller.get_control(self.index,self.scene_data)
+            else:
+                self.control_data.robot_index=self.index
+                self.control_data.velocity_x=0
+                self.control_data.velocity_y=0
         return self.control_data
 
     def execute_control(self):
