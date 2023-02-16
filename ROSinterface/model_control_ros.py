@@ -33,7 +33,7 @@ class ModelControl:
         self.color_index = {"green": 0}
         self.model_path = os.path.join(
             os.getcwd()
-            + "/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
+            + "/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full.pth"
         )
 
         self.robot = Robot(
