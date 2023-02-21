@@ -415,7 +415,7 @@ class GnnMapDecentralizedControllerSensor(Controller):
         return out_put
 
 class GnnMapDecentralizedControllerSynthesise(Controller):
-    def __init__(self, model_path, desired_distance=1.0, num_robot=10, input_height=100, input_width=100, use_cuda=True):
+    def __init__(self, model_path, desired_distance=1.0, num_robot=1, input_height=100, input_width=100, use_cuda=True):
         """
         :param desired_distance: Desired formation distance (type: float)
         :param num_robot: The number of robots (type: int)
