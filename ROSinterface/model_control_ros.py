@@ -26,7 +26,7 @@ class ModelControl:
 
         self.model_path = os.path.join(
             os.getcwd()
-            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full.pth"
+            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_position_2.pth"
         )
 
         self.robot = Robot(
