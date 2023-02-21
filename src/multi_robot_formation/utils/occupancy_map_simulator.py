@@ -19,6 +19,7 @@ class MapSimulator:
         local=True,
         block=True,
         partial=False,
+        position_encoding=True
     ):
         """
         :param robot_size: Size of robot in occupancy map
@@ -37,6 +38,15 @@ class MapSimulator:
         self.local = local
         self.block = block
         self.partial = partial
+        self.position_encoding=position_encoding
+        if self.position_encoding==True:
+            self.position_encoding_matrix=np.ones((self.map_size,self.map_size))
+            for i in range(self.map_size):
+                for j in range(self.map_size):
+                    if i==self.map_size/2 and j==self.map_size/2:
+                        self.position_encoding_matrix[i][j]=1
+                        continue
+                    self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
         self.observation_angle = 2 * math.pi / 3
 
     def arctan(self, x, y):
@@ -257,7 +267,8 @@ class MapSimulator:
         occupancy_map = occupancy_map[
             robot_range:-robot_range, robot_range:-robot_range
         ]
-
+        if self.position_encoding:
+            occupancy_map=occupancy_map*self.position_encoding_matrix
         return occupancy_map
 
     def generate_maps(

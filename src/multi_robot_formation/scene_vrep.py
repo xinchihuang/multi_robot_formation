@@ -39,14 +39,14 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = None
-        self.num_robot=5
-        self.desired_distance=1.0
+        self.num_robot=10
+        self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
         self.platform = "vrep"
         self.controller_type = "model_decentralized"
         self.sensor_type = "synthesise"
-        self.model_path="saved_model/model_map_local_full.pth"
+        self.model_path="saved_model/model_map_local_full_position_2.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):
@@ -160,7 +160,8 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
+        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0],
+                     [-4, 0, 0], [0, 4, 0], [4, 0, 0], [0, -4, 0], [2, 3, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

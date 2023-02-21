@@ -1,7 +1,8 @@
 import os
 import sys
-sys.path.append("..")
-
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+print(sys.path)
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -23,7 +24,7 @@ class RobotDatasetTrace(Dataset):
         data_path_root,
         local=True,
         partial=True,
-        desired_distance=1,
+        desired_distance=2,
         number_of_agents=5,
     ):
 
@@ -332,7 +333,7 @@ if __name__ == "__main__":
 
     T = Trainer()
     T.train(data_path_root="/home/xinchi/GNN_data")
-    T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full.pth")
+    T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_position_2.pth")
 # from utils.map_viewer import visualize_global_pose_array
 # trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
 # for i in range(99,100):
