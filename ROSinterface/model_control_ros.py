@@ -79,8 +79,8 @@ class ModelControl:
             if not blob.name in self.color_index:
                 continue
             robot_index = self.color_index[blob.name]
-            if look_up_table[robot_index] == 1:
-                continue
+            # if look_up_table[robot_index] == 1:
+            #     continue
             look_up_table[robot_index] = 1
             x_c, z_c, y_c = blob.center.x, -blob.center.y, blob.center.z
             if -0.2<z_c<0.2:
