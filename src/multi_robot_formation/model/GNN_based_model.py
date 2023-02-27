@@ -236,7 +236,7 @@ class GnnMapBasic(nn.Module):
         return action_predict
 class GnnMapDecentralized(nn.Module):
     def __init__(
-        self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
+        self, number_of_agent, input_width, input_height, use_cuda
     ):
         print("using GNN model controller (map no communication)")
         super().__init__()

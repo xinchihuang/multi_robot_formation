@@ -46,7 +46,7 @@ class Scene:
         self.platform = "vrep"
         self.controller_type = "model_decentralized"
         self.sensor_type = "synthesise"
-        self.model_path="saved_model/model_map_local_full_position_2.pth"
+        self.model_path="saved_model/model_map_local_full_2.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):

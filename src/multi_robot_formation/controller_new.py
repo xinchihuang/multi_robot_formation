@@ -335,7 +335,7 @@ class GnnMapDecentralizedControllerSensor(Controller):
         """
         Initialize GNN model
         """
-        self.GNN_model = GnnMapDecentralized(number_of_agent=self.num_robot, use_cuda=True)
+        self.GNN_model = GnnMapDecentralized(number_of_agent=self.num_robot,input_height=self.input_height,input_width=self.input_width, use_cuda=True)
         if not self.use_cuda:
             self.GNN_model.load_state_dict(
                 torch.load(self.model_path, map_location=torch.device("cpu"))
@@ -415,7 +415,7 @@ class GnnMapDecentralizedControllerSensor(Controller):
         return out_put
 
 class GnnMapDecentralizedControllerSynthesise(Controller):
-    def __init__(self, model_path, desired_distance=1.0, num_robot=1, input_height=100, input_width=100, use_cuda=True):
+    def __init__(self, model_path, desired_distance=1.0, num_robot=10, input_height=100, input_width=100, use_cuda=True):
         """
         :param desired_distance: Desired formation distance (type: float)
         :param num_robot: The number of robots (type: int)
@@ -438,7 +438,7 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         """
         Initialize GNN model
         """
-        self.GNN_model = GnnMapDecentralized(number_of_agent=self.num_robot, use_cuda=True)
+        self.GNN_model = GnnMapDecentralized(number_of_agent=self.num_robot,input_height=self.input_height,input_width=self.input_width, use_cuda=True)
         if not self.use_cuda:
             self.GNN_model.load_state_dict(
                 torch.load(self.model_path, map_location=torch.device("cpu"))

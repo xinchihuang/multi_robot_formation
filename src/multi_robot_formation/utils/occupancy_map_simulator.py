@@ -19,7 +19,7 @@ class MapSimulator:
         local=True,
         block=True,
         partial=False,
-        position_encoding=True
+        position_encoding=False
     ):
         """
         :param robot_size: Size of robot in occupancy map
