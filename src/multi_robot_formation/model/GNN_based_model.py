@@ -671,7 +671,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         mlp.append(
             nn.Linear(
                 in_features=128,
@@ -679,7 +680,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         mlp.append(
             nn.Linear(
                 in_features=128,
@@ -687,7 +689,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         self.MLP = nn.Sequential(*mlp).double()
         self.out_put = nn.Linear(
             in_features=2,

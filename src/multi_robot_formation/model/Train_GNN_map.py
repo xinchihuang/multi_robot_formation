@@ -70,7 +70,7 @@ class RobotDatasetTrace(Dataset):
         global_pose_array[:, 2] = 0
 
         use_random = random.uniform(0, 1)
-        if use_random > 0.5:
+        if use_random > 0.9:
             global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
             global_pose_array[:, 2] = 0
             self_orientation_array = (
@@ -329,7 +329,7 @@ if __name__ == "__main__":
 
     # dataset parameters
     local = True
-    partial = True
+    partial = False
 
     #trainer parameters
     criterion = "mse"
@@ -373,5 +373,5 @@ if __name__ == "__main__":
     )
     print(T.optimizer)
     T.train()
-    T.save(save_model_path )
+    T.save(save_model_path)
 

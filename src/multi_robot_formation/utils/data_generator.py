@@ -141,7 +141,7 @@ class DataGenerator:
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(rotate=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
 
         (
             position_lists_local,
@@ -167,15 +167,11 @@ class DataGenerator:
             scene_data_i = SceneData()
             scene_data_i.adjacency_list = adjacency_list_i
 
-            controller = Controller()
+            controller = CentralizedController()
             # print("robot_index",robot_index)
             # print(position_lists_local[robot_index])
             # print(adjacency_list_i)
-            control_i = controller.centralized_control(
-                robot_index,
-                sensor_data_i,
-                scene_data_i,
-            )
+            control_i=controller.get_control(robot_index,adjacency_list_i[robot_index],global_pose_array[robot_index])
 
             velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
             if self.local:

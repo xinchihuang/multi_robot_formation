@@ -1,7 +1,8 @@
 import os
 import sys
-sys.path.append("..")
-
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+print(sys.path)
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -9,22 +10,23 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch.nn as nn
 from tqdm import tqdm
-from model.GNN_based_model import DummyModel
-import os
+from GNN_based_model import DummyModel
+
 from utils.data_generator import DataGenerator
+from utils.occupancy_map_simulator import MapSimulator
 import math
 import random
-import cv2
+
 
 
 class RobotDatasetTrace(Dataset):
     def __init__(
         self,
         data_path_root,
-        local=True,
-        partial=True,
-        desired_distance=2,
-        number_of_agents=5,
+        desired_distance,
+        number_of_agents,
+        local,
+        partial,
     ):
 
         self.transform = True
@@ -61,21 +63,21 @@ class RobotDatasetTrace(Dataset):
             idx = idx.tolist()
 
         global_pose_array = self.pose_array[:, idx, :]
+
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = np.copy(self_orientation_array)
         global_pose_array[:, 2] = 0
 
         use_random = random.uniform(0, 1)
-        # print(print("use random data"),use_random)
-        if use_random > 0.9:
-            global_pose_array = 4 * np.random.random((self.number_of_agents, 3)) - 2
+        if use_random > 1:
+            global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
             global_pose_array[:, 2] = 0
             self_orientation_array = (
-                2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+                    2 * math.pi * np.random.random(self.number_of_agents) - math.pi
             )
 
-        # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        # self_orientation_array=[math.pi/3,0,0,0,0]
+        self_orientation_array = np.array(self_orientation_array)
+
         data_generator = DataGenerator(local=self.local, partial=self.partial)
         (
             position_lists_local,
@@ -83,141 +85,99 @@ class RobotDatasetTrace(Dataset):
             reference,
             adjacency_lists,
         ) = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
-        # print(position_lists_local[0])
-        # print(reference[0])
-        # for i in range(0,5):
-        #     print(reference[i])
-        # #     print(global_pose_array[i])
-        #     cv2.imshow(str(i), occupancy_maps[i])
-        #     cv2.waitKey(0)
+
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
         for key, value in adjacency_lists[0].items():
             for n in value:
                 neighbor[key][n[0]] = 1
-        refs = np.zeros((self.number_of_agents, 1))
-
-        scale = self.scale
-
         if self.transform:
-            position_lists_local = torch.from_numpy(position_lists_local).double()
-            self_orientation = torch.from_numpy(self_orientation).double()
+            position_lists_local= torch.from_numpy(position_lists_local).double()
             reference = torch.from_numpy(reference).double()
-            neighbor = torch.from_numpy(neighbor).double()
-            refs = torch.from_numpy(refs).double()
-            scale = torch.from_numpy(scale).double()
         return {
-            "position_lists_local": position_lists_local,
-            "self_orientation": self_orientation,
-            "neighbor": neighbor,
+            "position_lists": position_lists_local,
             "reference": reference,
-            "useless": refs,
-            "scale": scale,
         }
+
+
 
 
 class Trainer:
     def __init__(
         self,
-        criterion="mse",
-        optimizer="rms",
-        batch_size=128,
-        number_of_agent=5,
-        lr=0.01,
-        partial=True,
-        cuda=True,
-        if_continue=False,
-        load_model_path=None,
+        model,
+        trainset,
+        evaluateset,
+        number_of_agent,
+        criterion,
+        optimizer,
+        batch_size,
+        learning_rate,
+        use_cuda,
     ):
-        self.points_per_ep = None
-        self.number_of_agent = number_of_agent
-        self.batch_size = batch_size
-        self.model = DummyModel(
-            number_of_agent=self.number_of_agent,
-            use_cuda=cuda,
-        ).double()
-        self.if_continue = if_continue
-        if self.if_continue:
-            self.model.load_state_dict(torch.load(load_model_path))
+        self.model = model.double()
+        self.trainset=trainset
+        self.evaluateset=evaluateset
 
-        self.use_cuda = cuda
-        if self.use_cuda:
-            self.model = self.model.to("cuda")
-        self.lr = lr
+        self.number_of_agent = number_of_agent
+
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        print(criterion)
         if criterion == "mse":
             self.criterion = nn.MSELoss()
+        print(optimizer)
         if optimizer == "rms":
             self.optimizer = torch.optim.RMSprop(
-                [p for p in self.model.parameters() if p.requires_grad], lr=self.lr
+                [p for p in self.model.parameters() if p.requires_grad], lr=self.learning_rate
             )
         self.transform = transforms.Compose([transforms.ToTensor()])
         self.epoch = -1
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
-        self.currentAgent = -1
-        self.partial = partial
 
-    def train(self, data_path_root):
+        self.use_cuda = use_cuda
+        if self.use_cuda:
+            self.model = self.model.to("cuda")
+
+    def train(self):
         """ """
         self.epoch += 1
         if self.epoch in self.lr_schedule.keys():
             for g in self.optimizer.param_groups:
                 g["lr"] = self.lr_schedule[self.epoch]
 
-        trainset = RobotDatasetTrace(
-            os.path.join(data_path_root, "training"), partial=self.partial
-        )
         trainloader = DataLoader(
-            trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
-        )
-        evaluateset = RobotDatasetTrace(
-            os.path.join(data_path_root, "evaluating"), partial=self.partial
+            self.trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
         evaluateloader = DataLoader(
-            evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
+            self.evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 2:
+        while self.epoch < 1:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):
-                position_lists_local = batch["position_lists_local"]
-                self_orientation = batch["self_orientation"]
-                neighbor = batch["neighbor"]
+                position_lists = batch["position_lists"]
                 reference = batch["reference"]
-                useless = batch["useless"]
-                scale = batch["scale"]
                 if self.use_cuda:
-                    position_lists_local = position_lists_local.to("cuda")
-                    self_orientation = self_orientation.to("cuda")
-                    neighbor = neighbor.to("cuda")
+                    position_lists = position_lists.to("cuda")
                     reference = reference.to("cuda")
-                    useless = useless.to("cuda")
-                    scale = scale.to("cuda")
                 self.optimizer.zero_grad()
-                outs = self.model(position_lists_local)
-                # print("input",position_lists_local)
-                # print("model",outs)
-                # print("expert",reference)
+                outs = self.model(position_lists)
                 loss = self.criterion(outs[0], reference[:, 0])
-                # print(self.criterion(outs[0], reference[:, 0]))
-                # for i in range(1, self.number_of_agent):
-                #     loss += self.criterion(outs[i], reference[:, i])
-                #     print(self.criterion(outs[i], reference[:, i]))
+
+                for i in range(1, self.number_of_agent):
+                    loss += self.criterion(outs[i], reference[:, i])
                 loss.backward()
                 self.optimizer.step()
                 total_loss += loss.item()
-                total += position_lists_local.size(0) * self.number_of_agent
+                total += position_lists.size(0) * self.number_of_agent
                 iteration += 1
-                # print(iteration)
-                # if iter % 1000 == 0:
-                #     print("out", outs[0])
-                #     print("ref",reference[:, 0])
-                if iteration % 500 == 0:
+                if iteration % 1000 == 0:
 
                     print(
-                        "Epoch " + str(self.epoch) + ":"
                         "Average training_data loss at iteration "
                         + str(iteration)
                         + ":",
@@ -237,6 +197,7 @@ class Trainer:
                         self.number_of_agent,
                         iteration,
                     )
+
         return total_loss / total
 
     def save(self, save_path):
@@ -247,30 +208,20 @@ def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteratio
     total_loss_eval = 0
     total_eval = 0
     for iter_eval, batch_eval in enumerate(evaluateloader):
-        position_lists_local = batch_eval["position_lists_local"]
-        self_orientation = batch_eval["self_orientation"]
-        neighbor = batch_eval["neighbor"]
+        position_lists = batch_eval["position_lists"]
         reference = batch_eval["reference"]
-        useless = batch_eval["useless"]
-        scale = batch_eval["scale"]
         if use_cuda:
-            position_lists_local = position_lists_local.to("cuda")
-            self_orientation = self_orientation.to("cuda")
-            neighbor = neighbor.to("cuda")
+            position_lists = position_lists.to("cuda")
             reference = reference.to("cuda")
-            useless = useless.to("cuda")
-            scale = scale.to("cuda")
         optimizer.zero_grad()
-        # print(occupancy_maps.shape)
-
-        outs = model(position_lists_local)
+        outs = model(position_lists)
         loss = criterion(outs[0], reference[:, 0])
 
         for i in range(1, nA):
             loss += criterion(outs[i], reference[:, i])
         optimizer.step()
         total_loss_eval += loss.item()
-        total_eval += position_lists_local.size(0) * nA
+        total_eval += position_lists.size(0) * nA
     print(
         "Average evaluating_data loss at iteration " + str(iteration) + ":",
         total_loss_eval / total_eval,
@@ -280,16 +231,56 @@ def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteratio
 
 
 if __name__ == "__main__":
+    # global parameters
+    data_path_root = "/home/xinchi/GNN_data"
+    save_model_path = "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_dummy.pth"
+    desired_distance = 2.0
+    number_of_robot = 5
+    map_size=100
+
+    # dataset parameters
+    local = True
+    partial = True
+
+    #trainer parameters
+    criterion = "mse"
+    optimizer = "rms"
+    batch_size = 16
+    learning_rate= 0.01
+    use_cuda = True
+
+    # model
+    model=DummyModel(number_of_agent=number_of_robot,use_cuda=use_cuda)
+
+
+    # data set
+    trainset = RobotDatasetTrace(
+        data_path_root=os.path.join(data_path_root, "training"),
+        desired_distance=desired_distance,
+        number_of_agents=number_of_robot,
+        local=local,
+        partial=partial,
+    )
+    evaluateset = RobotDatasetTrace(
+        data_path_root=os.path.join(data_path_root, "evaluating"),
+        desired_distance=desired_distance,
+        number_of_agents=number_of_robot,
+        local=local,
+        partial=partial,
+    )
 
     T = Trainer(
-        load_model_path="/home/xinchi/multi_robot_formation/saved_model/model_final_expert_local_pose.pth"
+        model=model,
+        trainset=trainset,
+        evaluateset=evaluateset,
+        number_of_agent=number_of_robot,
+        criterion=criterion,
+        optimizer=optimizer,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        use_cuda=use_cuda,
     )
-    T.train(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-    T.save("/home/xinchi/multi_robot_formation/saved_model/model_dummy_0.95.pth")
-# from utils.map_viewer import visualize_global_pose_array
-# trainset = RobotDatasetTrace(data_path_root="/home/xinchi/gnn_data/expert_adjusted_5")
-# for i in range(99,100):
-#     data,global_pose_array=trainset.__getitem__(i)
-#     visualize_global_pose_array(global_pose_array)
-#     print(data["reference"])
-#     print(data["neighbor"])
+    print(T.optimizer)
+    T.train()
+    T.save(save_model_path)
+

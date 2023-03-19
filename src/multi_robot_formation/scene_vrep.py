@@ -39,7 +39,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = None
-        self.num_robot=10
+        self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
@@ -160,8 +160,8 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0],
-                     [-4, 0, 0], [0, 4, 0], [4, 0, 0], [0, -4, 0], [2, 3, 0]]
+        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+                     # [-4, 0, 0], [0, 4, 0], [4, 0, 0], [0, -4, 0], [2, 3, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
@@ -182,7 +182,7 @@ class Scene:
     def simulate(self,max_simulation_time,time_step=0.05):
         simulation_time = 0
         data_recorder = Recorder()
-        data_recorder.root_dir = "saved_data"
+        data_recorder.root_dir = "saved_data_test"
 
         while True:
             # vrep_interface.synchronize(self.client_id)
@@ -226,4 +226,4 @@ class Scene:
 
 if __name__ == "__main__":
     simulate_scene=Scene()
-    simulate_scene.simulate(100)
+    simulate_scene.simulate(50)
