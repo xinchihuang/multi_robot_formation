@@ -22,6 +22,7 @@ from .model.GNN_based_model import (
     GnnPoseBasic,
     DummyModel,
 )
+from .model.vit_model import ViT
 import cv2
 from .utils.occupancy_map_simulator import MapSimulator
 from .comm_data import ControlData
@@ -671,5 +672,81 @@ class DummyController(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
+class VitController(Controller):
+    def __init__(self, model_path, desired_distance=1.0, num_robot=10, input_height=100, input_width=100, use_cuda=True):
+        """
+        :param desired_distance: Desired formation distance (type: float)
+        :param num_robot: The number of robots (type: int)
+        :param model_path: Path to pretrained model (type: string)
+        :param input_height: Occupancy map height (type: int)
+        :param input_width: Occupancy map width (type: int)
+        :param use_cuda: Decide whether to use cuda (type: bool)
+        """
+        super().__init__(desired_distance)
+        self.name = "Vit Synthesise"
+        self.model_path = model_path
+        self.num_robot = num_robot
+
+        self.input_height = input_height
+        self.input_width = input_width
+
+        self.use_cuda = use_cuda
+        self.initialize_model()
+    def initialize_model(self):
+        """
+        Initialize GNN model
+        """
+        # print(self.name)
+        self.model = ViT(
+        image_size = 100,
+        patch_size = 10,
+        num_classes = 2,
+        dim = 256,
+        depth = 3,
+        heads = 8,
+        mlp_dim = 512,
+        dropout = 0.1,
+        emb_dropout = 0.1
+    ).double()
+        if not self.use_cuda:
+            self.model.load_state_dict(
+                torch.load(self.model_path, map_location=torch.device("cpu"))
+            )
+        else:
+            self.model.load_state_dict(torch.load(self.model_path))
+            self.model.to("cuda")
+        self.model.eval()
+
+    def get_control(self, index, occupancy_map):
+        """
+
+        :param index: Robots' index (type: int)
+        :param scene_data: Data from the scene (type: SceneData)
+        :return:Control data (type: ControlData)
+        """
+
+        out_put = ControlData()
+        self_input_occupancy_maps = np.zeros(
+            (1, 1, self.input_width, self.input_height)
+        )
+
+        self_input_occupancy_maps[0, 0, :, :] = occupancy_map
+        cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
+        cv2.waitKey(1)
+        self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
+
+        if self.use_cuda:
+            self_input_tensor = self_input_tensor.to("cuda")
+        self.model.eval()
 
 
+        control = (
+            self.model(self_input_tensor).detach().cpu().numpy()
+        )
+        velocity_x = control[0][0]
+        velocity_y = control[0][1]
+        out_put.robot_index = index
+        out_put.velocity_x = velocity_x
+        out_put.velocity_y = velocity_y
+
+        return out_put

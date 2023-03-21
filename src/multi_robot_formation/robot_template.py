@@ -52,6 +52,8 @@ class Robot:
                 self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path,desired_distance=self.desired_distance)
         elif self.controller_type == "model_dummy":
             self.controller=DummyController(self.model_path)
+        elif self.controller_type == "vit":
+            self.controller = VitController(self.model_path)
 
 
 
@@ -96,6 +98,19 @@ class Robot:
                         self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
                 elif self.controller_type == "model_dummy":
                     self.control_data=self.controller.get_control(self.index,self.scene_data)
+                elif self.controller_type == "vit":
+                    position_lists_global = self.scene_data.position_list
+                    orientation_list = self.scene_data.orientation_list
+                    occupancy_map_simulator = MapSimulator(local=True)
+                    (
+                        position_lists_local,
+                        self_orientation,
+                    ) = occupancy_map_simulator.global_to_local(
+                        np.array(position_lists_global), np.array(orientation_list)
+                    )
+                    occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                    self.sensor_data.occupancy_map = occupancy_map
+                    self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
             else:
                 self.control_data.robot_index=self.index
                 self.control_data.velocity_x=0

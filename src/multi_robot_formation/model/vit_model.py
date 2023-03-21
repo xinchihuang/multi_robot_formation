@@ -2,9 +2,11 @@ import os
 import sys
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
 print(sys.path)
 
 import torch
+print(torch.cuda.is_available())
 import numpy as np
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
@@ -82,11 +84,7 @@ class RobotDatasetTrace(Dataset):
             global_pose_array, self_orientation_array
         )
 
-        # for i in range(0,5):
-        #     print(reference[i])
-        # #     print(global_pose_array[i])
-        #     cv2.imshow(str(i), occupancy_maps[i])
-        #     cv2.waitKey(0)
+
 
         neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
         for key, value in adjacency_lists[0].items():
@@ -175,7 +173,7 @@ class Trainer:
                     occupancy_maps = occupancy_maps.to("cuda")
                     reference = reference.to("cuda")
                 self.optimizer.zero_grad()
-                print(occupancy_maps.shape)
+                # print(occupancy_maps.shape)
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1))
                 loss = self.criterion(outs, reference[:, 0])
 
@@ -216,33 +214,27 @@ class Trainer:
         torch.save(self.model.state_dict(), save_path)
 
 
-def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteration):
+def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, number_of_agent, iteration):
     total_loss_eval = 0
     total_eval = 0
     for iter_eval, batch_eval in enumerate(evaluateloader):
         occupancy_maps = batch_eval["occupancy_maps"]
-        neighbor = batch_eval["neighbor"]
         reference = batch_eval["reference"]
-        useless = batch_eval["useless"]
-        scale = batch_eval["scale"]
         if use_cuda:
             occupancy_maps = occupancy_maps.to("cuda")
-            neighbor = neighbor.to("cuda")
             reference = reference.to("cuda")
-            useless = useless.to("cuda")
-            scale = scale.to("cuda")
-        model.addGSO(neighbor)
         optimizer.zero_grad()
         # print(occupancy_maps.shape)
 
-        outs = model(occupancy_maps, {},0,useless, scale)
-        loss = criterion(outs[0], reference[:, 0])
+        outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1))
+        loss = criterion(outs, reference[:, 0])
 
-        for i in range(1, nA):
-            loss += criterion(outs[i], reference[:, i])
+        for i in range(1, number_of_agent):
+            outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1))
+            loss += criterion(outs, reference[:, i])
         optimizer.step()
         total_loss_eval += loss.item()
-        total_eval += occupancy_maps.size(0) * nA
+        total_eval += occupancy_maps.size(0) * number_of_agent
     print(
         "Average evaluating_data loss at iteration " + str(iteration) + ":",
         total_loss_eval / total_eval,
@@ -275,10 +267,10 @@ if __name__ == "__main__":
         image_size = 100,
         patch_size = 10,
         num_classes = 2,
-        dim = 1024,
-        depth = 6,
-        heads = 16,
-        mlp_dim = 2048,
+        dim = 256,
+        depth = 3,
+        heads = 8,
+        mlp_dim = 512,
         dropout = 0.1,
         emb_dropout = 0.1
     )

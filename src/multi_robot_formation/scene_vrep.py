@@ -5,7 +5,9 @@ author: Xinchi Huang
 import math
 import random
 import sys
-sys.path.append("..")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+print(sys.path)
 from collections import defaultdict
 import numpy as np
 from vrep import vrep_interface
@@ -44,9 +46,9 @@ class Scene:
         self.initial_max_range=10
         self.initial_min_range=1
         self.platform = "vrep"
-        self.controller_type = "model_decentralized"
+        self.controller_type = "vit"
         self.sensor_type = "synthesise"
-        self.model_path="saved_model/model_map_local_full_2.pth"
+        self.model_path="saved_model/vit.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):
@@ -160,7 +162,7 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
                      # [-4, 0, 0], [0, 4, 0], [4, 0, 0], [0, -4, 0], [2, 3, 0]]
         num_robot = len(self.robot_list)
 
@@ -185,8 +187,7 @@ class Scene:
         data_recorder.root_dir = "saved_data_test"
 
         while True:
-            # vrep_interface.synchronize(self.client_id)
-            # time.sleep(0.2)
+
             if simulation_time > max_simulation_time:
                 break
             simulation_time += time_step
