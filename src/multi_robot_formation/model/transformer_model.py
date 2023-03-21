@@ -19,22 +19,29 @@ class DummyModel(nn.Module):
         print("using dummy model controller")
         self.use_cuda = use_cuda
         self.device = "cuda" if use_cuda else "cpu"
-        self.NALU_layers=NALU(3,2,100,2)
+        self.NALU_layers=NALU(2,2,10,2)
+
+
     def forward(self, input_tensor,d):
-        # rate=(1-d/torch.norm(input_tensor,dim=1))
-        # print(input_tensor)
+        rate=(1-d/torch.norm(input_tensor,dim=1))
         action_current=self.NALU_layers(input_tensor)
-        # print(action_current)
-        # action_current=rate*action_current
+        action_current=-torch.unsqueeze(torch.sum(action_current*torch.unsqueeze(rate,-1),0),0)
         return action_current
 
 def expert(input,d):
     # print(input)
     rate=(1-d/torch.norm(input,dim=1))
+    # # print(rate)
+    # print(-torch.unsqueeze(torch.sum(input*torch.unsqueeze(rate,-1),0),0))
+    return -torch.unsqueeze(torch.sum(input*torch.unsqueeze(rate,-1),0),0)
+# def expert(input,d):
+#     normed_input=torch.norm(input,dim=1)
+#     print(normed_input)
+#     print(-input*(normed_input-d)/normed_input)
+    # rate=(1-d/torch.norm(input,dim=1))
     # print(rate)
     # print(torch.unsqueeze(torch.sum(input*torch.unsqueeze(rate,-1),0),0))
-    return torch.unsqueeze(torch.sum(input*torch.unsqueeze(rate,-1),0),0)
-
+    # return torch.unsqueeze(torch.sum(input*torch.unsqueeze(rate,-1),0),0)
 
 
 class Trainer:
@@ -62,13 +69,13 @@ class Trainer:
                 d=d.to("cuda")
                 input=input.to("cuda")
                 reference=reference.to("cuda")
-            outs = self.model(input)
+            outs = self.model(input,d)
             # print(outs,reference)
             loss = self.criterion(outs, reference)
             loss.backward()
             if iteration%1000==0:
                 total_loss = 0
-                for _ in range(100):
+                for _ in range(1000):
                     input = torch.rand(1, 2) * 10 - 5
                     d = torch.tensor([2])
                     reference = expert(input,d)
@@ -76,10 +83,10 @@ class Trainer:
                         d = d.to("cuda")
                         input = input.to("cuda")
                         reference = reference.to("cuda")
-                    outs = self.model(input)
+                    outs = self.model(input,d)
                     # print(input,outs,reference)
                     total_loss += self.criterion(outs, reference).item()
-                print("average loss ",total_loss/100)
+                print("average loss ",total_loss/1000)
             self.optimizer.step()
             iteration += 1
 
@@ -87,12 +94,12 @@ class Trainer:
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
 
-model=NALU(3,2,10,2)
+model=DummyModel()
 #
 #
 trainer=Trainer(model)
 trainer.train()
 #
-# input = torch.ones(4, 2)-1.0000001
+# input = torch.ones(1, 2)
 # d = torch.tensor([2])
 # reference = expert(input,d)
