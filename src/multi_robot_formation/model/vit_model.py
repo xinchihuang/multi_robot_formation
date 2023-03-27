@@ -21,7 +21,6 @@ import math
 import random
 from vit_pytorch import ViT
 
-
 class RobotDatasetTrace(Dataset):
     def __init__(
         self,
@@ -163,7 +162,7 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 1:
+        while self.epoch < 10:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):
@@ -197,7 +196,7 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("model_" + str(iteration) + ".pth")
+                    self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
                     evaluate(
                         evaluateloader,
                         self.use_cuda,

@@ -47,7 +47,7 @@ class Scene:
         self.initial_min_range=1
         self.platform = "vrep"
         self.controller_type = "vit"
-        self.sensor_type = "synthesise"
+        self.sensor_type = "real"
         self.model_path="saved_model/vit.pth"
 
         self.client_id = vrep_interface.init_vrep()
