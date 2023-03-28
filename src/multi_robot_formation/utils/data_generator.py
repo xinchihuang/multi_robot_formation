@@ -135,6 +135,7 @@ class DataGenerator:
             np.array(occupancy_maps),
             np.array(ref_control_list),
             np.array(adjacency_lists),
+           position_lists_local
         )
 
     def generate_pose_one(self, global_pose_array, self_orientation_array):
@@ -188,6 +189,7 @@ class DataGenerator:
 
             ref_control_list.append([velocity_x, velocity_y])
         return (
+
             np.array(position_array_local),
             np.array(self_orientation),
             np.array(ref_control_list),

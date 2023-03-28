@@ -163,7 +163,13 @@ class ViT(nn.Module):
 
 
 
-
+def sort_pose(position_list):
+    global_pose_array = np.array(position_list)
+    temp = copy.deepcopy(global_pose_array)
+    orders = np.argsort(global_pose_array, axis=0)
+    for i in range(len(orders)):
+        global_pose_array[i, :] = temp[orders[i][0]]
+    return global_pose_array
 class RobotDatasetTrace(Dataset):
     def __init__(
         self,
@@ -208,15 +214,12 @@ class RobotDatasetTrace(Dataset):
             idx = idx.tolist()
 
         global_pose_array = self.pose_array[:, idx, :]
-        temp = copy.deepcopy(global_pose_array)
-        orders = np.argsort(global_pose_array, axis=0)
-        for i in range(len(orders)):
-            global_pose_array[i, :] = temp[orders[i][0]]
+        global_pose_array=sort_pose(global_pose_array)
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
-        if use_random > 0:
+        if use_random > 0.9:
             global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
             orders = np.argsort(global_pose_array, axis=0)
             temp = copy.deepcopy(global_pose_array)
@@ -228,7 +231,7 @@ class RobotDatasetTrace(Dataset):
             )
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
-        occupancy_maps, reference, adjacency_lists = data_generator.generate_one(
+        occupancy_maps, reference, adjacency_lists,position_lists_local = data_generator.generate_one(
             global_pose_array, self_orientation_array
         )
 
@@ -248,12 +251,14 @@ class RobotDatasetTrace(Dataset):
             neighbor = torch.from_numpy(neighbor).double()
             refs = torch.from_numpy(refs).double()
             scale = torch.from_numpy(scale).double()
+            # position_lists_local=torch.from_numpy(position_lists_local).double()
         return {
             "occupancy_maps": occupancy_maps,
             "neighbor": neighbor,
             "reference": reference,
             "useless": refs,
             "scale": scale,
+            # "position_lists_local":position_lists_local
         }
 
 
