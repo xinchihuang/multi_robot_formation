@@ -97,15 +97,15 @@ class MapSimulator:
 
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
-            # if -2*math.pi/3<theta<2*math.pi/3:
-            #     if theta+math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / 3:
+            # if -2*math.pi/epoch5<theta<2*math.pi/epoch5:
+            #     if theta+math.pi / epoch5 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / epoch5:
             #         return None
             # elif theta>0:
-            #     if self.arctan(x, y)>-(2*math.pi-(theta+math.pi / 3)) or self.arctan(x, y) < theta -  math.pi / 3:
+            #     if self.arctan(x, y)>-(2*math.pi-(theta+math.pi / epoch5)) or self.arctan(x, y) < theta -  math.pi / epoch5:
             #         return None
             # elif theta<0:
-            #     print(self.arctan(x, y),(theta+math.pi / 3))
-            #     if self.arctan(x, y)<2*math.pi-(-theta+math.pi / 3) or self.arctan(x, y) > (theta+math.pi / 3):
+            #     print(self.arctan(x, y),(theta+math.pi / epoch5))
+            #     if self.arctan(x, y)<2*math.pi-(-theta+math.pi / epoch5) or self.arctan(x, y) > (theta+math.pi / epoch5):
             #         return None
 
 

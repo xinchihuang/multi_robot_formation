@@ -67,7 +67,7 @@ class RobotDataset(Dataset):
         alphas = self.alphas[idx]
 
         if self.transform:
-            # for i in range(3):
+            # for i in range(epoch5):
             # s = sample[:,i]
             # m = np.mean(s)
             # std = np.std(s)

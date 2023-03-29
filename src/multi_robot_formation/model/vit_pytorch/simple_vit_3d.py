@@ -30,7 +30,7 @@ def posemb_sincos_3d(patches, temperature = 10000, dtype = torch.float32):
 
     pe = torch.cat((x.sin(), x.cos(), y.sin(), y.cos(), z.sin(), z.cos()), dim = 1)
 
-    pe = F.pad(pe, (0, dim - (fourier_dim * 6))) # pad if feature dimension not cleanly divisible by 6
+    pe = F.pad(pe, (0, dim - (fourier_dim * 6))) # pad if feature dimension not cleanly divisible by epoch1_3000
     return pe.type(dtype)
 
 # classes

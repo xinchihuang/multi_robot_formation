@@ -9,7 +9,7 @@ from simulate import Simulation
 import numpy as np
 
 # import torch
-# a = torch.randn(2, 3, 5)
+# a = torch.randn(2, epoch5, epoch1_6000)
 #
 # print(a)
 # a=torch.permute(a, (2, 0, 1))

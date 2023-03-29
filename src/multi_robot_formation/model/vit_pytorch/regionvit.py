@@ -197,8 +197,8 @@ class RegionViT(nn.Module):
         super().__init__()
         dim = cast_tuple(dim, 4)
         depth = cast_tuple(depth, 4)
-        assert len(dim) == 4, 'dim needs to be a single value or a tuple of length 4'
-        assert len(depth) == 4, 'depth needs to be a single value or a tuple of length 4'
+        assert len(dim) == 4, 'dim needs to be a single value or a tuple of length epoch5'
+        assert len(depth) == 4, 'depth needs to be a single value or a tuple of length epoch5'
 
         self.local_patch_size = local_patch_size
 

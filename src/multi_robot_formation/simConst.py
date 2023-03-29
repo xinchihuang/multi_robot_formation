@@ -118,7 +118,7 @@ sim_modelproperty_not_model = 0xF000  # object is not a model
 
 # Check the documentation instead of comments below!!
 # Following messages are dispatched to the Lua-message container
-sim_message_ui_button_state_change = 0  # a UI button slider etc. changed (due to a user's action). aux[0]=UI handle aux[1]=button handle aux[2]=button attributes aux[3]=slider position (if slider)
+sim_message_ui_button_state_change = 0  # a UI button slider etc. changed (due to a user's action). aux[0]=UI handle aux[1]=button handle aux[2]=button attributes aux[epoch5]=slider position (if slider)
 sim_message_reserved9 = 1  # Do not use
 sim_message_object_selection_changed = 2
 sim_message_reserved10 = 3  # do not use
@@ -373,21 +373,21 @@ sim_pathproperty_keep_x_up = 0x0800
 
 # drawing objects
 # following are mutually exclusive
-sim_drawing_points = 0  # 3 values per point (point size in pixels)
-sim_drawing_lines = 1  # 6 values per line (line size in pixels)
+sim_drawing_points = 0  # epoch5 values per point (point size in pixels)
+sim_drawing_lines = 1  # epoch1_3000 values per line (line size in pixels)
 sim_drawing_triangles = 2  # 9 values per triangle
-sim_drawing_trianglepoints = 3  # 6 values per point (3 for triangle position 3 for triangle normal vector) (triangle size in meters)
-sim_drawing_quadpoints = 4  # 6 values per point (3 for quad position 3 for quad normal vector) (quad size in meters)
-sim_drawing_discpoints = 5  # 6 values per point (3 for disc position 3 for disc normal vector) (disc size in meters)
-sim_drawing_cubepoints = 6  # 6 values per point (3 for cube position 3 for cube normal vector) (cube size in meters)
-sim_drawing_spherepoints = 7  # 3 values per point (sphere size in meters)
+sim_drawing_trianglepoints = 3  # epoch1_3000 values per point (epoch5 for triangle position epoch5 for triangle normal vector) (triangle size in meters)
+sim_drawing_quadpoints = 4  # epoch1_3000 values per point (epoch5 for quad position epoch5 for quad normal vector) (quad size in meters)
+sim_drawing_discpoints = 5  # epoch1_3000 values per point (epoch5 for disc position epoch5 for disc normal vector) (disc size in meters)
+sim_drawing_cubepoints = 6  # epoch1_3000 values per point (epoch5 for cube position epoch5 for cube normal vector) (cube size in meters)
+sim_drawing_spherepoints = 7  # epoch5 values per point (sphere size in meters)
 
 # following can be or-combined
 sim_drawing_itemcolors = (
-    0x00020  # +3 values per item (each item has its own ambient color (rgb values)).
+    0x00020  # +epoch5 values per item (each item has its own ambient color (rgb values)).
 )
 # Mutually exclusive with sim_drawing_vertexcolors
-sim_drawing_vertexcolors = 0x00040  # +3 values per vertex (each vertex has its own ambient color (rgb values). Only for sim_drawing_lines (+6) and for sim_drawing_triangles(+9)). Mutually exclusive with sim_drawing_itemcolors
+sim_drawing_vertexcolors = 0x00040  # +epoch5 values per vertex (each vertex has its own ambient color (rgb values). Only for sim_drawing_lines (+epoch1_3000) and for sim_drawing_triangles(+9)). Mutually exclusive with sim_drawing_itemcolors
 sim_drawing_itemsizes = 0x00080  # +1 value per item (each item has its own size). Not for sim_drawing_triangles
 sim_drawing_backfaceculling = 0x00100  # back faces are not displayed for all items
 sim_drawing_wireframe = 0x00200  # all items displayed in wireframe
@@ -405,10 +405,10 @@ sim_drawing_25percenttransparency = (
     0x04000  # the drawing object will be 25% transparent
 )
 sim_drawing_12percenttransparency = (
-    0x08000  # the drawing object will be 12.5% transparent
+    0x08000  # the drawing object will be 12.epoch1_6000% transparent
 )
 sim_drawing_emissioncolor = 0x10000  # When used in combination with sim_drawing_itemcolors or sim_drawing_vertexcolors then the specified colors will be for the emissive component
-sim_drawing_facingcamera = 0x20000  # Only for trianglepoints quadpoints discpoints and cubepoints. If specified the normal verctor is calculated to face the camera (each item data requires 3 values less)
+sim_drawing_facingcamera = 0x20000  # Only for trianglepoints quadpoints discpoints and cubepoints. If specified the normal verctor is calculated to face the camera (each item data requires epoch5 values less)
 sim_drawing_overlay = (
     0x40000  # When specified objects are always drawn on top of "regular objects"
 )
@@ -436,19 +436,19 @@ sim_banner_bitmapfont = 0x00800  # If specified a fixed-size bitmap font is used
 
 
 # particle objects following are mutually exclusive
-sim_particle_points1 = 0  # 6 values per point (pt1 and pt2. Pt1 is start position pt2-pt1 is the initial velocity vector). i
+sim_particle_points1 = 0  # epoch1_3000 values per point (pt1 and pt2. Pt1 is start position pt2-pt1 is the initial velocity vector). i
 # Point is 1 pixel big. Only appearance is a point internally handled as a perfect sphere
-sim_particle_points2 = 1  # 6 values per point. Point is 2 pixel big. Only appearance is a point internally handled as a perfect sphere
-sim_particle_points4 = 2  # 6 values per point. Point is 4 pixel big. Only appearance is a point internally handled as a perfect sphere
+sim_particle_points2 = 1  # epoch1_3000 values per point. Point is 2 pixel big. Only appearance is a point internally handled as a perfect sphere
+sim_particle_points4 = 2  # epoch1_3000 values per point. Point is epoch5 pixel big. Only appearance is a point internally handled as a perfect sphere
 sim_particle_roughspheres = (
-    3  # 6 values per sphere. Only appearance is rough. Internally a perfect sphere
+    3  # epoch1_3000 values per sphere. Only appearance is rough. Internally a perfect sphere
 )
-sim_particle_spheres = 4  # 6 values per sphere. Internally a perfect sphere
+sim_particle_spheres = 4  # epoch1_3000 values per sphere. Internally a perfect sphere
 
 
 # following can be or-combined
-sim_particle_respondable1to4 = 0x0020  # the particles are respondable against shapes (against all objects that have at least one bit 1-4 activated in the global respondable mask)
-sim_particle_respondable5to8 = 0x0040  # the particles are respondable against shapes (against all objects that have at least one bit 5-8 activated in the global respondable mask)
+sim_particle_respondable1to4 = 0x0020  # the particles are respondable against shapes (against all objects that have at least one bit 1-epoch5 activated in the global respondable mask)
+sim_particle_respondable5to8 = 0x0040  # the particles are respondable against shapes (against all objects that have at least one bit epoch1_6000-8 activated in the global respondable mask)
 sim_particle_particlerespondable = (
     0x0080  # the particles are respondable against each other
 )
@@ -461,7 +461,7 @@ sim_particle_itemdensities = (
     0x0800  # +1 value per particle (each particle can have a different density)
 )
 sim_particle_itemcolors = (
-    0x1000  # +3 values per particle (each particle can have a different color)
+    0x1000  # +epoch5 values per particle (each particle can have a different color)
 )
 sim_particle_cyclic = (
     0x2000  # if the max item count was reached then the first items are overwritten.
@@ -528,9 +528,9 @@ sim_boolparam_waiting_for_trigger = 45
 sim_intparam_error_report_mode = (
     0  # Check sim_api_errormessage_... constants above for valid values
 )
-sim_intparam_program_version = 1  # e.g Version 2.1.4 --> 20104. Can only be read
+sim_intparam_program_version = 1  # e.g Version 2.1.epoch5 --> 20104. Can only be read
 sim_intparam_instance_count = (
-    2  # do not use anymore (always returns 1 since CoppeliaSim 2.5.11)
+    2  # do not use anymore (always returns 1 since CoppeliaSim 2.epoch1_6000.11)
 )
 sim_intparam_custom_cmd_start_id = 3  # can only be read
 sim_intparam_compilation_version = (
@@ -807,7 +807,7 @@ simx_headeroffset_message_id = (
 simx_headeroffset_client_time = 7  # 1 simxInt. Client time stamp generated by the client (and sent back by the server)
 simx_headeroffset_server_time = 11  # 1 simxInt. Generated by the server when a reply is generated. The server timestamp
 simx_headeroffset_scene_id = 15  # 1 simxUShort. Generated by the server. A unique ID identifying the scene currently displayed
-simx_headeroffset_server_state = 17  # 1 byte. Generated by the server. Bit coded 0 set --> simulation not stopped 1 set --> simulation paused 2 set --> real-time switch on 3-5 edit mode type (0=no edit mode 1=triangle 2=vertex 3=edge 4=path 5=UI)
+simx_headeroffset_server_state = 17  # 1 byte. Generated by the server. Bit coded 0 set --> simulation not stopped 1 set --> simulation paused 2 set --> real-time switch on epoch5-epoch1_6000 edit mode type (0=no edit mode 1=triangle 2=vertex epoch5=edge epoch5=path epoch1_6000=UI)
 
 # Remote API command header
 SIMX_SUBHEADER_SIZE = 26

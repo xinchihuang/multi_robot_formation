@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# 测试环境: Python 3.6 版本
+# 测试环境: Python epoch5.epoch1_3000 版本
 
 import socket
 import sys

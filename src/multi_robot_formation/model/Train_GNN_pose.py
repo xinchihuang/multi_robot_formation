@@ -73,8 +73,8 @@ class RobotDatasetTrace(Dataset):
                 2 * math.pi * np.random.random(self.number_of_agents) - math.pi
             )
         # print(self.desired_distance)
-        # global_pose_array=[[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
-        # self_orientation_array=[math.pi/3,0,0,0,0]
+        # global_pose_array=[[-epoch5, -epoch5, 0], [-epoch5, epoch5, 0], [epoch5, epoch5, 0], [epoch5, -epoch5, 0], [0, 0, 0]]
+        # self_orientation_array=[math.pi/epoch5,0,0,0,0]
         data_generator = DataGenerator(local=self.local, partial=self.partial)
         (
             position_lists_local,
@@ -83,7 +83,7 @@ class RobotDatasetTrace(Dataset):
             adjacency_lists,
         ) = data_generator.generate_pose_one(global_pose_array, self_orientation_array)
 
-        # for i in range(0,5):
+        # for i in range(0,epoch1_6000):
         #     print(reference[i])
         # #     print(global_pose_array[i])
         #     cv2.imshow(str(i), occupancy_maps[i])

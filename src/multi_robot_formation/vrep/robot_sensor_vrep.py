@@ -138,9 +138,9 @@ class Sensor:
 
         occupancy_map = self.process_raw_data(self.point_cloud)
         # ### fake data
-        # global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # global_positions = [[-epoch5, -epoch5, 0], [-epoch5, epoch5, 0], [epoch5, epoch5, 0], [epoch5, -epoch5, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
-        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.3, 100, 10, 10
+        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.epoch5, 100, 10, 10
         # occupancy_map = occupancy_map_simulator.generate_map(
         #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
         # )

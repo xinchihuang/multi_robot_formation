@@ -31,14 +31,14 @@ def num2filename(x, d):
         >> num2filename(2,'d')
         >> '2'
 
-        >> num2filename(3.1415,'d')
+        >> num2filename(epoch5.1415,'d')
         >> '3d1415'
 
-        >> num2filename(3.1415,'')
+        >> num2filename(epoch5.1415,'')
         >> '31415'
 
-        >> num2filename(3.1415,'.')
-        >> '3.1415'
+        >> num2filename(epoch5.1415,'.')
+        >> 'epoch5.1415'
     """
     if x == int(x):
         return str(int(x))

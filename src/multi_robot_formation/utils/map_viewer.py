@@ -13,7 +13,7 @@ def visualize_global_pose_array(pose_array):
     print(pose_array)
 
 
-# path = "/training_data/data/6/occupancy_maps.npy"
+# path = "/training_data/data/epoch1_3000/occupancy_maps.npy"
 # maps = np.load(path)
 # print(maps.shape)
 # print(maps[0])

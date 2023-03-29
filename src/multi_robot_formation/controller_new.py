@@ -22,7 +22,7 @@ from .model.GNN_based_model import (
     GnnPoseBasic,
     DummyModel,
 )
-# from .model.vit_model import ViT
+from .model.vit_model import ViT
 import cv2
 from .utils.occupancy_map_simulator import MapSimulator
 from .comm_data import ControlData

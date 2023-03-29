@@ -82,7 +82,7 @@ class RobotDatasetTrace(Dataset):
             global_pose_array, self_orientation_array
         )
 
-        # for i in range(0,5):
+        # for i in range(0,epoch1_6000):
         #     print(reference[i])
         # #     print(global_pose_array[i])
         #     cv2.imshow(str(i), occupancy_maps[i])
@@ -322,7 +322,7 @@ def evaluate(evaluateloader, use_cuda, model, optimizer, criterion, nA, iteratio
 if __name__ == "__main__":
     # global parameters
     data_path_root = "/home/xinchi/GNN_data"
-    save_model_path = "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_2_0.5.pth"
+    save_model_path = "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_2_0.epoch1_6000.pth"
     desired_distance = 2.0
     number_of_robot = 5
     map_size=100

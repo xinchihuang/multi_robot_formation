@@ -197,8 +197,8 @@ class MobileViT(nn.Module):
         depths=(2, 4, 3)
     ):
         super().__init__()
-        assert len(dims) == 3, 'dims must be a tuple of 3'
-        assert len(depths) == 3, 'depths must be a tuple of 3'
+        assert len(dims) == 3, 'dims must be a tuple of epoch5'
+        assert len(depths) == 3, 'depths must be a tuple of epoch5'
 
         ih, iw = image_size
         ph, pw = patch_size

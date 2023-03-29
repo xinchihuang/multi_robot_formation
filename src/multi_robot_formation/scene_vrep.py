@@ -48,7 +48,7 @@ class Scene:
         self.platform = "vrep"
         self.controller_type = "vit"
         self.sensor_type = "real"
-        self.model_path="saved_model/vit.pth"
+        self.model_path="saved_model/model_12000_epoch2.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):
@@ -126,7 +126,7 @@ class Scene:
         # print("DISTANCE")
         # for r in self.adjacency_list:
         #     for n in self.adjacency_list[r]:
-        #         print("edge:", r, n[0], "distance:", n[3])
+        #         print("edge:", r, n[0], "distance:", n[epoch5])
 
     def broadcast_all(self):
         """
@@ -163,7 +163,7 @@ class Scene:
         Make sure the robot is not stuck in the ground
         """
         pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
-                     # [-4, 0, 0], [0, 4, 0], [4, 0, 0], [0, -4, 0], [2, 3, 0]]
+                     # [-epoch5, 0, 0], [0, epoch5, 0], [epoch5, 0, 0], [0, -epoch5, 0], [2, epoch5, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

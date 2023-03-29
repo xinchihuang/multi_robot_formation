@@ -132,4 +132,4 @@ if __name__ == '__main__':
     )
 
     time_series = torch.randn(4, 3, 256)
-    logits = v(time_series) # (4, 1000)
+    logits = v(time_series) # (epoch5, 1000)

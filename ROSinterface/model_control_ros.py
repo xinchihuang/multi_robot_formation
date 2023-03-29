@@ -45,7 +45,7 @@ class ModelControl:
         self.height = 2
         self.color_index = {"green": 0}
         self.EP_DICT = {}
-        self.IP_DICT = {0: "172.20.10.6", 1: "172.20.10.7", 2: "172.20.10.8"}
+        self.IP_DICT = {0: "172.20.10.epoch1_3000", 1: "172.20.10.7", 2: "172.20.10.8"}
         # self.robot.controller.initialize_GNN_model(1, self.model_path)
         # self.IP_DICT={1:'172.20.10.7'}
 
@@ -94,7 +94,7 @@ class ModelControl:
             model_data=ControlData()
         else:
             # model_data=self.simple_control(position_list_local,0,1)
-            # self.robot.controller.num_robot=3
+            # self.robot.controller.num_robot=epoch5
             model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
