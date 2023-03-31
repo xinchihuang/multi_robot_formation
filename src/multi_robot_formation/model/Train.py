@@ -36,6 +36,7 @@ class RobotDatasetTrace(Dataset):
         number_of_agents,
         local,
         partial,
+        task_type="graph"
     ):
 
         self.transform = True
@@ -43,6 +44,8 @@ class RobotDatasetTrace(Dataset):
         self.partial = partial
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
+        self.task_type=task_type
+
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
@@ -86,34 +89,21 @@ class RobotDatasetTrace(Dataset):
             )
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
-        occupancy_maps, reference, adjacency_lists,position_lists_local = data_generator.generate_one(
-            global_pose_array, self_orientation_array
-        )
-
-
-
-        neighbor = np.zeros((self.number_of_agents, self.number_of_agents))
-        for key, value in adjacency_lists[0].items():
-            for n in value:
-                neighbor[key][n[0]] = 1
-        refs = np.zeros((self.number_of_agents, 1))
-
-        scale = self.scale
+        if self.task_type=="control":
+            occupancy_maps, reference,adjacency_lists = data_generator.generate_map_control(
+                global_pose_array, self_orientation_array
+            )
+        elif self.task_type=="graph":
+            occupancy_maps, reference = data_generator.generate_map_graph(
+                global_pose_array, self_orientation_array
+            )
 
         if self.transform:
             occupancy_maps = torch.from_numpy(occupancy_maps).double()
             reference = torch.from_numpy(reference).double()
-            neighbor = torch.from_numpy(neighbor).double()
-            refs = torch.from_numpy(refs).double()
-            scale = torch.from_numpy(scale).double()
-            # position_lists_local=torch.from_numpy(position_lists_local).double()
         return {
             "occupancy_maps": occupancy_maps,
-            "neighbor": neighbor,
             "reference": reference,
-            "useless": refs,
-            "scale": scale,
-            # "position_lists_local":position_lists_local
         }
 
 
@@ -187,6 +177,7 @@ class Trainer:
             for iter, batch in enumerate(tqdm(trainloader)):
                 occupancy_maps = batch["occupancy_maps"]
                 reference = batch["reference"]
+                print()
                 if self.use_cuda:
                     occupancy_maps = occupancy_maps.to("cuda")
                     reference = reference.to("cuda")
@@ -275,7 +266,7 @@ if __name__ == "__main__":
     model=ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 2,
+        num_classes = 5,
         dim = 256,
         depth = 3,
         heads = 8,

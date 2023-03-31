@@ -77,7 +77,7 @@ class DataGenerator:
                 )
         return new_adj_list
 
-    def generate_one(self, global_pose_array, self_orientation_array):
+    def generate_map_control(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
@@ -135,9 +135,31 @@ class DataGenerator:
             np.array(occupancy_maps),
             np.array(ref_control_list),
             np.array(adjacency_lists),
-           position_lists_local
         )
+    def generate_map_graph(self, global_pose_array, self_orientation_array):
+        global_pose_array = np.array(global_pose_array)
+        self_orientation_array = np.array(self_orientation_array)
+        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
 
+        (
+            position_lists_local,
+            self_orientation,
+        ) = occupancy_map_simulator.global_to_local(
+            global_pose_array, self_orientation_array
+        )
+        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+        neighbor_lists = []
+        number_of_robot = global_pose_array.shape[0]
+        for robot_index in range(number_of_robot):
+            adjacency_list_i = self.update_adjacency_list(global_pose_array)
+            neighbor_list_i=[0]*number_of_robot
+            for n in adjacency_list_i[robot_index]:
+                neighbor_list_i[n[0]]=1
+            neighbor_lists.append(neighbor_list_i)
+        return (
+            np.array(occupancy_maps),
+            np.array(neighbor_lists),
+        )
     def generate_pose_one(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
@@ -224,7 +246,7 @@ if __name__ == "__main__":
     self_pose_array=[[0,0,0],[-2,-2,0]]
     self_orientation_array=[math.pi,0]
     data_generator=DataGenerator(partial=True)
-    occupancy_maps,ref_control_lists,adjacency_lists=data_generator.generate_one(self_pose_array,self_orientation_array)
+    occupancy_maps,ref_control_lists,adjacency_lists=data_generator.generate_map_control(self_pose_array,self_orientation_array)
     cv2.imshow("robot view (Synthesise)", occupancy_maps[0])
     cv2.waitKey(0)
     print(ref_control_lists)
