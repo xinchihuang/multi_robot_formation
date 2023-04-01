@@ -171,7 +171,7 @@ class Trainer:
         self.model.train()
         total_loss = 0
         total = 0
-        while self.epoch < 10:
+        while self.epoch < self.max_epoch:
             self.epoch += 1
             iteration = 0
             for iter, batch in enumerate(tqdm(trainloader)):
@@ -185,7 +185,6 @@ class Trainer:
                 # print(occupancy_maps.shape)
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1))
                 loss = self.criterion(outs, reference[:, 0])
-
                 for i in range(1, self.number_of_agent):
                     outs = self.model(torch.unsqueeze(occupancy_maps[:,i,:,:],1))
                     loss += self.criterion(outs, reference[:, i])
@@ -258,21 +257,24 @@ if __name__ == "__main__":
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    batch_size = 16
+    batch_size = 32
     learning_rate= 0.01
+    max_epoch=10
     use_cuda = True
 
     # model
     model=ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 5,
+        num_classes = 2,
         dim = 256,
         depth = 3,
         heads = 8,
         mlp_dim = 512,
         dropout = 0.1,
-        emb_dropout = 0.1
+        emb_dropout = 0.1,
+        task="graph",
+        agent_number=5
     )
 
 
@@ -303,6 +305,7 @@ if __name__ == "__main__":
         optimizer=optimizer,
         batch_size=batch_size,
         learning_rate=learning_rate,
+        max_epoch=max_epoch,
         use_cuda=use_cuda,
     )
     print(T.optimizer)

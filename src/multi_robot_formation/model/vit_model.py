@@ -85,7 +85,7 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
-    def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,task="control",agent_number=5):
+    def __init__(self, *, image_size, patch_size, dim, depth, heads, mlp_dim,num_classes, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,task="control",agent_number=5):
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
@@ -117,12 +117,12 @@ class ViT(nn.Module):
             nn.Linear(dim, num_classes)
         )
         self.mlp_position = nn.Sequential(
-            nn.LayerNorm(dim*agent_number),
-            nn.Linear(dim*agent_number, num_classes)
+            nn.LayerNorm(dim),
+            nn.Linear(dim, num_classes*agent_number)
         )
         self.mlp_graph = nn.Sequential(
-            nn.LayerNorm(agent_number),
-            nn.Linear(agent_number, num_classes)
+            nn.LayerNorm(dim),
+            nn.Linear(dim, agent_number)
         )
 
     def forward(self, img):
