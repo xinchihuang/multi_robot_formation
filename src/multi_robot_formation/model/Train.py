@@ -19,13 +19,7 @@ from vit_model import ViT
 from utils.data_generator import DataGenerator
 
 
-def sort_pose(position_list):
-    global_pose_array = np.array(position_list)
-    temp = copy.deepcopy(global_pose_array)
-    orders = np.argsort(global_pose_array, axis=0)
-    for i in range(len(orders)):
-        global_pose_array[i, :] = temp[orders[i][0]]
-    return global_pose_array
+
 
 
 class RobotDatasetTrace(Dataset):
@@ -75,14 +69,12 @@ class RobotDatasetTrace(Dataset):
             idx = idx.tolist()
 
         global_pose_array = self.pose_array[:, idx, :]
-        global_pose_array=sort_pose(global_pose_array)
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
         if use_random > 0.9:
             global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
-            global_pose_array=sort_pose(global_pose_array)
             global_pose_array[:, 2] = 0
             self_orientation_array = (
                     2 * math.pi * np.random.random(self.number_of_agents) - math.pi
@@ -95,6 +87,10 @@ class RobotDatasetTrace(Dataset):
             )
         elif self.task_type=="graph":
             occupancy_maps, reference = data_generator.generate_map_graph(
+                global_pose_array, self_orientation_array
+            )
+        elif self.task_type=="position":
+            occupancy_maps, reference = data_generator.generate_map_position(
                 global_pose_array, self_orientation_array
             )
 
@@ -185,6 +181,7 @@ class Trainer:
                 # print(occupancy_maps.shape)
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1))
                 loss = self.criterion(outs, reference[:, 0])
+                print(reference[:, 0])
                 for i in range(1, self.number_of_agent):
                     outs = self.model(torch.unsqueeze(occupancy_maps[:,i,:,:],1))
                     loss += self.criterion(outs, reference[:, i])
@@ -257,11 +254,13 @@ if __name__ == "__main__":
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    batch_size = 32
+    batch_size = 16
     learning_rate= 0.01
     max_epoch=10
     use_cuda = True
 
+
+    task_type="position"
     # model
     model=ViT(
         image_size = 100,
@@ -273,7 +272,7 @@ if __name__ == "__main__":
         mlp_dim = 512,
         dropout = 0.1,
         emb_dropout = 0.1,
-        task="graph",
+        task=task_type,
         agent_number=5
     )
 
@@ -285,6 +284,7 @@ if __name__ == "__main__":
         number_of_agents=number_of_robot,
         local=local,
         partial=partial,
+        task_type=task_type
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -292,6 +292,7 @@ if __name__ == "__main__":
         number_of_agents=number_of_robot,
         local=local,
         partial=partial,
+        task_type=task_type
     )
 
 

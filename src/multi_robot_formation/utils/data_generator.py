@@ -11,6 +11,14 @@ from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 from multi_robot_formation.comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
 from multi_robot_formation.controller_new import *
+import copy
+def sort_pose(position_list):
+    global_pose_array = np.array(position_list)
+    temp = copy.deepcopy(global_pose_array)
+    orders = np.argsort(global_pose_array, axis=0)
+    for i in range(len(orders)):
+        global_pose_array[i, :] = temp[orders[i][0]]
+    return global_pose_array
 
 
 class DataGenerator:
@@ -88,6 +96,7 @@ class DataGenerator:
         ) = occupancy_map_simulator.global_to_local(
             global_pose_array, self_orientation_array
         )
+
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []
@@ -159,6 +168,27 @@ class DataGenerator:
         return (
             np.array(occupancy_maps),
             np.array(neighbor_lists),
+        )
+    def generate_map_position(self, global_pose_array, self_orientation_array):
+        global_pose_array = np.array(global_pose_array)
+        self_orientation_array = np.array(self_orientation_array)
+        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+
+        (
+            position_lists_local,
+            self_orientation,
+        ) = occupancy_map_simulator.global_to_local(
+            global_pose_array, self_orientation_array
+        )
+        for i in range(len(position_lists_local)):
+            while len(position_lists_local[i])<len(position_lists_local)-1:
+                position_lists_local[i].append([float("inf"),float("inf"),0])
+
+        print(position_lists_local)
+        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+        return (
+            np.array(occupancy_maps),
+            np.array(position_lists_local),
         )
     def generate_pose_one(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)

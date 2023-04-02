@@ -206,6 +206,7 @@ class MapSimulator:
             position_lists_local.append(position_list_local_i)
         if self.block:
             position_lists_local = self.blocking(position_lists_local)
+
         return position_lists_local, self_orientation_global
 
     def world_to_map(self, world_point, map_size, max_x, max_y):
