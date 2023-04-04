@@ -85,7 +85,7 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
-    def __init__(self, *, image_size, patch_size, dim, depth, heads, mlp_dim,num_classes, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,task="control",agent_number=5):
+    def __init__(self, *, image_size, patch_size, dim, depth, heads, mlp_dim,num_classes, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,agent_number=5):
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
@@ -95,7 +95,6 @@ class ViT(nn.Module):
         num_patches = (image_height // patch_height) * (image_width // patch_width)
         patch_dim = channels * patch_height * patch_width
         assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
-        self.task = task
         self.to_patch_embedding = nn.Sequential(
             Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width),
             nn.LayerNorm(patch_dim),
@@ -118,14 +117,14 @@ class ViT(nn.Module):
         )
         self.mlp_position = nn.Sequential(
             nn.LayerNorm(dim),
-            nn.Linear(dim, num_classes*agent_number)
+            nn.Linear(dim, num_classes*(agent_number-1))
         )
         self.mlp_graph = nn.Sequential(
             nn.LayerNorm(dim),
-            nn.Linear(dim, agent_number)
+            nn.Linear(dim, agent_number-1)
         )
 
-    def forward(self, img):
+    def forward(self, img,task):
         x = self.to_patch_embedding(img)
         b, n, _ = x.shape
 
@@ -140,11 +139,11 @@ class ViT(nn.Module):
 
         x = self.to_latent(x)
 
-        if self.task=="position":
+        if task=="position":
             return self.mlp_position(x)
-        if self.task=="graph":
+        if task=="graph":
             return self.mlp_graph(x)
-        if self.task=="control":
+        if task=="control":
             return self.mlp_control(x)
 
 
