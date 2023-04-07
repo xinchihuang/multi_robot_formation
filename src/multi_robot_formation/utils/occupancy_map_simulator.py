@@ -273,6 +273,7 @@ class MapSimulator:
             occupancy_map=occupancy_map*self.position_encoding_matrix
         return occupancy_map
 
+
     def generate_maps(
         self,
         position_lists_local,
