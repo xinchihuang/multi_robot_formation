@@ -287,7 +287,7 @@ class Trainer:
                     reference_neighbor = reference_neighbor.to("cuda")
                 self.optimizer.zero_grad()
 
-
+                # print(reference_control)
 
                 # print(occupancy_maps.shape)
                 # control
@@ -310,17 +310,18 @@ class Trainer:
                 # loss.backward()
 
                 #graph
-
-                outs = self.model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),"graph")
-                loss = self.criterion(outs, reference_neighbor[:, 0])
-                for i in range(1, self.number_of_agent):
-                    outs = self.model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),"graph")
-                    loss += self.criterion(outs, reference_neighbor[:, i])
-                total_loss_graph+=loss.item()
-                loss.backward()
-
+                # if iteration%5==0:
+                #     outs = self.model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),"graph")
+                #     loss = self.criterion(outs, reference_neighbor[:, 0])
+                #     for i in range(1, self.number_of_agent):
+                #         outs = self.model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),"graph")
+                #         loss += self.criterion(outs, reference_neighbor[:, i])
+                #     total_loss_graph+=loss.item()
+                #     loss.backward()
+                #
+                #
+                #     self.optimizer.step()
                 total += occupancy_maps.size(0) * self.number_of_agent
-                self.optimizer.step()
                 iteration += 1
 
                 ### save and evaluating
@@ -342,14 +343,14 @@ class Trainer:
                     # )
                     # print("loss ", total_loss_position)
                     # print("total ", total)
-                    print(
-                        "Average training_data loss(graph) at iteration "
-                        + str(iteration)
-                        + ":",
-                        total_loss_graph / total,
-                    )
-                    print("loss ", total_loss_graph)
-                    print("total ", total)
+                    # print(
+                    #     "Average training_data loss(graph) at iteration "
+                    #     + str(iteration)
+                    #     + ":",
+                    #     total_loss_graph / total,
+                    # )
+                    # print("loss ", total_loss_graph)
+                    # print("total ", total)
                     total_loss_control = 0
                     total_loss_position = 0
                     total_loss_graph = 0
@@ -414,32 +415,32 @@ class Trainer:
                     # print("loss_eval ", total_loss_eval)
                     # print("total_eval ", total_eval)
                     # graph
-                    total_loss_eval = 0
-                    total_eval = 0
-                    for iter_eval, batch_eval in enumerate(evaluateloader):
-                        occupancy_maps = batch_eval["occupancy_maps"]
-                        reference_neighbor = batch_eval["reference_neighbor"]
-                        if self.use_cuda:
-                            occupancy_maps = occupancy_maps.to("cuda")
-                            reference_neighbor = reference_neighbor.to("cuda")
-
-                        self.optimizer.zero_grad()
-                        # print(occupancy_maps.shape)
-                        # control
-                        outs = self.model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1), "graph")
-                        loss = self.criterion(outs, reference_neighbor[:, 0])
-                        for i in range(1, self.number_of_agent):
-                            outs = self.model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1), "graph")
-                            loss += self.criterion(outs, reference_neighbor[:, i])
-
-                        total_loss_eval += loss.item()
-                        total_eval += occupancy_maps.size(0) * self.number_of_agent
-                    print(
-                        "Average evaluating_data loss(Neighbor) at iteration " + str(iteration) + ":",
-                        total_loss_eval / total_eval,
-                    )
-                    print("loss_eval ", total_loss_eval)
-                    print("total_eval ", total_eval)
+                    # total_loss_eval = 0
+                    # total_eval = 0
+                    # for iter_eval, batch_eval in enumerate(evaluateloader):
+                    #     occupancy_maps = batch_eval["occupancy_maps"]
+                    #     reference_neighbor = batch_eval["reference_neighbor"]
+                    #     if self.use_cuda:
+                    #         occupancy_maps = occupancy_maps.to("cuda")
+                    #         reference_neighbor = reference_neighbor.to("cuda")
+                    #
+                    #     self.optimizer.zero_grad()
+                    #     # print(occupancy_maps.shape)
+                    #     # control
+                    #     outs = self.model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1), "graph")
+                    #     loss = self.criterion(outs, reference_neighbor[:, 0])
+                    #     for i in range(1, self.number_of_agent):
+                    #         outs = self.model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1), "graph")
+                    #         loss += self.criterion(outs, reference_neighbor[:, i])
+                    #
+                    #     total_loss_eval += loss.item()
+                    #     total_eval += occupancy_maps.size(0) * self.number_of_agent
+                    # print(
+                    #     "Average evaluating_data loss(Neighbor) at iteration " + str(iteration) + ":",
+                    #     total_loss_eval / total_eval,
+                    # )
+                    # print("loss_eval ", total_loss_eval)
+                    # print("total_eval ", total_eval)
 
     def save(self, save_path):
         torch.save(self.model.state_dict(), save_path)
@@ -463,7 +464,7 @@ if __name__ == "__main__":
     optimizer = "rms"
     batch_size = 16
     learning_rate= 0.01
-    max_epoch=10
+    max_epoch=1
     use_cuda = True
 
 

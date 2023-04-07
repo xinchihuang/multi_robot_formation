@@ -1,10 +1,13 @@
 import math
-import random
 import numpy as np
 from collections import defaultdict
 import cv2
 import os
 import sys
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
+print(sys.path)
 print(os.getcwd())
 from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
@@ -305,12 +308,12 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    self_pose_array=[[0,0,0],[-2,-2,0]]
-    self_orientation_array=[math.pi,0]
-    data_generator=DataGenerator(partial=True)
-    occupancy_maps,ref_control_lists,adjacency_lists=data_generator.generate_map_control(self_pose_array,self_orientation_array)
+    self_pose_array=[[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
+    self_orientation_array=[0,0,0,0,0]
+    data_generator=DataGenerator(partial=False)
+
+    occupancy_maps,ref_control_lists,adjacency_lists,position_lists_squeezed,neighbor_lists=data_generator.generate_map_all(self_pose_array,self_orientation_array)
     cv2.imshow("robot view (Synthesise)", occupancy_maps[0])
     cv2.waitKey(0)
-    print(ref_control_lists)
     pass
 

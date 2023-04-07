@@ -741,7 +741,7 @@ class VitController(Controller):
 
 
         control = (
-            self.model(self_input_tensor).detach().cpu().numpy()
+            self.model(self_input_tensor,task="control").detach().cpu().numpy()
         )
         velocity_x = control[0][0]
         velocity_y = control[0][1]

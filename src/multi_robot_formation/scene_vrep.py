@@ -48,7 +48,7 @@ class Scene:
         self.platform = "vrep"
         self.controller_type = "vit"
         self.sensor_type = "real"
-        self.model_path="saved_model/model_12000_epoch2.pth"
+        self.model_path="saved_model/model_12000_epoch1.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):

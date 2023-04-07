@@ -90,12 +90,15 @@ class MapSimulator:
             or y < -self.max_y
             or z < -self.max_height
         ):  #
+            print("a")
             return None
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
+            print("b")
             return None
         if self.partial:
 
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
+                print("c")
                 return None
             # if -2*math.pi/epoch5<theta<2*math.pi/epoch5:
             #     if theta+math.pi / epoch5 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / epoch5:
@@ -200,7 +203,6 @@ class MapSimulator:
                     )
                     point_local_raw = point_local_rotated
                 point_local = self.data_filter(point_local_raw)
-
                 if not point_local == None:
                     position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
@@ -219,8 +221,8 @@ class MapSimulator:
         :return: points in map coordinate
 
         """
-        if world_point == None:
-            return None
+        # if world_point == None:
+        #     return None
         x_world = world_point[0]
         y_world = world_point[1]
         x_map = int((max_x - y_world) / (2 * max_x) * map_size)
@@ -254,7 +256,6 @@ class MapSimulator:
         )
         try:
             for world_points in position_list_local:
-
                 map_points = self.world_to_map(world_points, self.map_size, self.max_x, self.max_y)
                 if map_points == None:
                     continue
