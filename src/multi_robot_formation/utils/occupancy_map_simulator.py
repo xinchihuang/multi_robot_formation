@@ -90,15 +90,11 @@ class MapSimulator:
             or y < -self.max_y
             or z < -self.max_height
         ):  #
-            print("a")
             return None
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
-            print("b")
             return None
         if self.partial:
-
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
-                print("c")
                 return None
             # if -2*math.pi/epoch5<theta<2*math.pi/epoch5:
             #     if theta+math.pi / epoch5 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / epoch5:

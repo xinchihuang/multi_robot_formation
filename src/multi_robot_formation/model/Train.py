@@ -30,7 +30,7 @@ class RobotDatasetTrace(Dataset):
         number_of_agents,
         local,
         partial,
-        task_type="graph"
+        task_type="all"
     ):
 
         self.transform = True
@@ -72,7 +72,7 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
-        if use_random > 0.9:
+        if use_random > 1.0:
             global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
             global_pose_array[:, 2] = 0
             self_orientation_array = (
@@ -81,6 +81,7 @@ class RobotDatasetTrace(Dataset):
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
         if self.task_type=="all":
+            # print(self.task_type)
             occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = data_generator.generate_map_all(
                 global_pose_array, self_orientation_array
             )
@@ -133,7 +134,7 @@ class Trainer:
         learning_rate,
         max_epoch=10,
 
-        task_type="control",
+        task_type="all",
         if_continue=False,
         load_model_path='',
         use_cuda=True,
@@ -179,10 +180,10 @@ class Trainer:
                 g["lr"] = self.lr_schedule[self.epoch]
 
         trainloader = DataLoader(
-            self.trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
+            self.trainset, batch_size=self.batch_size, shuffle=False, drop_last=True
         )
         evaluateloader = DataLoader(
-            self.evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
+            self.evaluateset, batch_size=self.batch_size, shuffle=False, drop_last=True
         )
         self.model.train()
         total_loss = 0
@@ -198,6 +199,7 @@ class Trainer:
                     reference = reference.to("cuda")
                 self.optimizer.zero_grad()
                 # print(occupancy_maps.shape)
+
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1),self.task_type)
                 # print(reference[:, 0])
                 loss = self.criterion(outs, reference[:, 0])
@@ -211,7 +213,7 @@ class Trainer:
                 iteration += 1
 
                 ### save and evaluating
-                if iteration % 1000 == 0:
+                if iteration % 100 == 0:
 
                     print(
                         "Average training_data loss at iteration "
@@ -235,11 +237,11 @@ class Trainer:
                         self.optimizer.zero_grad()
                         # print(occupancy_maps.shape)
 
-                        outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1))
+                        outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),self.task_type)
                         loss = self.criterion(outs, reference[:, 0])
 
                         for i in range(1, self.number_of_agent):
-                            outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1))
+                            outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),self.task_type)
                             loss += self.criterion(outs, reference[:, i])
                         self.optimizer.step()
                         total_loss_eval += loss.item()
@@ -254,6 +256,7 @@ class Trainer:
         return total_loss / total
 
     def train_all(self):
+        print("train_all")
         """ """
         self.epoch += 1
         if self.epoch in self.lr_schedule.keys():
@@ -287,7 +290,6 @@ class Trainer:
                     reference_neighbor = reference_neighbor.to("cuda")
                 self.optimizer.zero_grad()
 
-                # print(reference_control)
 
                 # print(occupancy_maps.shape)
                 # control
@@ -296,8 +298,9 @@ class Trainer:
                 for i in range(1, self.number_of_agent):
                     outs = self.model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1), "control")
                     loss += self.criterion(outs, reference_control[:, i])
-                total_loss_control += loss.item()
                 loss.backward()
+                self.optimizer.step()
+                total_loss_control += loss.item()
 
                 # #position
                 #
@@ -325,7 +328,7 @@ class Trainer:
                 iteration += 1
 
                 ### save and evaluating
-                if iteration % 1000 == 0:
+                if iteration % 100 == 0:
 
                     print(
                         "Average training_data loss(control)at iteration "
@@ -462,13 +465,13 @@ if __name__ == "__main__":
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    batch_size = 16
+    batch_size = 128
     learning_rate= 0.01
     max_epoch=1
     use_cuda = True
 
 
-    task_type="all"
+    task_type="control"
     # model
     model=ViT(
         image_size = 100,
@@ -515,9 +518,10 @@ if __name__ == "__main__":
         learning_rate=learning_rate,
         max_epoch=max_epoch,
         use_cuda=use_cuda,
+        task_type=task_type
     )
     print(T.optimizer)
-    T.train_all()
+    T.train()
     T.save(save_model_path)
 
 #

@@ -78,12 +78,12 @@ class Robot:
                 elif self.controller_type == "model_basic":
                     if self.sensor_type == "real":
                         self.control_data=self.controller.get_control(self.index,self.scene_data)
-                    if self.sensor_type == "synthesise":
+                    elif self.sensor_type == "synthesise":
                         self.control_data=self.controller.get_control(self.index,self.scene_data)
                 elif self.controller_type == "model_decentralized":
                     if self.sensor_type == "real":
                         self.control_data = self.controller.get_control(self.index, self.scene_data)
-                    if self.sensor_type == "synthesise":
+                    elif self.sensor_type == "synthesise":
                         position_lists_global = self.scene_data.position_list
                         orientation_list = self.scene_data.orientation_list
                         occupancy_map_simulator = MapSimulator(local=True)
@@ -99,18 +99,21 @@ class Robot:
                 elif self.controller_type == "model_dummy":
                     self.control_data=self.controller.get_control(self.index,self.scene_data)
                 elif self.controller_type == "vit":
-                    position_lists_global = self.scene_data.position_list
-                    orientation_list = self.scene_data.orientation_list
-                    occupancy_map_simulator = MapSimulator(local=True)
-                    (
-                        position_lists_local,
-                        self_orientation,
-                    ) = occupancy_map_simulator.global_to_local(
-                        np.array(position_lists_global), np.array(orientation_list)
-                    )
-                    occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
-                    self.sensor_data.occupancy_map = occupancy_map
-                    self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
+                    if self.sensor_type == "real":
+                        self.control_data = self.controller.get_control(self.index, self.scene_data)
+                    elif self.sensor_type == "synthesise":
+                        position_lists_global = self.scene_data.position_list
+                        orientation_list = self.scene_data.orientation_list
+                        occupancy_map_simulator = MapSimulator(local=True)
+                        (
+                            position_lists_local,
+                            self_orientation,
+                        ) = occupancy_map_simulator.global_to_local(
+                            np.array(position_lists_global), np.array(orientation_list)
+                        )
+                        occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                        self.sensor_data.occupancy_map = occupancy_map
+                        self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
             else:
                 self.control_data.robot_index=self.index
                 self.control_data.velocity_x=0
@@ -129,4 +132,7 @@ class Robot:
             else:
 
                 self.control_data.orientation = self.sensor_data.orientation
+                self.control_data.velocity_x=0
+                self.control_data.velocity_y=0
+                self.control_data.orientation=[0,0,1]
         self.executor.execute_control(self.control_data)

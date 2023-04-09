@@ -47,8 +47,8 @@ class Scene:
         self.initial_min_range=1
         self.platform = "vrep"
         self.controller_type = "vit"
-        self.sensor_type = "real"
-        self.model_path="saved_model/model_12000_epoch1.pth"
+        self.sensor_type = "synthesise"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
 
         self.client_id = vrep_interface.init_vrep()
         for i in range(self.num_robot):
@@ -162,8 +162,8 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
-                     # [-epoch5, 0, 0], [0, epoch5, 0], [epoch5, 0, 0], [0, -epoch5, 0], [2, epoch5, 0]]
+        pose_list = [[-3, -3, 1], [-3, 3, 1], [3, 3, 1], [3, -3,1], [0, 0, 1]]
+                     # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0], [2, 5, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
@@ -203,6 +203,7 @@ class Scene:
                 data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
+
             self.check_stop_condition()
             self.broadcast_all()
             vrep_interface.synchronize(self.client_id)
@@ -227,4 +228,4 @@ class Scene:
 
 if __name__ == "__main__":
     simulate_scene=Scene()
-    simulate_scene.simulate(50)
+    simulate_scene.simulate(100)
