@@ -10,18 +10,6 @@ from vrep import vrep_interface
 import cv2
 from comm_data import SensorData
 
-# class SensorData:
-#     """
-#     A class for record sensor data
-#     """
-#
-#     def __init__(self):
-#         self.robot_index = None
-#         self.position = None
-#         self.orientation = None
-#         self.linear_velocity = None
-#         self.angular_velocity = None
-#         self.occupancy_map = None
 
 
 class Sensor:
@@ -41,9 +29,8 @@ class Sensor:
         self.min_range = 0.2
 
         #### sensor output settings
-        self.point_cloud = []
         self.occupancy_map_size = 100
-
+        self.point_cloud = []
         self.sensor_buffer = []
         self.sensor_buffer_count = 0
 

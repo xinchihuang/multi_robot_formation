@@ -2,8 +2,7 @@
 A scene template
 author: Xinchi Huang
 """
-import math
-import random
+
 import sys
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
@@ -19,7 +18,7 @@ from vrep.robot_sensor_vrep import Sensor
 
 from comm_data import SceneData
 from recorder import Recorder
-
+from controller_new import *
 class Scene:
     """
     Scene for multiple robots
@@ -40,7 +39,7 @@ class Scene:
         self.adjacency_list = defaultdict(list)
         self.position_list = None
         self.orientation_list = None
-        self.client_id = None
+        self.client_id = vrep_interface.init_vrep()
         self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=10
@@ -49,15 +48,14 @@ class Scene:
         self.controller_type = "vit"
         self.sensor_type = "synthesise"
         self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
-
-        self.client_id = vrep_interface.init_vrep()
+        self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         for i in range(self.num_robot):
-            self.add_robot_vrep(i,desired_distance=self.desired_distance)
+            self.add_robot_vrep(i,controller=self.controller,desired_distance=self.desired_distance)
         self.reset_pose(self.initial_max_range, self.initial_min_range)
 
 
 
-    def add_robot_vrep(self, robot_index,desired_distance=1.0):
+    def add_robot_vrep(self, robot_index,controller,desired_distance=1.0):
         """
         Add a robot in the scene
         :param robot_index: The robot index
@@ -66,6 +64,7 @@ class Scene:
         new_robot = Robot(
             sensor=Sensor(),
             executor=Executor(),
+            controller=controller,
             desired_distance=desired_distance,
             platform=self.platform,
             controller_type=self.controller_type,

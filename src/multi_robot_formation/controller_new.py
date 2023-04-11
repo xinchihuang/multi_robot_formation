@@ -10,34 +10,34 @@ All controls are in robot coordinate
 
 theta: counter clockwise relative to x-axis
 """
+import sys
 
 
 import collections
 import math
 import numpy as np
 import torch
-from .model.GNN_based_model import (
+from model.GNN_based_model import (
     GnnMapBasic,
     GnnMapDecentralized,
     GnnPoseBasic,
     DummyModel,
 )
-from .model.vit_model import ViT
+from model.vit_model import ViT
 import cv2
-from .utils.occupancy_map_simulator import MapSimulator
-from .comm_data import ControlData
+from utils.occupancy_map_simulator import MapSimulator
+from comm_data import ControlData
 class Controller:
     def __init__(self,desired_distance=1):
         self.desired_distance=desired_distance
         self.name=None
-
 class CentralizedController(Controller):
     """
     A centralized controller
     """
     def __init__(self,desired_distance=2):
         super().__init__(desired_distance)
-        self.name="Centralized"
+        self.name="CentralizedController"
     def get_control(self,index,neighbors,self_pose):
         """
         Return controls
@@ -98,7 +98,7 @@ class GnnMapBasicControllerSensor(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name="GNN map Basic"
+        self.name="GnnMapBasicControllerSensor"
         self.model_path=model_path
         self.num_robot=num_robot
 
@@ -192,7 +192,6 @@ class GnnMapBasicControllerSensor(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
-
 class GnnMapBasicControllerSynthesise(Controller):
     def __init__(self, model_path, desired_distance=1.0, num_robot=5, input_height=100, input_width=100, use_cuda=True):
         """
@@ -204,7 +203,7 @@ class GnnMapBasicControllerSynthesise(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "GNN map Basic Synthesise"
+        self.name = "GnnMapBasicControllerSynthesise"
         self.model_path = model_path
         self.num_robot = num_robot
 
@@ -311,7 +310,6 @@ class GnnMapBasicControllerSynthesise(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
-
 class GnnMapDecentralizedControllerSensor(Controller):
     def __init__(self, model_path, desired_distance=1.0, num_robot=5, input_height=100, input_width=100, use_cuda=True):
         """
@@ -323,7 +321,7 @@ class GnnMapDecentralizedControllerSensor(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "GNN map Decentralized Sensor"
+        self.name = "GnnMapDecentralizedControllerSensor"
         self.model_path = model_path
         self.num_robot = num_robot
 
@@ -414,7 +412,6 @@ class GnnMapDecentralizedControllerSensor(Controller):
         out_put.velocity_x = velocity_x
         out_put.velocity_y = velocity_y
         return out_put
-
 class GnnMapDecentralizedControllerSynthesise(Controller):
     def __init__(self, model_path, desired_distance=1.0, num_robot=10, input_height=100, input_width=100, use_cuda=True):
         """
@@ -426,7 +423,7 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "GNN map Decentralized Synthesise"
+        self.name = "GnnMapDecentralizedControllerSynthesise"
         self.model_path = model_path
         self.num_robot = num_robot
 
@@ -497,7 +494,6 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
-
 class GnnPoseBasicController(Controller):
     def __init__(self, model_path, desired_distance=1.0, num_robot=5, use_cuda=True):
         """
@@ -507,7 +503,7 @@ class GnnPoseBasicController(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "GNN Pose"
+        self.name = "GnnPoseBasicController"
         self.model_path = model_path
         self.num_robot = num_robot
 
@@ -607,8 +603,6 @@ class GnnPoseBasicController(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
-
-
 class DummyController(Controller):
     def __init__(self, model_path, desired_distance=1.0, num_robot=5, use_cuda=True):
         """
@@ -618,7 +612,7 @@ class DummyController(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "Dummy"
+        self.name = "DummyController"
         self.model_path = model_path
         self.num_robot = num_robot
 
@@ -683,7 +677,7 @@ class VitController(Controller):
         :param use_cuda: Decide whether to use cuda (type: bool)
         """
         super().__init__(desired_distance)
-        self.name = "Vit Synthesise"
+        self.name = "VitController"
         self.model_path = model_path
         self.num_robot = num_robot
 
