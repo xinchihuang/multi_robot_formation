@@ -11,7 +11,9 @@ All controls are in robot coordinate
 theta: counter clockwise relative to x-axis
 """
 import sys
-
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
+sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
+print(sys.path)
 
 import collections
 import math
@@ -27,10 +29,44 @@ from model.vit_model import ViT
 import cv2
 from utils.occupancy_map_simulator import MapSimulator
 from comm_data import ControlData
+from  utils.gabreil_graph import get_gabreil_graph
 class Controller:
-    def __init__(self,desired_distance=1):
+    def __init__(self,desired_distance=2):
         self.desired_distance=desired_distance
         self.name=None
+class LocalExpertController(Controller):
+    def __init__(self,desired_distance=2):
+        super().__init__(desired_distance)
+        self.name="CentralizedController"
+    def get_control(self,position_list_local):
+        """
+        :param position_list_local: local position list for training
+        """
+        position_array=np.array(position_list_local)
+        out_put = ControlData()
+        neighbor=np.ones(len(position_list_local))
+        for v in range(len(position_list_local)):
+            m = (position_array[v]) / 2
+            for w in range(len(position_list_local)):
+                if w == v:
+                    continue
+                if np.linalg.norm(position_array[w] - m) < np.linalg.norm(m):
+                    neighbor[v]=0
+        velocity_sum_x =0
+        velocity_sum_y =0
+        for i in range(len(position_list_local)):
+            if neighbor[i]==1:
+                distance = (position_array[i][0]** 2 + position_array[i][1]** 2)**0.5
+                rate = (distance - self.desired_distance) / distance
+                velocity_x = rate * (-position_array[i][0])
+                velocity_y = rate * (-position_array[i][1])
+                velocity_sum_x -= velocity_x
+                velocity_sum_y -= velocity_y
+        print(neighbor)
+        out_put.velocity_x = velocity_sum_x
+        out_put.velocity_y = velocity_sum_y
+
+        return out_put
 class CentralizedController(Controller):
     """
     A centralized controller
@@ -744,3 +780,9 @@ class VitController(Controller):
         out_put.velocity_y = velocity_y
 
         return out_put
+
+if __name__ == "__main__":
+    controller=LocalExpertController()
+    position_list_local=[[1,0,0],[2,0,0],[1,2,0]]
+    out=controller.get_control(position_list_local)
+    print(out.velocity_x,out.velocity_y)
