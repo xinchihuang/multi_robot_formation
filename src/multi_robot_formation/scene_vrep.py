@@ -161,7 +161,7 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 1], [-3, 3, 1], [3, 3, 1], [3, -3,1], [0, 0, 1]]
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0]]
                      # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0], [2, 5, 0]]
         num_robot = len(self.robot_list)
 
@@ -227,4 +227,4 @@ class Scene:
 
 if __name__ == "__main__":
     simulate_scene=Scene()
-    simulate_scene.simulate(100)
+    simulate_scene.simulate(50)

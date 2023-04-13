@@ -773,6 +773,7 @@ class VitController(Controller):
         control = (
             self.model(self_input_tensor,task="control").detach().cpu().numpy()
         )
+        print(control)
         velocity_x = control[0][0]
         velocity_y = control[0][1]
         out_put.robot_index = index

@@ -14,6 +14,7 @@ from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 from multi_robot_formation.comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
 from multi_robot_formation.controller_new import *
+from multi_robot_formation.model.LocalExpertController import LocalExpertController
 import copy
 def sort_pose(position_list):
     global_pose_array = np.array(position_list)
@@ -89,33 +90,9 @@ class DataGenerator:
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
-
-            adjacency_list_i = self.update_adjacency_list(global_pose_array)
-            adjacency_lists.append(adjacency_list_i)
-            sensor_data_i = SensorData()
-            sensor_data_i.position = global_pose_array[robot_index]
-            sensor_data_i.orientation = [0, 0, self_orientation_array[robot_index]]
-            scene_data_i = SceneData()
-            scene_data_i.adjacency_list = adjacency_list_i
-
-            controller = CentralizedController()
-
-
-            control_i=controller.get_control(robot_index,adjacency_list_i[robot_index],global_pose_array[robot_index])
-
+            controller = LocalExpertController()
+            control_i=controller.get_control(position_lists_local[robot_index])
             velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
-            # print(velocity_x,velocity_y)
-            if self.local:
-                theta = self_orientation_array[robot_index]
-                velocity_x_global = velocity_x * math.cos(
-                    theta
-                ) + velocity_y * math.sin(theta)
-                velocity_y_global = -velocity_x * math.sin(
-                    theta
-                ) + velocity_y * math.cos(theta)
-                velocity_x = velocity_x_global
-                velocity_y = velocity_y_global
-
             ref_control_list.append([velocity_x, velocity_y])
         return (
             np.array(occupancy_maps),
@@ -196,32 +173,9 @@ class DataGenerator:
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
-
-            adjacency_list_i = self.update_adjacency_list(global_pose_array)
-            adjacency_lists.append(adjacency_list_i)
-            sensor_data_i = SensorData()
-            sensor_data_i.position = global_pose_array[robot_index]
-            sensor_data_i.orientation = [0, 0, self_orientation_array[robot_index]]
-            scene_data_i = SceneData()
-            scene_data_i.adjacency_list = adjacency_list_i
-
-            controller = CentralizedController()
-
-            control_i = controller.get_control(robot_index, adjacency_list_i[robot_index],
-                                               global_pose_array[robot_index])
-
+            controller = LocalExpertController()
+            control_i = controller.get_control(position_lists_local[robot_index])
             velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
-            # print(velocity_x,velocity_y)
-            if self.local:
-                theta = self_orientation_array[robot_index]
-                velocity_x_global = velocity_x * math.cos(
-                    theta
-                ) + velocity_y * math.sin(theta)
-                velocity_y_global = -velocity_x * math.sin(
-                    theta
-                ) + velocity_y * math.cos(theta)
-                velocity_x = velocity_x_global
-                velocity_y = velocity_y_global
 
             ref_control_list.append([velocity_x, velocity_y])
 

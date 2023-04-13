@@ -141,7 +141,4 @@ class Robot:
             else:
 
                 self.control_data.orientation = self.sensor_data.orientation
-                self.control_data.velocity_x=0
-                self.control_data.velocity_y=0
-                self.control_data.orientation=[0,0,1]
         self.executor.execute_control(self.control_data)

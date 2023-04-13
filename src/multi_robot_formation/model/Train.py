@@ -66,13 +66,18 @@ class RobotDatasetTrace(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
         global_pose_array = self.pose_array[:, idx, :]
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
-        if use_random > 1.0:
+        if use_random > 0.9:
+            global_pose_array = 4 * np.random.random((self.number_of_agents, 3)) - 2
+            global_pose_array[:, 2] = 0
+            self_orientation_array = (
+                    2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+            )
+        if use_random < 0.1:
             global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
             global_pose_array[:, 2] = 0
             self_orientation_array = (
@@ -180,10 +185,10 @@ class Trainer:
                 g["lr"] = self.lr_schedule[self.epoch]
 
         trainloader = DataLoader(
-            self.trainset, batch_size=self.batch_size, shuffle=False, drop_last=True
+            self.trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
         evaluateloader = DataLoader(
-            self.evaluateset, batch_size=self.batch_size, shuffle=False, drop_last=True
+            self.evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
         self.model.train()
         total_loss = 0
