@@ -174,14 +174,4 @@ def stop(client_id):
     vrep.simxFinish(client_id)
 
 
-# client_id=init_vrep()
-# robot_index=1
-# robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle =
-# get_vrep_handle(client_id, robot_index)
-# while True:
-#
-#     pos,ori=get_robot_pose(client_id,robot_handle)
-#     vel, omega, velodyne_points=get_sensor_data(client_id,robot_handle,robot_index)
-#     print(pos, ori)
-#     post_control(client_id, motor_left_handle, motor_right_handle, 10, 10)
-#     synchronize(client_id)
+

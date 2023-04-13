@@ -19,6 +19,7 @@ class MapSimulator:
         local=True,
         block=True,
         partial=False,
+        position_encoding=False
     ):
         """
         :param robot_size: Size of robot in occupancy map
@@ -37,6 +38,15 @@ class MapSimulator:
         self.local = local
         self.block = block
         self.partial = partial
+        self.position_encoding=position_encoding
+        if self.position_encoding==True:
+            self.position_encoding_matrix=np.ones((self.map_size,self.map_size))
+            for i in range(self.map_size):
+                for j in range(self.map_size):
+                    if i==self.map_size/2 and j==self.map_size/2:
+                        self.position_encoding_matrix[i][j]=1
+                        continue
+                    self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
         self.observation_angle = 2 * math.pi / 3
 
     def arctan(self, x, y):
@@ -66,10 +76,6 @@ class MapSimulator:
         """
         Filter out the points that out of sensor range
         :param world_point: Points in world coordinate
-        :param max_x: points' max x coordinate (left/right)
-        :param max_y: points' max y coordinate (depth/distance)
-        :param max_height: points' horizontal range
-        :param min_range: min distance between robots
         :return: Points within sensor range
         """
 
@@ -88,8 +94,19 @@ class MapSimulator:
         if x < min_range and y < min_range and x > -min_range and y > -min_range:
             return None
         if self.partial:
-            if math.pi / 6 < self.arctan(x, y) < 5 * math.pi / 6:
+            if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
+            # if -2*math.pi/epoch5<theta<2*math.pi/epoch5:
+            #     if theta+math.pi / epoch5 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / epoch5:
+            #         return None
+            # elif theta>0:
+            #     if self.arctan(x, y)>-(2*math.pi-(theta+math.pi / epoch5)) or self.arctan(x, y) < theta -  math.pi / epoch5:
+            #         return None
+            # elif theta<0:
+            #     print(self.arctan(x, y),(theta+math.pi / epoch5))
+            #     if self.arctan(x, y)<2*math.pi-(-theta+math.pi / epoch5) or self.arctan(x, y) > (theta+math.pi / epoch5):
+            #         return None
+
 
         return [x, y, z]
 
@@ -182,12 +199,12 @@ class MapSimulator:
                     )
                     point_local_raw = point_local_rotated
                 point_local = self.data_filter(point_local_raw)
-
                 if not point_local == None:
                     position_list_local_i.append(point_local)
             position_lists_local.append(position_list_local_i)
         if self.block:
             position_lists_local = self.blocking(position_lists_local)
+
         return position_lists_local, self_orientation_global
 
     def world_to_map(self, world_point, map_size, max_x, max_y):
@@ -200,8 +217,8 @@ class MapSimulator:
         :return: points in map coordinate
 
         """
-        if world_point == None:
-            return None
+        # if world_point == None:
+        #     return None
         x_world = world_point[0]
         y_world = world_point[1]
         x_map = int((max_x - y_world) / (2 * max_x) * map_size)
@@ -213,10 +230,6 @@ class MapSimulator:
     def generate_map_one(
         self,
         position_list_local,
-        robot_size,
-        map_size,
-        max_x,
-        max_y,
     ):
 
         """
@@ -231,16 +244,15 @@ class MapSimulator:
         :return: occupancy map
         """
 
-        scale = min(max_x, max_y)
-        robot_range = max(1, int(math.floor(map_size * robot_size / scale / 2)))
+        scale = min(self.max_x, self.max_y)
+        robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale / 2)))
 
         occupancy_map = (
-            np.ones((map_size + 2 * robot_range, map_size + 2 * robot_range)) * 255
+            np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
         )
         try:
             for world_points in position_list_local:
-
-                map_points = self.world_to_map(world_points, map_size, max_x, max_y)
+                map_points = self.world_to_map(world_points, self.map_size, self.max_x, self.max_y)
                 if map_points == None:
                     continue
                 x = map_points[0]
@@ -253,8 +265,10 @@ class MapSimulator:
         occupancy_map = occupancy_map[
             robot_range:-robot_range, robot_range:-robot_range
         ]
-
+        if self.position_encoding:
+            occupancy_map=occupancy_map*self.position_encoding_matrix
         return occupancy_map
+
 
     def generate_maps(
         self,
@@ -270,12 +284,7 @@ class MapSimulator:
         maps = []
         for robot_index in range(len(position_lists_local)):
             occupancy_map = self.generate_map_one(
-                position_lists_local[robot_index],
-                self.robot_size,
-                self.map_size,
-                self.max_x,
-                self.max_y,
-            )
+                position_lists_local[robot_index])
             maps.append(occupancy_map)
         return np.array(maps)
 

@@ -673,7 +673,7 @@ def simxReadForceSensor(clientID, forceSensorHandle, operationMode):
     arr2 = []
     for i in range(3):
         arr2.append(torqueVector[i])
-    # if sys.version_info[0] == 3:
+    # if sys.version_info[0] == epoch5:
     #    state=state.value
     # else:
     #    state=ord(state.value)

@@ -157,6 +157,8 @@ def plot_formation_gabreil(pose_array, save_path):
     position_array = pose_array[:, -1, :2]
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
+    xlist=[]
+    ylist=[]
     for i in range(rob_num):
         for j in range(i + 1, rob_num):
             if gabriel_graph[i][j] == 0:
@@ -171,6 +173,8 @@ def plot_formation_gabreil(pose_array, save_path):
     plt.title("Formation")
     plt.xlabel("distance(m)")
     plt.ylabel("distance(m)")
+    plt.xlim(min(xlist)-5, min(xlist)+5)
+    plt.ylim(min(ylist)-5, min(ylist)+5)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"))
     plt.close()
@@ -215,7 +219,6 @@ def plot_load_data(dt, root_dir):
     for _, dirs, _ in os.walk(root_dir, topdown=False):
         for name in dirs:
             robot_path_list.append(name)
-
     trace_array = None
     for robot_path in robot_path_list:
         trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"))
@@ -224,7 +227,7 @@ def plot_load_data(dt, root_dir):
             trace_array = trace_array_single
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
-    position_array = trace_array[:, :-200, 0, :2]
+    position_array = trace_array[:, :, 0, :2]
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array, root_dir)
@@ -243,4 +246,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data/0")
+    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/15")

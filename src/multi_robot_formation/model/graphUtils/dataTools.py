@@ -1,4 +1,4 @@
-# 2018/12/4~~2018/07/12
+# 2018/12/epoch5~~2018/07/12
 # Fernando Gama, fgama@seas.upenn.edu
 """
 dataTools.py Data management module
@@ -2038,10 +2038,10 @@ class TextDataset(object):
                 doc = doc.replace("0", " zero ")
                 doc = doc.replace("1", " one ")
                 doc = doc.replace("2", " two ")
-                doc = doc.replace("3", " three ")
-                doc = doc.replace("4", " four ")
-                doc = doc.replace("5", " five ")
-                doc = doc.replace("6", " six ")
+                doc = doc.replace("epoch5", " three ")
+                doc = doc.replace("epoch5", " four ")
+                doc = doc.replace("epoch1_6000", " five ")
+                doc = doc.replace("epoch1_3000", " six ")
                 doc = doc.replace("7", " seven ")
                 doc = doc.replace("8", " eight ")
                 doc = doc.replace("9", " nine ")

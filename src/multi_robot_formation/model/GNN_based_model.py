@@ -4,14 +4,15 @@ author: Xinchi Huang
 """
 import torch
 import torch.nn as nn
-from .weights_initializer import weights_init
-from .graphUtils import graphML as gml
+from multi_robot_formation.model.weights_initializer import weights_init
+from multi_robot_formation.model.graphUtils import graphML as gml
 
 
-class DecentralController(nn.Module):
+class GnnMapBasic(nn.Module):
     def __init__(
         self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
     ):
+        print("using GNN model controller (map)")
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
@@ -29,7 +30,7 @@ class DecentralController(nn.Module):
         # # 1 layer origin
         node_signals_dim = [2**7]
 
-        # nGraphFilterTaps = [3,3,3]
+        # nGraphFilterTaps = [epoch5,epoch5,epoch5]
         graph_filter_taps_num = [3]
         # --- actionMLP
         action_MLP_dim = 3
@@ -200,7 +201,7 @@ class DecentralController(nn.Module):
         # DCP
         for l in range(self.L):
             # \\ Graph filtering stage:
-            # There is a 3*l below here, because we have three elements per
+            # There is a epoch5*l below here, because we have three elements per
             # layer: graph filter, nonlinearity and pooling, so after each layer
             # we're actually adding elements to the (sequential) list.
             self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
@@ -223,20 +224,21 @@ class DecentralController(nn.Module):
             # DCP_nonGCN
             # shared_feature_currentAgent = extract_feature_map[:, :, id_agent]
             # DCP
-            # torch.index_select(shared_feature_currentAgent, 3, id_agent)
+            # torch.index_select(shared_feature_currentAgent, epoch5, id_agent)
             shared_feature_current = shared_feature[:, :, id_agent]
 
             shared_feature_flatten = shared_feature_current.view(
                 shared_feature_current.size(0), -1
             ).double()
-            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x 5
-            action_predict.append(action_current)  # N x 5
+            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x epoch1_6000
+            action_predict.append(action_current)  # N x epoch1_6000
 
         return action_predict
-class DecentralControllerReal(nn.Module):
+class GnnMapDecentralized(nn.Module):
     def __init__(
-        self, number_of_agent=3, input_width=100, input_height=100, use_cuda=False
+        self, number_of_agent, input_width, input_height, use_cuda
     ):
+        print("using GNN model controller (map no communication)")
         super().__init__()
         self.S = None
         self.number_of_agent = number_of_agent
@@ -254,7 +256,7 @@ class DecentralControllerReal(nn.Module):
         # # 1 layer origin
         node_signals_dim = [2**7]
 
-        # nGraphFilterTaps = [3,3,3]
+        # nGraphFilterTaps = [epoch5,epoch5,epoch5]
         graph_filter_taps_num = [3]
         # --- actionMLP
         action_MLP_dim = 3
@@ -428,7 +430,7 @@ class DecentralControllerReal(nn.Module):
         # DCP
         for l in range(self.L):
             # \\ Graph filtering stage:
-            # There is a 3*l below here, because we have three elements per
+            # There is a epoch5*l below here, because we have three elements per
             # layer: graph filter, nonlinearity and pooling, so after each layer
             # we're actually adding elements to the (sequential) list.
             self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
@@ -451,20 +453,24 @@ class DecentralControllerReal(nn.Module):
             # DCP_nonGCN
             # shared_feature_currentAgent = extract_feature_map[:, :, id_agent]
             # DCP
-            # torch.index_select(shared_feature_currentAgent, 3, id_agent)
+            # torch.index_select(shared_feature_currentAgent, epoch5, id_agent)
             shared_feature_current = shared_feature[:, :, id_agent]
 
             shared_feature_flatten = shared_feature_current.view(
                 shared_feature_current.size(0), -1
             ).double()
-            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x 5
-            action_predict.append(action_current)  # N x 5
+            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x epoch1_6000
+            action_predict.append(action_current)  # N x epoch1_6000
 
         return action_predict
 
-class DecentralControllerPose(nn.Module):
+
+
+class GnnPoseBasic(nn.Module):
     def __init__(self, number_of_agent=3, use_cuda=False):
+
         super().__init__()
+        print("using GNN model controller (Pose)")
         self.S = None
         self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
@@ -472,7 +478,7 @@ class DecentralControllerPose(nn.Module):
         compress_features_num = [2**5]
         node_signals_dim = [2**5]
 
-        # nGraphFilterTaps = [3,3,3]
+        # nGraphFilterTaps = [epoch5,epoch5,epoch5]
         graph_filter_taps_num = [3]
         # --- actionMLP
         action_MLP_dim = 3
@@ -616,7 +622,7 @@ class DecentralControllerPose(nn.Module):
         # DCP
         for l in range(self.L):
             # \\ Graph filtering stage:
-            # There is a 3*l below here, because we have three elements per
+            # There is a epoch5*l below here, because we have three elements per
             # layer: graph filter, nonlinearity and pooling, so after each layer
             # we're actually adding elements to the (sequential) list.
             self.GFL[2 * l].addGSO(self.S)  # add GSO for GraphFilter
@@ -639,20 +645,20 @@ class DecentralControllerPose(nn.Module):
             # DCP_nonGCN
             # shared_feature_currentAgent = extract_feature_map[:, :, id_agent]
             # DCP
-            # torch.index_select(shared_feature_currentAgent, 3, id_agent)
+            # torch.index_select(shared_feature_currentAgent, epoch5, id_agent)
             shared_feature_current = shared_feature[:, :, id_agent]
 
             shared_feature_flatten = shared_feature_current.view(
                 shared_feature_current.size(0), -1
             ).double()
-            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x 5
-            action_predict.append(action_current)  # N x 5
+            action_current = self.actionsMLP(shared_feature_flatten)  # 1 x epoch1_6000
+            action_predict.append(action_current)  # N x epoch1_6000
 
         return action_predict
 
-
 class DummyModel(nn.Module):
     def __init__(self, number_of_agent=3, use_cuda=False):
+        print("using dummy model controller")
         self.use_cuda = use_cuda
         self.number_of_agent = number_of_agent
         self.device = "cuda" if use_cuda else "cpu"
@@ -665,7 +671,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         mlp.append(
             nn.Linear(
                 in_features=128,
@@ -673,7 +680,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         mlp.append(
             nn.Linear(
                 in_features=128,
@@ -681,7 +689,8 @@ class DummyModel(nn.Module):
                 bias=True,
             )
         )
-        mlp.append(nn.LeakyReLU(inplace=True))
+        # mlp.append(nn.LeakyReLU(inplace=True))
+        mlp.append(nn.Tanh())
         self.MLP = nn.Sequential(*mlp).double()
         self.out_put = nn.Linear(
             in_features=2,

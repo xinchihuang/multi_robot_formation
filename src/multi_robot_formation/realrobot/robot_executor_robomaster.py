@@ -141,11 +141,6 @@ class Executor:
     """
 
     def __init__(self):
-        self.client_id = None
-        self.robot_handle = None
-        self.motor_left_handle = None
-        self.motor_right_handle = None
-        self.point_cloud_handle = None
         self.connector = UartConnector()
 
     def execute_control(self, control_data):
@@ -159,12 +154,15 @@ class Executor:
         print("x", velocity_x)
         print("y", velocity_y)
 
-        velocity_x= 1*abs(velocity_x)/velocity_x if abs(velocity_x)>1 else velocity_x
-        velocity_y = 1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 1 else velocity_yse
-        # msg = "command"
-        # self.connector.send_to_robot(msg)
+        velocity_x= 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x)>0.1 else velocity_x
+        velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
 
-        msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-            speed_x=velocity_x, speed_y=velocity_y, speed_z=0
-        )
+        if not velocity_x==0 or not velocity_y==0:
+            msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=0
+            )
+        else:
+            msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=0.1
+            )
         self.connector.send_to_robot(msg)

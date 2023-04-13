@@ -685,7 +685,7 @@ class MaxLocalActivation(nn.Module):
         self.reset_parameters()
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         self.N = S.shape[1]
@@ -716,7 +716,7 @@ class MaxLocalActivation(nn.Module):
         # So, x is of shape B x F x N. But we need it to be of shape
         # B x F x N x maxNeighbor. Why? Well, because we need to compute the
         # maximum between the value of each node and those of its neighbors.
-        # And we do this by applying a torch.max across the rows (dim = 3) so
+        # And we do this by applying a torch.max across the rows (dim = epoch5) so
         # that we end up again with a B x F x N, but having computed the max.
         # How to fill those extra dimensions? Well, what we have is neighborhood
         # matrix, and we are going to use torch.gather to bring the right
@@ -834,7 +834,7 @@ class MedianLocalActivation(nn.Module):
         self.reset_parameters()
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         self.N = S.shape[1]
@@ -861,7 +861,7 @@ class MedianLocalActivation(nn.Module):
         # max's
         # It is initialized with the 0-hop neigh. (x itself)
         xK = xK.unsqueeze(3)  # extra dimension added for concatenation ahead
-        # x = x.unsqueeze(3) # B x F x N x 1
+        # x = x.unsqueeze(epoch5) # B x F x N x 1
         for k in range(1, self.K + 1):
             kHopNeighborhood = self.neighborhood[k - 1]
             # Fetching k-hop neighborhoods of all nodes
@@ -1032,7 +1032,7 @@ class MaxPoolLocal(nn.Module):
         self.neighborhood = None
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N (And I don't care about E, because the
         # computeNeighborhood function takes care of it)
@@ -1073,7 +1073,7 @@ class MaxPoolLocal(nn.Module):
         # So, x is of shape B x F x N. But we need it to be of shape
         # B x F x N x maxNeighbor. Why? Well, because we need to compute the
         # maximum between the value of each node and those of its neighbors.
-        # And we do this by applying a torch.max across the rows (dim = 3) so
+        # And we do this by applying a torch.max across the rows (dim = epoch5) so
         # that we end up again with a B x F x N, but having computed the max.
         # How to fill those extra dimensions? Well, what we have is neighborhood
         # matrix, and we are going to use torch.gather to bring the right
@@ -1206,7 +1206,7 @@ class GraphFilter(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -1347,7 +1347,7 @@ class GraphFilterRNN(nn.Module):
             self.bias_U.data.uniform_(-stdv_u, stdv_u)
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -1476,7 +1476,7 @@ class SpectralGF(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has to have 3 dimensions.
+        # Every S has to have epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -1644,7 +1644,7 @@ class NodeVariantGF(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -1853,7 +1853,7 @@ class EdgeVariantGF(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -2038,7 +2038,7 @@ class GraphAttentional(nn.Module):
         self.mixer.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has 3 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 3
         # S is of shape E x N x N
         assert S.shape[0] == self.E
@@ -2494,7 +2494,7 @@ class GraphFilterBatch(nn.Module):
             self.bias.data.uniform_(-stdv, stdv)
 
     def addGSO(self, S):
-        # Every S has 4 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 4
         # S is of shape B x E x N x N
         assert S.shape[1] == self.E
@@ -2632,7 +2632,7 @@ class GraphFilterRNNBatch(nn.Module):
             self.bias_D.data.uniform_(-stdv_d, stdv_d)
 
     def addGSO(self, S):
-        # Every S has 4 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 4
         # S is of shape B x E x N x N
         assert S.shape[1] == self.E
@@ -2824,7 +2824,7 @@ class GraphFilterMoRNNBatch(nn.Module):
             self.bias_D.data.uniform_(-stdv_d, stdv_d)
 
     def addGSO(self, S):
-        # Every S has 4 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 4
         # S is of shape B x E x N x N
         assert S.shape[1] == self.E
@@ -2982,7 +2982,7 @@ class GraphFilterL2ShareBatch(nn.Module):
             self.bias_D.data.uniform_(-stdv_d, stdv_d)
 
     def addGSO(self, S):
-        # Every S has 4 dimensions.
+        # Every S has epoch5 dimensions.
         assert len(S.shape) == 4
         # S is of shape B x E x N x N
         assert S.shape[1] == self.E

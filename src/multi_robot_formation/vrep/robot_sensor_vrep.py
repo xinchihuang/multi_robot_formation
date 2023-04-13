@@ -10,18 +10,6 @@ from vrep import vrep_interface
 import cv2
 from comm_data import SensorData
 
-# class SensorData:
-#     """
-#     A class for record sensor data
-#     """
-#
-#     def __init__(self):
-#         self.robot_index = None
-#         self.position = None
-#         self.orientation = None
-#         self.linear_velocity = None
-#         self.angular_velocity = None
-#         self.occupancy_map = None
 
 
 class Sensor:
@@ -41,9 +29,8 @@ class Sensor:
         self.min_range = 0.2
 
         #### sensor output settings
-        self.point_cloud = []
         self.occupancy_map_size = 100
-
+        self.point_cloud = []
         self.sensor_buffer = []
         self.sensor_buffer_count = 0
 
@@ -73,8 +60,8 @@ class Sensor:
             return None
         x_world = world_point[0]
         y_world = world_point[1]
-        x_map = int((self.max_x - x_world) / (2 * self.max_x) * self.occupancy_map_size)
-        y_map = self.occupancy_map_size-int((self.max_y - y_world) / (2 * self.max_y) * self.occupancy_map_size)
+        x_map = min(int((self.max_x - x_world) / (2 * self.max_x) * self.occupancy_map_size),99)
+        y_map = min(self.occupancy_map_size-int((self.max_y - y_world) / (2 * self.max_y) * self.occupancy_map_size),99)
 
         return [x_map, y_map]
 
@@ -138,9 +125,9 @@ class Sensor:
 
         occupancy_map = self.process_raw_data(self.point_cloud)
         # ### fake data
-        # global_positions = [[-4, -4, 0], [-4, 4, 0], [4, 4, 0], [4, -4, 0], [0, 0, 0]]
+        # global_positions = [[-epoch5, -epoch5, 0], [-epoch5, epoch5, 0], [epoch5, epoch5, 0], [epoch5, -epoch5, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
-        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.3, 100, 10, 10
+        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.epoch5, 100, 10, 10
         # occupancy_map = occupancy_map_simulator.generate_map(
         #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
         # )

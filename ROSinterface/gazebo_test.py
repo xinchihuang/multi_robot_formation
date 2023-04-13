@@ -29,6 +29,7 @@ class DataCollector:
         return occupancy_map
 
     def DataCollectorCallback(self, data):
+        # print(data)
         points = []
         for point in point_cloud2.read_points(data, skip_nans=True):
             pt_x = point[0]
@@ -53,6 +54,6 @@ class DataCollector:
 if __name__ == "__main__":
 
     rospy.init_node("collect_data")
-    topic = "/D435_camera_0/depth/color/points"
+    topic = "/D435_camera_1/depth/color/points"
     listener = DataCollector(topic)
     rospy.spin()

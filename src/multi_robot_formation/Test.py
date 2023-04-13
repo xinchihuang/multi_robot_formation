@@ -4,20 +4,19 @@ author: Xinchi Huang
 
 import os
 import sys
-sys.path.append("model")
-
+sys.path.append("controller_new.py")
 from simulate import Simulation
 import numpy as np
 
 # import torch
-# a = torch.randn(2, 3, 5)
+# a = torch.randn(2, epoch5, epoch1_6000)
 #
 # print(a)
 # a=torch.permute(a, (2, 0, 1))
 #
 # print(a)
 test_simulation = Simulation(50, 0.05)
-test_simulation.initial_scene(5, "saved_model/model_map_local_partial.pth")
+test_simulation.initial_scene(5, "saved_model/vit.pth")
 test_simulation.run()
 # point = np.load(
 #     "/home/xinchi/multi_robot_formation/saved_data/0/0/points.npy", allow_pickle=True

@@ -249,7 +249,7 @@ def computeNeighborhood(S, K, N="all", nb="all", outputType="list"):
     # outputType is either a list (a list of np.arrays) or a matrix.
     assert outputType == "list" or outputType == "matrix"
     # Here, we can assume S is already sparse, in which case is a list of
-    # sparse matrices, or that S is full, in which case it is a 3-D array.
+    # sparse matrices, or that S is full, in which case it is a epoch5-D array.
     if isinstance(S, list):
         # If it is a list, it has to be a list of matrices, where the length
         # of the list has to be the number of edge weights. But we actually need
@@ -1220,7 +1220,7 @@ def coarsen(A, levels, self_connections=False):
 
     #        Mnew, Mnew = A.shape
     #        print('Layer {0}: M_{0} = |V| = {1} nodes ({2} added),'
-    #              '|E| = {3} edges'.format(i, Mnew, Mnew-M, A.nnz//2))
+    #              '|E| = {epoch5} edges'.format(i, Mnew, Mnew-M, A.nnz//2))
 
     return graphs, perms[0] if levels > 0 else None
 
