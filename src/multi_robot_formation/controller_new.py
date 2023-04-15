@@ -34,39 +34,6 @@ class Controller:
     def __init__(self,desired_distance=2):
         self.desired_distance=desired_distance
         self.name=None
-class LocalExpertController(Controller):
-    def __init__(self,desired_distance=2):
-        super().__init__(desired_distance)
-        self.name="CentralizedController"
-    def get_control(self,position_list_local):
-        """
-        :param position_list_local: local position list for training
-        """
-        position_array=np.array(position_list_local)
-        out_put = ControlData()
-        neighbor=np.ones(len(position_list_local))
-        for v in range(len(position_list_local)):
-            m = (position_array[v]) / 2
-            for w in range(len(position_list_local)):
-                if w == v:
-                    continue
-                if np.linalg.norm(position_array[w] - m) < np.linalg.norm(m):
-                    neighbor[v]=0
-        velocity_sum_x =0
-        velocity_sum_y =0
-        for i in range(len(position_list_local)):
-            if neighbor[i]==1:
-                distance = (position_array[i][0]** 2 + position_array[i][1]** 2)**0.5
-                rate = (distance - self.desired_distance) / distance
-                velocity_x = rate * (-position_array[i][0])
-                velocity_y = rate * (-position_array[i][1])
-                velocity_sum_x -= velocity_x
-                velocity_sum_y -= velocity_y
-        print(neighbor)
-        out_put.velocity_x = velocity_sum_x
-        out_put.velocity_y = velocity_sum_y
-
-        return out_put
 class CentralizedController(Controller):
     """
     A centralized controller
@@ -82,7 +49,7 @@ class CentralizedController(Controller):
         :param self_position: Robot's self position (type: 1D iterator)
         :return: Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
 
         if neighbors == None:
@@ -166,7 +133,7 @@ class GnnMapBasicControllerSensor(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
         if not scene_data:
 
@@ -269,7 +236,7 @@ class GnnMapBasicControllerSynthesise(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
         if not scene_data:
             print("No scene data")
@@ -387,7 +354,7 @@ class GnnMapDecentralizedControllerSensor(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
         if not scene_data:
             print("No scene data")
@@ -489,7 +456,7 @@ class GnnMapDecentralizedControllerSynthesise(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
         self_input_occupancy_maps = np.zeros(
             (1, self.num_robot, self.input_width, self.input_height)
@@ -566,6 +533,7 @@ class GnnPoseBasicController(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
+        print(self.name)
         out_put = ControlData()
         if not scene_data:
             print("No scene data")
@@ -675,6 +643,7 @@ class DummyController(Controller):
         :param position_lists_local: Data from the scene (type: 2D iterator)
         :return:Control data (type: ControlData)
         """
+        print(self.name)
         print(position_lists_local)
         out_put = ControlData()
         position_array_local = np.zeros((1, 1, len(position_lists_local), 3))
@@ -754,7 +723,7 @@ class VitController(Controller):
         :param scene_data: Data from the scene (type: SceneData)
         :return:Control data (type: ControlData)
         """
-
+        print(self.name)
         out_put = ControlData()
         self_input_occupancy_maps = np.zeros(
             (1, 1, self.input_width, self.input_height)

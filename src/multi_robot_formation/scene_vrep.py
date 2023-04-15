@@ -19,6 +19,7 @@ from vrep.robot_sensor_vrep import Sensor
 from comm_data import SceneData
 from recorder import Recorder
 from controller_new import *
+from model.LocalExpertController import LocalExpertController
 class Scene:
     """
     Scene for multiple robots
@@ -47,8 +48,9 @@ class Scene:
         self.platform = "vrep"
         self.controller_type = "vit"
         self.sensor_type = "synthesise"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.8.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+        # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
             self.add_robot_vrep(i,controller=self.controller,desired_distance=self.desired_distance)
         self.reset_pose(self.initial_max_range, self.initial_min_range)
