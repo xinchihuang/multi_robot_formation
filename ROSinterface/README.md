@@ -38,15 +38,19 @@
   1. Start ROS
   
   `rosecore`
+  
   2. Start realsense camera
   
   `roslaunch realsense2_camera rs_rgbd.launch `
+  
   3. Start cmvision_3d
   
   `roslaunch cmvision_3d color_tracker.launch `
+  
   4. Start expert control 
   
   `rosrun multi_robot_formation expert_control.py `
+  
 ### Interactions with other models
     
   Interface is defined in model_control_ros.py. You can use the ModelControl as ros interface or you can define your own.
