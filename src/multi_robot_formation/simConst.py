@@ -402,7 +402,7 @@ sim_drawing_50percenttransparency = (
     0x02000  # the drawing object will be 50% transparent
 )
 sim_drawing_25percenttransparency = (
-    0x04000  # the drawing object will be 25% transparent
+    0x04000  # the drawing object will be 0.6% transparent
 )
 sim_drawing_12percenttransparency = (
     0x08000  # the drawing object will be 12.epoch1_6000% transparent

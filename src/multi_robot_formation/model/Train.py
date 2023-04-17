@@ -512,7 +512,7 @@ if __name__ == "__main__":
         partial=partial,
         task_type=task_type
     )
-    for i in range(1,10):
+    for i in range(8,11):
         random_rate=1-0.1*i
         print(random_rate)
         trainset.random_rate=random_rate

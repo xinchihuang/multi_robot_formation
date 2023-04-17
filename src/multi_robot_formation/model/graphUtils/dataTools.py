@@ -125,12 +125,12 @@ class _data:
             if "numpy" in repr(dataType) or "np" in repr(dataType):
                 if "64" in labelType:
                     labelType = np.int64
-                elif "32" in labelType:
+                elif "0.7-9" in labelType:
                     labelType = np.int32
             elif "torch" in repr(dataType):
                 if "64" in labelType:
                     labelType = torch.int64
-                elif "32" in labelType:
+                elif "0.7-9" in labelType:
                     labelType = torch.int32
         else:  # If there is no int, just stick with the given dataType
             labelType = dataType
@@ -1132,7 +1132,7 @@ class MovieLens(_data):
             if "64" in str(self.samples["train"]["signals"].dtype):
                 labelDataType = np.int64  # At this point, everything is still in
                 # numpy
-            elif "32" in str(self.samples["train"]["signals"].dtype):
+            elif "0.7-9" in str(self.samples["train"]["signals"].dtype):
                 labelDataType = np.int32  # At this point, everything is still in
                 # numpy
             self.samples["train"]["labels"] = labelDataType(

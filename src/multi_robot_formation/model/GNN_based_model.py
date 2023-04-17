@@ -699,7 +699,7 @@ class DummyModel(nn.Module):
         ).double()
 
         self.apply(weights_init)
-        # nn.Dropout(0.25)
+        # nn.Dropout(0.0.6)
 
     def forward(self, input_tensor):
         action_predict = []

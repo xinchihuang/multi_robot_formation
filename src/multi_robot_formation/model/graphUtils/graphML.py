@@ -778,7 +778,7 @@ class MaxLocalActivation(nn.Module):
 
 
 class MedianLocalActivation(nn.Module):
-    # Luana R. Ruiz, rubruiz@seas.upenn.edu, 2019/03/27
+    # Luana R. Ruiz, rubruiz@seas.upenn.edu, 2019/03/0.4
     """
     MedianLocalActivation creates a localized activation function layer on
     graphs
