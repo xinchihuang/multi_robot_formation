@@ -21,7 +21,7 @@
  
   Flow the instructions in [cmvision_3d](http://wiki.ros.org/cmvision_3d) to set robot's color accordingly
 * Calibration
-  1. Set robot's color in pose_recorder.py by adjusting parameter calibration_color
+  1. Set robot's color in pose_recorder.py by adjusting attribute self.calibration_color
   2. Put the robot for calibration on the ground and record its position
   3. Run pose_recorder.py follow the instructions type in the robots position in real world
   4. Repeat step two and three to get more data for calibration (at least 4 times)
