@@ -79,11 +79,12 @@ class Executor:
         Use interface/APIs to execute control in simulator/real world
         :param control_data: Controls to be executed
         """
-        velocity_x = control_data.velocity_x
-        velocity_y = control_data.velocity_y
-
-        theta = control_data.orientation[2]
-        omega_left, omega_right = self.velocity_transform(velocity_x, velocity_y, theta)
+        velocity_x_local = control_data.velocity_x
+        velocity_y_local = control_data.velocity_y
+        theta_global = control_data.orientation[2]
+        velocity_x_global=velocity_x_local*math.cos(theta_global)-velocity_y_local*math.sin(theta_global)
+        velocity_v_global=velocity_x_local*math.sin(theta_global)+velocity_y_local*math.cos(theta_global)
+        omega_left, omega_right = self.velocity_transform(velocity_x_global, velocity_v_global, theta_global)
         omega_left = omega_left * self.wheel_adjustment
         omega_right = omega_right * self.wheel_adjustment
         vrep_interface.post_control(

@@ -91,8 +91,8 @@ class MapSimulator:
             or z < -self.max_height
         ):  #
             return None
-        if x < min_range and y < min_range and x > -min_range and y > -min_range:
-            return None
+        # if x < min_range and y < min_range and x > -min_range and y > -min_range:
+        #     return None
         if self.partial:
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
@@ -127,7 +127,7 @@ class MapSimulator:
 
     def blocking(self, position_lists_local):
         """
-        Handle the blocking case, Remove the f
+        Handle the blocking case, Remove the further robots
         :param position_lists_local:
         :return:
         """

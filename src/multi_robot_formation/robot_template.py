@@ -14,7 +14,7 @@ import numpy as np
 from multi_robot_formation.controller_new import *
 from multi_robot_formation.comm_data import ControlData,SceneData,SensorData
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
-
+import cv2
 class Robot:
     """
     A robot template. Used for handling different components and store data for components.
@@ -123,6 +123,27 @@ class Robot:
                     occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
+                elif self.controller.name == "LocalExpertController":
+
+                    position_lists_global = self.scene_data.position_list
+                    print(position_lists_global)
+                    orientation_list = self.scene_data.orientation_list
+                    print(orientation_list)
+                    occupancy_map_simulator = MapSimulator(local=True)
+                    (
+                        position_lists_local,
+                        self_orientation,
+                    ) = occupancy_map_simulator.global_to_local(
+                        np.array(position_lists_global), np.array(orientation_list)
+                    )
+                    occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                    cv2.imshow("robot view " + str(self.index) + "(Synthesise)", occupancy_map)
+                    cv2.waitKey(1)
+                    self.sensor_data.occupancy_map = occupancy_map
+                    self.control_data=self.controller.get_control(position_lists_local[self.index])
+                    self.control_data.robot_index=self.index
+                    print(self.index,self.control_data.velocity_x,self.control_data.velocity_y)
+
             else:
                 self.control_data.robot_index=self.index
                 self.control_data.velocity_x=0

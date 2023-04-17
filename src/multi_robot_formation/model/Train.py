@@ -39,7 +39,8 @@ class RobotDatasetTrace(Dataset):
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
         self.task_type=task_type
-
+        self.random_rate=1
+        self.random_range=(1,2)
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
@@ -71,18 +72,20 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
-        if use_random > 0.9:
-            global_pose_array = 4 * np.random.random((self.number_of_agents, 3)) - 2
+        if use_random > self.random_rate:
+            global_pose_array = np.random.uniform(self.random_range[0], self.random_range[1], size=(self.number_of_agents,3))
+            if random.uniform(0, 1)<0.5:
+                global_pose_array=global_pose_array*-1
             global_pose_array[:, 2] = 0
             self_orientation_array = (
                     2 * math.pi * np.random.random(self.number_of_agents) - math.pi
             )
-        if use_random < 0.1:
-            global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
-            global_pose_array[:, 2] = 0
-            self_orientation_array = (
-                    2 * math.pi * np.random.random(self.number_of_agents) - math.pi
-            )
+        # if use_random < 0.2:
+        #     global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
+        #     global_pose_array[:, 2] = 0
+        #     self_orientation_array = (
+        #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+        #     )
 
         data_generator = DataGenerator(local=self.local, partial=self.partial)
         if self.task_type=="all":
@@ -143,6 +146,7 @@ class Trainer:
         if_continue=False,
         load_model_path='',
         use_cuda=True,
+        random_rate=1.
     ):
 
 
@@ -171,8 +175,7 @@ class Trainer:
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
         self.max_epoch=max_epoch
 
-
-
+        self.random_rate = random_rate
         self.use_cuda = use_cuda
         if self.use_cuda:
             self.model = self.model.to("cuda")
@@ -365,7 +368,7 @@ class Trainer:
                     total = 0
                     self.save(
                         "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/" + "model_" + str(
-                            iteration) + "_epoch" + str(self.epoch) + ".pth")
+                            iteration) + "_epoch" + str(self.epoch)+"_random"+str(self.random_rate) + ".pth")
 
                     #control
                     total_loss_eval = 0
@@ -499,7 +502,7 @@ if __name__ == "__main__":
         number_of_agents=number_of_robot,
         local=local,
         partial=partial,
-        task_type=task_type
+        task_type=task_type,
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -509,25 +512,32 @@ if __name__ == "__main__":
         partial=partial,
         task_type=task_type
     )
+    for i in range(8,11):
+        random_rate=1-0.1*i
+        print(random_rate)
+        trainset.random_rate=random_rate
+        evaluateset.random_rate=random_rate
+        trainset.random_range = (1,3)
+        evaluateset.random_range = (1,3)
 
 
-
-    T = Trainer(
-        model=model,
-        trainset=trainset,
-        evaluateset=evaluateset,
-        number_of_agent=number_of_robot,
-        criterion=criterion,
-        optimizer=optimizer,
-        batch_size=batch_size,
-        learning_rate=learning_rate,
-        max_epoch=max_epoch,
-        use_cuda=use_cuda,
-        task_type=task_type
-    )
-    print(T.optimizer)
-    T.train()
-    T.save(save_model_path)
+        T = Trainer(
+            model=model,
+            trainset=trainset,
+            evaluateset=evaluateset,
+            number_of_agent=number_of_robot,
+            criterion=criterion,
+            optimizer=optimizer,
+            batch_size=batch_size,
+            learning_rate=learning_rate,
+            max_epoch=max_epoch,
+            use_cuda=use_cuda,
+            task_type=task_type,
+            random_rate=random_rate
+        )
+        print(T.optimizer)
+        T.train()
+        T.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit"+str(random_rate)+".pth")
 
 #
 
