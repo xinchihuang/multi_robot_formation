@@ -48,7 +48,7 @@ class Scene:
         self.platform = "vrep"
         self.controller_type = "vit"
         self.sensor_type = "synthesise"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.4.pth"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.8.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
