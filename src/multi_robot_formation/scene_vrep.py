@@ -41,14 +41,14 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=9
+        self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
         self.platform = "vrep"
         self.controller_type = "vit"
         self.sensor_type = "synthesise"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.8.pth"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
@@ -163,8 +163,8 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],
-                     [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],]
+                     # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
