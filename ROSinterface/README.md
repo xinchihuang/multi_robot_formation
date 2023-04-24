@@ -1,6 +1,6 @@
 # A simple platform for multi-robot control with ROS
 ## Prerequisites
-* Robot platform: Robomaster EP
+* Robot platform: Robomaster EP Core
 * Sensor: Intel realsense D435i
 * Operating system: Ubuntu 18.04/Ubuntu 20.04
 * ROS version: melodic/noetic 
