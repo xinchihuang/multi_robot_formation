@@ -39,7 +39,7 @@
 * Expert Control
   1. Start ROS
   
-  `rosecore`
+  `roscore`
   
   2. Start realsense camera
   
