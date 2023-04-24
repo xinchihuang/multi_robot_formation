@@ -30,7 +30,7 @@ class RobotDatasetTrace(Dataset):
         number_of_agents,
         local,
         partial,
-        random_raange,
+        random_range,
         task_type="all",
 
     ):
