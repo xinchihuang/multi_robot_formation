@@ -3,7 +3,7 @@
 Robot platform: Robomaster EP
 Sensor: Intel realsense D435i
 Operating system: Ubuntu 18.04/Ubuntu 20.04
-1. [ ] ###### ROS version: melodic/noetic 
+ROS version: melodic/noetic 
 ## Dependencies
 * ROS package
   * [cmvision](http://wiki.ros.org/cmvision)
