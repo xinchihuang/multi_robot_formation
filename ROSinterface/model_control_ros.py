@@ -33,7 +33,7 @@ class ModelControl:
         self.robot = Robot(
             sensor=None,
             executor=Executor(),
-            controller=VitController(),
+            controller=self.controller,
             platform="robomaster",
             controller_type="model_decentralized",
             model_path=self.model_path
