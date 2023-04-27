@@ -1,6 +1,6 @@
 # A simple platform for multi-robot control with ROS
 ## Prerequisites
-* Robot platform: Robomaster EP
+* Robot platform: Robomaster EP Core
 * Sensor: Intel realsense D435i
 * Operating system: Ubuntu 18.04/Ubuntu 20.04
 * ROS version: melodic/noetic 
@@ -14,6 +14,8 @@
   * pyrealsense2
   * cv2
   * socket
+  * scipy
+  * pandas
 ## Usage
 
 ### Localization
@@ -21,7 +23,7 @@
  
   Flow the instructions in [cmvision_3d](http://wiki.ros.org/cmvision_3d) to set robot's color accordingly
 * Calibration
-  1. Set robot's color in pose_recorder.py by adjusting parameter calibration_color
+  1. Set robot's color in pose_recorder.py by adjusting attribute self.calibration_color
   2. Put the robot for calibration on the ground and record its position
   3. Run pose_recorder.py follow the instructions type in the robots position in real world
   4. Repeat step two and three to get more data for calibration (at least 4 times)
@@ -37,16 +39,20 @@
 * Expert Control
   1. Start ROS
   
-  `rosecore`
+  `roscore`
+  
   2. Start realsense camera
   
   `roslaunch realsense2_camera rs_rgbd.launch `
+  
   3. Start cmvision_3d
   
   `roslaunch cmvision_3d color_tracker.launch `
+  
   4. Start expert control 
   
   `rosrun multi_robot_formation expert_control.py `
+  
 ### Interactions with other models
     
   Interface is defined in model_control_ros.py. You can use the ModelControl as ros interface or you can define your own.

@@ -41,7 +41,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=9
+        self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
@@ -67,6 +67,8 @@ class Scene:
             controller=controller,
             desired_distance=desired_distance,
             platform=self.platform,
+            controller_type=self.controller_type,
+            sensor_type=self.sensor_type,
             model_path = self.model_path
         )
         new_robot.index = robot_index
@@ -159,8 +161,8 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],
-                     [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],]
+                     # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):

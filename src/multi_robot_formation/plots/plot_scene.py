@@ -159,6 +159,8 @@ def plot_formation_gabreil(pose_array, save_path):
     plt.scatter(position_array[:, 0], position_array[:, 1])
     xlist=[]
     ylist=[]
+    formation_error=0
+    count=0
     for i in range(rob_num):
         for j in range(i + 1, rob_num):
             if gabriel_graph[i][j] == 0:
@@ -169,8 +171,11 @@ def plot_formation_gabreil(pose_array, save_path):
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
             plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
+            count+=1
+            formation_error+=abs(distance-2)
+
     plt.legend()
-    plt.title("Formation")
+    plt.title("Average Formation Error: "+str(formation_error/count))
     plt.xlabel("distance(m)")
     plt.ylabel("distance(m)")
     plt.xlim(min(xlist)-5, min(xlist)+5)
@@ -246,4 +251,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/0.4-9")
+    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/0.9")
