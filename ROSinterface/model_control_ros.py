@@ -35,7 +35,6 @@ class ModelControl:
             executor=Executor(),
             controller=self.controller,
             platform="robomaster",
-            controller_type="model_decentralized",
             model_path=self.model_path
         )
 
