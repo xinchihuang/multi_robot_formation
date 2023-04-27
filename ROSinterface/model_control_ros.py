@@ -35,7 +35,6 @@ class ModelControl:
             executor=Executor(),
             controller=self.controller,
             platform="robomaster",
-            model_path=self.model_path
         )
 
         self.topic = topic
