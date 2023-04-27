@@ -32,6 +32,7 @@ class ModelControl:
         self.robot = Robot(
             sensor=None,
             executor=Executor(),
+            controller=VitController(),
             desired_distance = 1.0,
             platform="robomaster",
             controller_type="model_decentralized",
