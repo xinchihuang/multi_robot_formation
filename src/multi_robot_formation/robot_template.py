@@ -21,9 +21,8 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,controller,desired_distance=1.0,model_path="saved_model/model_12000.pth", platform="vrep"
+        self, sensor, executor,controller, platform="vrep"
     ):
-        self.desired_distance=desired_distance
         self.index = None
         self.GNN_model = None
         self.sensor_data = SensorData()
@@ -34,8 +33,6 @@ class Robot:
         self.sensor = sensor
         self.executor = executor
         self.controller=controller
-
-        self.model_path=model_path
 
         # if self.controller_type == "expert":
         #     self.controller=CentralizedController()
