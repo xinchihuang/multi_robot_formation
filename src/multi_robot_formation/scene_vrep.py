@@ -67,8 +67,6 @@ class Scene:
             controller=controller,
             desired_distance=desired_distance,
             platform=self.platform,
-            controller_type=self.controller_type,
-            sensor_type=self.sensor_type,
             model_path = self.model_path
 
         )
