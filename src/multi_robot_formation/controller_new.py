@@ -27,9 +27,9 @@ from .model.GNN_based_model import (
 )
 from .model.vit_model import ViT
 import cv2
-from utils.occupancy_map_simulator import MapSimulator
-from comm_data import ControlData
-from  utils.gabreil_graph import get_gabreil_graph
+from .utils.occupancy_map_simulator import MapSimulator
+from .comm_data import ControlData
+from  .utils.gabreil_graph import get_gabreil_graph
 class Controller:
     def __init__(self,desired_distance=2):
         self.desired_distance=desired_distance
