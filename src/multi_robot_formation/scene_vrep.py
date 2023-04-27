@@ -46,9 +46,7 @@ class Scene:
         self.initial_max_range=10
         self.initial_min_range=1
         self.platform = "vrep"
-        self.controller_type = "vit"
-        self.sensor_type = "synthesise"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.4.pth"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
@@ -69,8 +67,6 @@ class Scene:
             controller=controller,
             desired_distance=desired_distance,
             platform=self.platform,
-            controller_type=self.controller_type,
-            sensor_type=self.sensor_type,
             model_path = self.model_path
         )
         new_robot.index = robot_index

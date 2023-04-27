@@ -5,7 +5,7 @@ import sys
 import os
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
-from multi_robot_formation.controller import Controller
+from multi_robot_formation.controller_new import VitController
 from multi_robot_formation.robot_template import Robot
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 
@@ -26,12 +26,13 @@ class ModelControl:
 
         self.model_path = os.path.join(
             os.getcwd()
-            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_position_2.pth"
+            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
         )
 
         self.robot = Robot(
             sensor=None,
             executor=Executor(),
+            desired_distance = 1.0,
             platform="robomaster",
             controller_type="model_decentralized",
             model_path=self.model_path

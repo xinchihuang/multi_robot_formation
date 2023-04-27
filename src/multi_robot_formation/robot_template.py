@@ -21,7 +21,7 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,controller,desired_distance=1.0,model_path="saved_model/model_12000.pth", platform="vrep", controller_type="expert",sensor_type="synthesise"
+        self, sensor, executor,controller,desired_distance=1.0,model_path="saved_model/model_12000.pth", platform="vrep"
     ):
         self.desired_distance=desired_distance
         self.index = None
@@ -31,8 +31,6 @@ class Robot:
         self.scene_data = SceneData()
 
         self.platform = platform
-        self.controller_type = controller_type
-        self.sensor_type=sensor_type
         self.sensor = sensor
         self.executor = executor
         self.controller=controller
