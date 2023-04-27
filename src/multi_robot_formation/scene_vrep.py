@@ -70,6 +70,7 @@ class Scene:
             controller_type=self.controller_type,
             sensor_type=self.sensor_type,
             model_path = self.model_path
+
         )
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
