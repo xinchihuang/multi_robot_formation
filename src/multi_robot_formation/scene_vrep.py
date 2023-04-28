@@ -65,9 +65,7 @@ class Scene:
             sensor=Sensor(),
             executor=Executor(),
             controller=controller,
-            desired_distance=desired_distance,
             platform=self.platform,
-            model_path = self.model_path
 
         )
         new_robot.index = robot_index
