@@ -253,6 +253,7 @@ class MapSimulator:
         try:
             for world_points in position_list_local:
                 map_points = self.world_to_map(world_points, self.map_size, self.max_x, self.max_y)
+                print(map_points)
                 if map_points == None:
                     continue
                 x = map_points[0]
