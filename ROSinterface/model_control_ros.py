@@ -86,13 +86,13 @@ class ModelControl:
             if -0.2<z_c<0.2:
             # print(blob.name,x_w,y_w,z_w)
                 position_list_local.append([x_c, y_c, z_c])
-        print("position",position_list_local)
-        occupancy_map_simulator = MapSimulator()
-        occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
         if len(position_list_local) == 0:
             print("no data")
             model_data=ControlData()
         else:
+            print("position", position_list_local)
+            occupancy_map_simulator = MapSimulator()
+            occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
             # model_data=self.simple_control(position_list_local,0,1)
             # self.robot.controller.num_robot=epoch5
             model_data=self.robot.controller.get_control(0,occupancy_map)
