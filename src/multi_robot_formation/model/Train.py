@@ -30,7 +30,7 @@ class RobotDatasetTrace(Dataset):
         number_of_agents,
         local,
         partial,
-        random_raange,
+        random_range,
         task_type="all",
 
     ):
@@ -42,7 +42,7 @@ class RobotDatasetTrace(Dataset):
         self.number_of_agents = number_of_agents
         self.task_type=task_type
         self.random_rate=0
-        self.random_range=random_raange
+        self.random_range=random_range
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []

@@ -5,7 +5,7 @@ import sys
 import os
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
-from multi_robot_formation.controller import Controller
+from multi_robot_formation.controller_new import VitController
 from multi_robot_formation.robot_template import Robot
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 
@@ -26,15 +26,15 @@ class ModelControl:
 
         self.model_path = os.path.join(
             os.getcwd()
-            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_map_local_full_position_2.pth"
+            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
         )
-
+        self.desired_distance=1.0
+        self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         self.robot = Robot(
             sensor=None,
             executor=Executor(),
+            controller=self.controller,
             platform="robomaster",
-            controller_type="model_decentralized",
-            model_path=self.model_path
         )
 
         self.topic = topic
@@ -86,13 +86,13 @@ class ModelControl:
             if -0.2<z_c<0.2:
             # print(blob.name,x_w,y_w,z_w)
                 position_list_local.append([x_c, y_c, z_c])
-        print(position_list_local)
-        occupancy_map_simulator = MapSimulator(local=True)
-        occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
         if len(position_list_local) == 0:
             print("no data")
             model_data=ControlData()
         else:
+            print("position", position_list_local)
+            occupancy_map_simulator = MapSimulator()
+            occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
             # model_data=self.simple_control(position_list_local,0,1)
             # self.robot.controller.num_robot=epoch5
             model_data=self.robot.controller.get_control(0,occupancy_map)
