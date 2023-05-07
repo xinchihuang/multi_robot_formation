@@ -23,7 +23,7 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 
 class ModelControl:
     def __init__(self, topic):
-
+        print(os.path.abspath('..'))
         self.model_path = "../src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
 
         self.desired_distance=1.0
