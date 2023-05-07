@@ -3,10 +3,10 @@ import numpy as np
 import os
 import math
 # # Creating dataset
-# np.random.seed(10)
+# np.random.seed(4)
 # data = np.random.normal(100, 20, 200)
 #
-# fig = plt.figure(figsize=(10, 7))
+# fig = plt.figure(figsize=(4, 7))
 #
 # # Creating plot
 # plt.boxplot(data)

@@ -121,9 +121,7 @@ class Robot:
                 elif self.controller.name == "LocalExpertController":
 
                     position_lists_global = self.scene_data.position_list
-                    print(position_lists_global)
                     orientation_list = self.scene_data.orientation_list
-                    print(orientation_list)
                     occupancy_map_simulator = MapSimulator(local=True)
                     (
                         position_lists_local,

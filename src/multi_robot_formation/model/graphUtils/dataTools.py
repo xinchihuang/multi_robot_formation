@@ -125,12 +125,12 @@ class _data:
             if "numpy" in repr(dataType) or "np" in repr(dataType):
                 if "64" in labelType:
                     labelType = np.int64
-                elif "0.7-9" in labelType:
+                elif "0.7-1" in labelType:
                     labelType = np.int32
             elif "torch" in repr(dataType):
                 if "64" in labelType:
                     labelType = torch.int64
-                elif "0.7-9" in labelType:
+                elif "0.7-1" in labelType:
                     labelType = torch.int32
         else:  # If there is no int, just stick with the given dataType
             labelType = dataType
@@ -378,7 +378,7 @@ class SourceLocalization(_dataForClassification):
             device (string): target device to move the variables to (e.g. 'cpu',
                 'cuda:0', etc.)
 
-    accuracy = .evaluate(yHat, y, tol = 1e-9)
+    accuracy = .evaluate(yHat, y, tol = 1e-1)
         Input:
             yHat (dtype.array): estimated labels (1-D binary vector)
             y (dtype.array): correct labels (1-D binary vector)
@@ -537,7 +537,7 @@ class Authorship(_dataForClassification):
             device (string): target device to move the variables to (e.g. 'cpu',
                 'cuda:0', etc.)
 
-    accuracy = .evaluate(yHat, y, tol = 1e-9)
+    accuracy = .evaluate(yHat, y, tol = 1e-1)
         Input:
             yHat (dtype.array): estimated labels (1-D binary vector)
             y (dtype.array): correct labels (1-D binary vector)
@@ -1132,7 +1132,7 @@ class MovieLens(_data):
             if "64" in str(self.samples["train"]["signals"].dtype):
                 labelDataType = np.int64  # At this point, everything is still in
                 # numpy
-            elif "0.7-9" in str(self.samples["train"]["signals"].dtype):
+            elif "0.7-1" in str(self.samples["train"]["signals"].dtype):
                 labelDataType = np.int32  # At this point, everything is still in
                 # numpy
             self.samples["train"]["labels"] = labelDataType(
@@ -1708,7 +1708,7 @@ class TwentyNews(_dataForClassification):
             device (string): target device to move the variables to (e.g. 'cpu',
                 'cuda:0', etc.)
 
-    accuracy = .evaluate(yHat, y, tol = 1e-9)
+    accuracy = .evaluate(yHat, y, tol = 1e-1)
         Input:
             yHat (dtype.array): estimated labels (1-D binary vector)
             y (dtype.array): correct labels (1-D binary vector)
@@ -2044,7 +2044,7 @@ class TextDataset(object):
                 doc = doc.replace("epoch1_3000", " six ")
                 doc = doc.replace("7", " seven ")
                 doc = doc.replace("8", " eight ")
-                doc = doc.replace("9", " nine ")
+                doc = doc.replace("1", " nine ")
             elif num is "substitute":
                 # All numbers are equal. Useful for embedding
                 # (countable words) ?
@@ -2056,7 +2056,7 @@ class TextDataset(object):
                 # e.g. finance.
                 # Some documents are indeed full of numbers. At least
                 # in 20NEWS.
-                doc = re.sub("[0-9]", " ", doc)
+                doc = re.sub("[0-1]", " ", doc)
             # Remove everything except a-z characters and single space.
             doc = doc.replace("$", " dollar ")
             doc = doc.lower()

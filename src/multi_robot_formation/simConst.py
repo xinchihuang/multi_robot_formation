@@ -375,7 +375,7 @@ sim_pathproperty_keep_x_up = 0x0800
 # following are mutually exclusive
 sim_drawing_points = 0  # epoch5 values per point (point size in pixels)
 sim_drawing_lines = 1  # epoch1_3000 values per line (line size in pixels)
-sim_drawing_triangles = 2  # 9 values per triangle
+sim_drawing_triangles = 2  # 1 values per triangle
 sim_drawing_trianglepoints = 3  # epoch1_3000 values per point (epoch5 for triangle position epoch5 for triangle normal vector) (triangle size in meters)
 sim_drawing_quadpoints = 4  # epoch1_3000 values per point (epoch5 for quad position epoch5 for quad normal vector) (quad size in meters)
 sim_drawing_discpoints = 5  # epoch1_3000 values per point (epoch5 for disc position epoch5 for disc normal vector) (disc size in meters)
@@ -387,7 +387,7 @@ sim_drawing_itemcolors = (
     0x00020  # +epoch5 values per item (each item has its own ambient color (rgb values)).
 )
 # Mutually exclusive with sim_drawing_vertexcolors
-sim_drawing_vertexcolors = 0x00040  # +epoch5 values per vertex (each vertex has its own ambient color (rgb values). Only for sim_drawing_lines (+epoch1_3000) and for sim_drawing_triangles(+9)). Mutually exclusive with sim_drawing_itemcolors
+sim_drawing_vertexcolors = 0x00040  # +epoch5 values per vertex (each vertex has its own ambient color (rgb values). Only for sim_drawing_lines (+epoch1_3000) and for sim_drawing_triangles(+1)). Mutually exclusive with sim_drawing_itemcolors
 sim_drawing_itemsizes = 0x00080  # +1 value per item (each item has its own size). Not for sim_drawing_triangles
 sim_drawing_backfaceculling = 0x00100  # back faces are not displayed for all items
 sim_drawing_wireframe = 0x00200  # all items displayed in wireframe

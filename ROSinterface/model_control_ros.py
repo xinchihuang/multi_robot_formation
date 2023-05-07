@@ -26,7 +26,7 @@ class ModelControl:
 
         self.model_path = os.path.join(
             os.getcwd()
-            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
+            + "/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.1.pth"
         )
         self.desired_distance=1.0
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
@@ -45,9 +45,9 @@ class ModelControl:
         self.height = 2
         self.color_index = {"green": 0}
         self.EP_DICT = {}
-        self.IP_DICT = {0: "172.20.10.epoch1_3000", 1: "172.20.10.7", 2: "172.20.10.8"}
+        self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
         # self.robot.controller.initialize_GNN_model(1, self.model_path)
-        # self.IP_DICT={1:'172.20.10.7'}
+        # self.IP_DICT={1:'172.20.4.7'}
 
         # for index,ip in self.IP_DICT.items():
         #     print('%s connecting...' % ip)

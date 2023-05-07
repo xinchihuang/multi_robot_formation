@@ -2,7 +2,8 @@
 A scene template
 author: Xinchi Huang
 """
-
+import math
+import random
 import sys
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
@@ -41,7 +42,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=5
+        self.num_robot=9
         self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
@@ -158,8 +159,24 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],]
-                     # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
+        # pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],]
+        #              # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
+        pose_list=[]
+        for i in range(self.num_robot):
+            while True:
+                x = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
+                y = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
+                theta=2*math.pi*random.uniform(0,1)-math.pi
+                redo=False
+                for j in range(len(pose_list)):
+                    distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
+                    if distance<min_disp_range:
+                        redo=True
+                        break
+                if redo==False:
+                    pose_list.append([x,y,theta])
+                    break
+
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
@@ -221,7 +238,11 @@ class Scene:
                             r1=key, r2=r[0], r3=r[3]
                         )
                     )
-
+    def stop(self):
+        vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
-    simulate_scene=Scene()
-    simulate_scene.simulate(50)
+    for i in range(10):
+        simulate_scene=Scene()
+        simulate_scene.reset_pose(5,1)
+        simulate_scene.simulate(50)
+        simulate_scene.stop()

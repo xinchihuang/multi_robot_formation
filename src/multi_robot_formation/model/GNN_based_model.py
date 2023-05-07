@@ -138,7 +138,7 @@ class GnnMapBasic(nn.Module):
         #                                                                   #
         #####################################################################
 
-        # + 10 for ref angles, +10 for alphas
+        # + 4 for ref angles, +4 for alphas
         action_features_num = (
             [self.F[-1] + 10 + 10] + [self.F[-1]] + [self.F[-1]] + action_features_num
         )
@@ -364,7 +364,7 @@ class GnnMapDecentralized(nn.Module):
         #                                                                   #
         #####################################################################
 
-        # + 10 for ref angles, +10 for alphas
+        # + 4 for ref angles, +4 for alphas
         action_features_num = (
             [self.F[-1] + 10 + 10] + [self.F[-1]] + [self.F[-1]] + action_features_num
         )
@@ -563,7 +563,7 @@ class GnnPoseBasic(nn.Module):
         #                                                                   #
         #####################################################################
 
-        # + 10 for ref angles, +10 for alphas
+        # + 4 for ref angles, +4 for alphas
         action_features_num = (
             [self.F[-1] + 10 + 10] + [self.F[-1]] + [self.F[-1]] + action_features_num
         )

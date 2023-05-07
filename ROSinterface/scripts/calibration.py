@@ -2,8 +2,8 @@ import random
 import numpy as np
 import pandas as pd
 random.seed(88)
-# data_x=pd.DataFrame({"a":random.sample(range(100),10),"b":random.sample(range(100),10),"c":random.sample(range(100),10)})
-# data_y=pd.Series(random.sample(range(200),10))
+# data_x=pd.DataFrame({"a":random.sample(range(100),4),"b":random.sample(range(100),4),"c":random.sample(range(100),4)})
+# data_y=pd.Series(random.sample(range(200),4))
 # data_y.name="y"
 data=pd.read_csv("/home/xinchi/catkin_ws/pose_record.csv",header=None)
 data_camera=data.iloc[:, 3:]

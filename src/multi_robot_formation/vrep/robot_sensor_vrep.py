@@ -127,7 +127,7 @@ class Sensor:
         # ### fake data
         # global_positions = [[-epoch5, -epoch5, 0], [-epoch5, epoch5, 0], [epoch5, epoch5, 0], [epoch5, -epoch5, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
-        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.epoch5, 100, 10, 10
+        # robot_size, max_height, map_size, max_x, max_y = 0.2, 0.epoch5, 100, 4, 4
         # occupancy_map = occupancy_map_simulator.generate_map(
         #     position_lists_local, robot_size, max_height, map_size, max_x, max_y
         # )

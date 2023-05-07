@@ -285,8 +285,8 @@ class ImageListener:
         # self.executor.initialize()
         self.EP_DICT={}
 
-        self.IP_DICT={0:'172.20.10.6',1:'172.20.10.7',2:'172.20.10.8'}
-        # self.IP_DICT={1:'172.20.10.7'}
+        self.IP_DICT={0:'172.20.4.6',1:'172.20.4.7',2:'172.20.4.8'}
+        # self.IP_DICT={1:'172.20.4.7'}
 
         for index,ip in self.IP_DICT.items():
             print('%s connecting...' % ip)

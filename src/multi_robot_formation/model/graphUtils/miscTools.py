@@ -1,4 +1,4 @@
-# 2018/10/15~2018/07/12
+# 2018/4/15~2018/07/12
 # Fernando Gama, fgama@seas.upenn.edu.
 """
 miscTools Miscellaneous Tools module
