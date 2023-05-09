@@ -14,7 +14,10 @@ import numpy as np
 from multi_robot_formation.controller_new import *
 from multi_robot_formation.comm_data import ControlData,SceneData,SensorData
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
+from multi_robot_formation.utils.preprocess import preprocess
 import cv2
+
+
 class Robot:
     """
     A robot template. Used for handling different components and store data for components.
@@ -34,7 +37,7 @@ class Robot:
         self.executor = executor
         self.controller=controller
 
-        self.sensor_type="rea"
+        self.sensor_type="real"
         # if self.controller_type == "expert":
         #     self.controller=CentralizedController()
         # elif self.controller_type == "model_basic":
@@ -119,7 +122,7 @@ class Robot:
                     occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
                     if self.sensor_type=="real":
                         occupancy_map=self.sensor_data.occupancy_map
-                        occupancy_map=cv2.erode(occupancy_map,(3,3))
+                        occupancy_map=preprocess(occupancy_map)
                     # print(occupancy_map)
                     cv2.imshow("robot view " + str(self.index) + "(Synthesise)", occupancy_map)
                     cv2.waitKey(1)

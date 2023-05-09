@@ -247,5 +247,5 @@ if __name__ == "__main__":
     for i in range(1):
         simulate_scene=Scene()
         simulate_scene.reset_pose(5,1)
-        simulate_scene.simulate(0.5)
+        simulate_scene.simulate(10)
         simulate_scene.stop()
