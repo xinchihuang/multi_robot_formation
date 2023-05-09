@@ -34,7 +34,7 @@ class Robot:
         self.executor = executor
         self.controller=controller
 
-        self.sensor_type="real"
+        self.sensor_type="rea"
         # if self.controller_type == "expert":
         #     self.controller=CentralizedController()
         # elif self.controller_type == "model_basic":

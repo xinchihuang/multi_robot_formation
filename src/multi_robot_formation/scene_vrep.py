@@ -222,7 +222,8 @@ class Scene:
             vrep_interface.synchronize(self.client_id)
         data_recorder.save_to_file()
         for robot in self.robot_list:
-            cv2.imwrite(str(robot.index)+"s.jpg",robot.sensor_data.occupancy_map)
+            map = robot.sensor_data.occupancy_map
+            cv2.imwrite(str(robot.index)+"s.jpg",map)
         # vrep_interface.stop(self.client_id)
         return 1
     def check_stop_condition(self):
@@ -246,5 +247,5 @@ if __name__ == "__main__":
     for i in range(1):
         simulate_scene=Scene()
         simulate_scene.reset_pose(5,1)
-        simulate_scene.simulate(50)
+        simulate_scene.simulate(0.5)
         simulate_scene.stop()
