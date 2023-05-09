@@ -467,6 +467,7 @@ class Trainer:
 
 
 if __name__ == "__main__":
+    torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/GNN_data"
     save_model_path = "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
@@ -491,7 +492,7 @@ if __name__ == "__main__":
     # model
     model=ViT(
         image_size = 100,
-        patch_size = 10,
+        patch_size = 20,
         num_classes = 2,
         dim = 256,
         depth = 3,
@@ -511,7 +512,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_raange=(1,3)
+        random_range=(1,3)
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -520,7 +521,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_raange=(1, 3)
+        random_range=(1, 3)
     )
 
 

@@ -42,7 +42,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=9
+        self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=10
         self.initial_min_range=1
@@ -159,8 +159,7 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-        # pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3,0], [0, 0, 0],]
-        #              # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
+
         pose_list=[]
         for i in range(self.num_robot):
             while True:
@@ -176,7 +175,8 @@ class Scene:
                 if redo==False:
                     pose_list.append([x,y,theta])
                     break
-
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
+        # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
@@ -221,6 +221,8 @@ class Scene:
             self.broadcast_all()
             vrep_interface.synchronize(self.client_id)
         data_recorder.save_to_file()
+        for robot in self.robot_list:
+            cv2.imwrite(str(robot.index)+"s.jpg",robot.sensor_data.occupancy_map)
         # vrep_interface.stop(self.client_id)
         return 1
     def check_stop_condition(self):
@@ -241,7 +243,7 @@ class Scene:
     def stop(self):
         vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
-    for i in range(10):
+    for i in range(1):
         simulate_scene=Scene()
         simulate_scene.reset_pose(5,1)
         simulate_scene.simulate(50)

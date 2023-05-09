@@ -698,7 +698,7 @@ class VitController(Controller):
         # print(self.name)
         self.model = ViT(
         image_size = 100,
-        patch_size = 10,
+        patch_size = 20,
         num_classes = 2,
         dim = 256,
         depth = 3,
@@ -730,8 +730,8 @@ class VitController(Controller):
         )
 
         self_input_occupancy_maps[0, 0, :, :] = occupancy_map
-        cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
-        cv2.waitKey(1)
+        # cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
+        # cv2.waitKey(1)
         self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
 
         if self.use_cuda:

@@ -34,6 +34,7 @@ class Robot:
         self.executor = executor
         self.controller=controller
 
+        self.sensor_type="real"
         # if self.controller_type == "expert":
         #     self.controller=CentralizedController()
         # elif self.controller_type == "model_basic":
@@ -116,6 +117,12 @@ class Robot:
                         np.array(position_lists_global), np.array(orientation_list)
                     )
                     occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                    if self.sensor_type=="real":
+                        occupancy_map=self.sensor_data.occupancy_map
+                        occupancy_map=cv2.erode(occupancy_map,(3,3))
+                    # print(occupancy_map)
+                    cv2.imshow("robot view " + str(self.index) + "(Synthesise)", occupancy_map)
+                    cv2.waitKey(1)
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
                 elif self.controller.name == "LocalExpertController":
