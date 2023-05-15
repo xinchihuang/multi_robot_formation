@@ -71,7 +71,6 @@ class ModelControl:
         out_put.velocity_y = velocity_sum_y
         return out_put
     def ModelControlCallback(self, data):
-        print("ros_initialized")
         position_list_local = []
         look_up_table = [0, 0, 0]
         for blob in data.blobs:
@@ -97,16 +96,16 @@ class ModelControl:
             model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
-def handler(signum, frame):
-    res = input("Ctrl-c was pressed. Do you really want to exit? y/n ")
-    if res == 'y':
-        exit(1)
+    def stop(self):
+        res = input("Ctrl-c was pressed. Do you really want to exit? y/n ")
+        if res == 'y':
+            self.robot.executor.stop()
+            exit(1)
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, handler)
+    # signal.signal(signal.SIGINT, handler)
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    # time.sleep(1)
-
     rospy.spin()
+    rospy.on_shutdown(listener.stop())
