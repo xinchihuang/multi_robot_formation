@@ -16,7 +16,7 @@ import numpy as np
 #
 # print(a)
 test_simulation = Simulation(50, 0.05)
-test_simulation.initial_scene(5, "saved_model/vit.pth")
+test_simulation.initial_scene(5, "saved_model/vit0.9.pth")
 test_simulation.run()
 # point = np.load(
 #     "/home/xinchi/multi_robot_formation/saved_data/0/0/points.npy", allow_pickle=True
