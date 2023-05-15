@@ -97,7 +97,7 @@ class ModelControl:
         self.robot.executor.execute_control(model_data)
 
     def stop(self):
-        res = input("Ctrl-c was pressed. Do you really want to exit? y/n ")
+        res = input(" Do you really want to exit? y/n ")
         if res == 'y':
             self.robot.executor.stop()
             exit(1)
