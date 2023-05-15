@@ -157,7 +157,7 @@ class Executor:
         velocity_x= 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x)>0.1 else velocity_x
         velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
 
-        if not (velocity_x>0.02 or velocity_y>0.2):
+        if not (velocity_x>0.02 or velocity_y>0.02):
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=velocity_y, speed_z=0
             )
