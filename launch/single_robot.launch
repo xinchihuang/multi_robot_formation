@@ -24,6 +24,6 @@
 
   <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"></include>
   <include file="$(find cmvision_3d)/launch/color_tracker.launch"></include>
-  <node name="model_control_ros" pkg="multi_robot_formation" type="model_control_ros.py"></node>
+<!--   <node name="model_control_ros" pkg="multi_robot_formation" type="model_control_ros.py"></node> -->
   </launch>
 
