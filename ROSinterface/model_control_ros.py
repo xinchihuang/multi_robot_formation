@@ -103,9 +103,10 @@ def handler(signum, frame):
         exit(1)
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, handler)
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
     # time.sleep(1)
-    signal.signal(signal.SIGINT, handler)
+
     rospy.spin()
