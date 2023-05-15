@@ -102,5 +102,5 @@ if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    time.sleep(1)
+    # time.sleep(1)
     rospy.spin()
