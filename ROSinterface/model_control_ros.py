@@ -3,6 +3,7 @@ import numpy as np
 import rospy
 import sys
 import os
+import signal
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from multi_robot_formation.controller_new import VitController
@@ -96,11 +97,15 @@ class ModelControl:
             model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
-
+def handler(signum, frame):
+    res = input("Ctrl-c was pressed. Do you really want to exit? y/n ")
+    if res == 'y':
+        exit(1)
 
 if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
     # time.sleep(1)
+    signal.signal(signal.SIGINT, handler)
     rospy.spin()
