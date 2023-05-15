@@ -163,7 +163,7 @@ class Executor:
             )
         else:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=1
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=5
             )
         self.connector.send_to_robot(msg)
     def stop(self):
