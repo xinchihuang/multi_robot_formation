@@ -124,8 +124,8 @@ class Robot:
                         occupancy_map=self.sensor_data.occupancy_map
                         occupancy_map=preprocess(occupancy_map)
                     # print(occupancy_map)
-                    cv2.imshow("robot view " + str(self.index) + "(Synthesise)", occupancy_map)
-                    cv2.waitKey(1)
+                    # cv2.imshow("robot view " + str(self.index) + "(Synthesise)", occupancy_map)
+                    # cv2.waitKey(1)
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
                 elif self.controller.name == "LocalExpertController":
