@@ -470,7 +470,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/GNN_data"
-    save_model_path = "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
+    save_model_path = "/src/multi_robot_formation/saved_model/vit0.9.pth"
     desired_distance = 2.0
     number_of_robot = 5
     map_size=100

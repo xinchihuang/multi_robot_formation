@@ -3,6 +3,7 @@ import numpy as np
 import rospy
 import sys
 import os
+import signal
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from multi_robot_formation.controller_new import VitController
@@ -24,8 +25,9 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 class ModelControl:
     def __init__(self, topic):
 
-        self.model_path =os.path.abspath('..')+"/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
+        self.model_path =os.path.abspath('..')+"/jetson/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
         self.desired_distance=1.0
+
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         self.robot = Robot(
             sensor=None,
@@ -69,7 +71,6 @@ class ModelControl:
         out_put.velocity_y = velocity_sum_y
         return out_put
     def ModelControlCallback(self, data):
-        print("ros_initialized")
         position_list_local = []
         look_up_table = [0, 0, 0]
         for blob in data.blobs:
@@ -95,11 +96,16 @@ class ModelControl:
             model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
-
+    def stop(self):
+        res = input(" Do you really want to exit? y/n ")
+        if res == 'y':
+            self.robot.executor.stop()
+            exit(1)
 
 if __name__ == "__main__":
+    # signal.signal(signal.SIGINT, handler)
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    time.sleep(1)
     rospy.spin()
+    rospy.on_shutdown(listener.stop())
