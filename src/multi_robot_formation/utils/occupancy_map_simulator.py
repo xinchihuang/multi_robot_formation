@@ -6,7 +6,7 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-
+from .preprocess import preprocess
 
 class MapSimulator:
     def __init__(
@@ -285,6 +285,7 @@ class MapSimulator:
         for robot_index in range(len(position_lists_local)):
             occupancy_map = self.generate_map_one(
                 position_lists_local[robot_index])
+            occupancy_map=preprocess(occupancy_map)
             maps.append(occupancy_map)
         return np.array(maps)
 

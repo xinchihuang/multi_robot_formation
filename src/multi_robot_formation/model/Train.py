@@ -492,7 +492,7 @@ if __name__ == "__main__":
     # model
     model=ViT(
         image_size = 100,
-        patch_size = 20,
+        patch_size = 10,
         num_classes = 2,
         dim = 256,
         depth = 3,
