@@ -3,18 +3,19 @@ author: Xinchi Huang
 """
 import cv2
 import numpy as np
-image1=cv2.imread("0.jpg")
-image2=cv2.imread("0s.jpg")
+image1=cv2.imread("4.jpg")
+image2=cv2.imread("4s.jpg")
 cv2.imshow("before", np.concatenate([image1,image2],axis=1))
-image1=cv2.dilate(image1,np.ones((2,2)),iterations=1)
-image2=cv2.dilate(image2,np.ones((2,2)),iterations=1)
 cv2.imshow("dilate", np.concatenate([image1,image2],axis=1))
 image1=cv2.blur(image1,(5,5))
 image2=cv2.blur(image2,(5,5))
 cv2.imshow("blur", np.concatenate([image1,image2],axis=1))
-
-_,image1=cv2.threshold(image1,250,255,0)
-_,image2=cv2.threshold(image2,250,255,0)
+cv2.imwrite("image1b.jpg",image1)
+cv2.imwrite("image2b.jpg",image2)
+_,image1=cv2.threshold(image1,253,255,0)
+_,image2=cv2.threshold(image2,253,255,0)
+cv2.imwrite("image1.jpg",image1)
+cv2.imwrite("image2.jpg",image2)
 cv2.imshow("after", np.concatenate([image1,image2],axis=1))
 cv2.waitKey(0)
 

@@ -175,7 +175,7 @@ class Scene:
                 if redo==False:
                     pose_list.append([x,y,theta])
                     break
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
+        # pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
         # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 
@@ -221,9 +221,9 @@ class Scene:
             self.broadcast_all()
             vrep_interface.synchronize(self.client_id)
         data_recorder.save_to_file()
-        for robot in self.robot_list:
-            map = robot.sensor_data.occupancy_map
-            cv2.imwrite(str(robot.index)+"s.jpg",map)
+        # for robot in self.robot_list:
+        #     map = robot.sensor_data.occupancy_map
+        #     cv2.imwrite(str(robot.index)+".jpg",map)
         # vrep_interface.stop(self.client_id)
         return 1
     def check_stop_condition(self):
@@ -247,5 +247,5 @@ if __name__ == "__main__":
     for i in range(1):
         simulate_scene=Scene()
         simulate_scene.reset_pose(5,1)
-        simulate_scene.simulate(10)
+        simulate_scene.simulate(50)
         simulate_scene.stop()
