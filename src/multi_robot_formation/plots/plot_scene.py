@@ -145,7 +145,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array, save_path):
+def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -172,10 +172,10 @@ def plot_formation_gabreil(pose_array, save_path):
             )
             plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
             count+=1
-            formation_error+=abs(distance-2)
+            formation_error+=abs(distance-desired_distance)
 
     plt.legend()
-    plt.title("Average Formation Error: "+str(formation_error/count))
+    plt.title("Average relative Formation Error: "+str(formation_error/count/desired_distance))
     plt.xlabel("distance(m)")
     plt.ylabel("distance(m)")
     plt.xlim(min(xlist)-5, min(xlist)+5)
@@ -213,7 +213,7 @@ def plot_trace(position_array, save_path):
     plt.close()
 
 
-def plot_load_data(dt, root_dir):
+def plot_load_data(root_dir,dt=0.05):
     """
 
     :param dt: Time interval
@@ -251,4 +251,4 @@ def plot_load_data(dt, root_dir):
 
 
 if __name__ == "__main__":
-    plot_load_data(0.05, "/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/38")
+    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/3")

@@ -88,7 +88,7 @@ class Sensor:
             # print(x_world,y_world)
             # print("map point of robot", self.robot_index, self.robot_handle)
             # print(point_map)
-            occupancy_map[point_map[0]][point_map[1]] = 0
+            occupancy_map[point_map[1]][point_map[0]] = 0
         return occupancy_map
 
     def get_sensor_data(self):

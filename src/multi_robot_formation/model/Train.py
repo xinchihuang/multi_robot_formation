@@ -470,7 +470,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/GNN_data"
-    save_model_path = "/src/multi_robot_formation/saved_model/vit0.9.pth"
+    save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
     desired_distance = 2.0
     number_of_robot = 5
     map_size=100
@@ -512,7 +512,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(1,3)
+        random_range=(1,5)
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -521,7 +521,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(1, 3)
+        random_range=(1, 5)
     )
 
 

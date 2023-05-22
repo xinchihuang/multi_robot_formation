@@ -96,16 +96,7 @@ class MapSimulator:
         if self.partial:
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
-            # if -2*math.pi/epoch5<theta<2*math.pi/epoch5:
-            #     if theta+math.pi / epoch5 < self.arctan(x, y) or self.arctan(x, y) < theta -  math.pi / epoch5:
-            #         return None
-            # elif theta>0:
-            #     if self.arctan(x, y)>-(2*math.pi-(theta+math.pi / epoch5)) or self.arctan(x, y) < theta -  math.pi / epoch5:
-            #         return None
-            # elif theta<0:
-            #     print(self.arctan(x, y),(theta+math.pi / epoch5))
-            #     if self.arctan(x, y)<2*math.pi-(-theta+math.pi / epoch5) or self.arctan(x, y) > (theta+math.pi / epoch5):
-            #         return None
+
 
 
         return [x, y, z]
@@ -285,7 +276,7 @@ class MapSimulator:
         for robot_index in range(len(position_lists_local)):
             occupancy_map = self.generate_map_one(
                 position_lists_local[robot_index])
-            occupancy_map=preprocess(occupancy_map)
+            # occupancy_map=preprocess(occupancy_map)
             maps.append(occupancy_map)
         return np.array(maps)
 

@@ -5,6 +5,7 @@ author: Xinchi Huang
 import os
 import numpy as np
 from collections import defaultdict
+from plots.plot_scene import plot_load_data
 
 
 class Recorder:
@@ -82,4 +83,5 @@ class Recorder:
             control_data = self.control_data[robot_index]
             control_data_array = np.array(control_data)
             np.save(control_data_path, control_data_array)
+        plot_load_data(simulation_path)
         return True

@@ -47,7 +47,7 @@ class Scene:
         self.initial_max_range=10
         self.initial_min_range=1
         self.platform = "vrep"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
+        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
@@ -175,7 +175,7 @@ class Scene:
                 if redo==False:
                     pose_list.append([x,y,theta])
                     break
-        # pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
+        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
         # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 
