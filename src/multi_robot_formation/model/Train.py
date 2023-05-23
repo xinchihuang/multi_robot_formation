@@ -17,7 +17,7 @@ import math
 import random
 from vit_model import ViT
 from utils.data_generator import DataGenerator
-
+from utils.preprocess import preprocess
 
 
 
