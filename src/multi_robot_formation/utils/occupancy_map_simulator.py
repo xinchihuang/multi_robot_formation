@@ -212,8 +212,14 @@ class MapSimulator:
         #     return None
         x_world = world_point[0]
         y_world = world_point[1]
-        x_map = int((max_x - y_world) / (2 * max_x) * map_size)
-        y_map = int((max_y + x_world) / (2 * max_y) * map_size)
+
+
+        # x_map = int((max_x - x_world) / (2 * max_x) * map_size)
+        # y_map = int((max_y + x_world) / (2 * max_y) * map_size)
+
+        y_map = min(int(map_size/2)+int(x_world*map_size/max_x/2), map_size-1)
+        x_map = min(int(map_size/2)-int(y_world*map_size/max_y/2), map_size-1)
+
         if 0 <= x_map < map_size and 0 <= y_map < map_size:
             return [x_map, y_map]
         return None

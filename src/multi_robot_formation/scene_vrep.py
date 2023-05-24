@@ -175,7 +175,7 @@ class Scene:
                 if redo==False:
                     pose_list.append([x,y,theta])
                     break
-        pose_list = [[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
+        pose_list = [[-3, -3, 0], [-5, 5, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0], ]
         # [-5, 0, 0], [0, 5, 0], [5, 0, 0], [0, -2, 0]]
         num_robot = len(self.robot_list)
 

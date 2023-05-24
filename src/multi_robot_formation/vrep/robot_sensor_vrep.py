@@ -60,9 +60,13 @@ class Sensor:
             return None
         x_world = world_point[0]
         y_world = world_point[1]
-        x_map = min(int((self.max_x - x_world) / (2 * self.max_x) * self.occupancy_map_size),99)
-        y_map = min(self.occupancy_map_size-int((self.max_y - y_world) / (2 * self.max_y) * self.occupancy_map_size),99)
+        # print(x_world,y_world)
+        # x_map = min(int((self.max_x - y_world) / (2 * self.max_x) * self.occupancy_map_size),self.occupancy_map_size-1)
+        # y_map = min(self.occupancy_map_size-int((self.max_y - x_world) / (2 * self.max_y) * self.occupancy_map_size),self.occupancy_map_size-1)
 
+        y_map = min(int(self.occupancy_map_size / 2) + int(x_world * self.occupancy_map_size / self.max_x / 2), self.occupancy_map_size - 1)
+        x_map = min(int(self.occupancy_map_size / 2) - int(y_world * self.occupancy_map_size / self.max_y / 2), self.occupancy_map_size - 1)
+        # print(x_map,y_map)
         return [x_map, y_map]
 
     def process_raw_data(self, point_cloud):
@@ -76,19 +80,17 @@ class Sensor:
             x_world = sensor_points[i + 0]
             y_world = sensor_points[i + 2]
             z_world = sensor_points[i + 1]
-            # print("world point of robot", self.robot_index)
-            # print([x_world,y_world,z_world])
-            # if self.robot_index==2:
-            #     print([x_world,y_world,z_world])
+
+            x_world,y_world=y_world,x_world
             point_world = self.filter_data([x_world, y_world, z_world])
             point_map = self.world_to_map(point_world)
             if point_map == None:
                 continue
-            # print("world point",self.robot_index)
-            # print(x_world,y_world)
-            # print("map point of robot", self.robot_index, self.robot_handle)
-            # print(point_map)
-            occupancy_map[point_map[1]][point_map[0]] = 0
+            print("world point",self.robot_index)
+            print(x_world,y_world)
+            print("map point of robot", self.robot_index, self.robot_handle)
+            print(point_map)
+            occupancy_map[point_map[0]][point_map[1]] = 0
         return occupancy_map
 
     def get_sensor_data(self):

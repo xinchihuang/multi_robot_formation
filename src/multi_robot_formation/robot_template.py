@@ -112,8 +112,7 @@ class Robot:
                 elif self.controller.name == "VitController":
                     position_lists_global = self.scene_data.position_list
                     orientation_list = self.scene_data.orientation_list
-
-                    if self.sensor_type=="realn":
+                    if self.sensor_type=="real":
                         occupancy_map=self.sensor_data.occupancy_map
                         occupancy_map=preprocess(occupancy_map)
                     else:
@@ -126,10 +125,12 @@ class Robot:
                         )
                         occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
 
-                    # cv2.imshow("robot view " + str(self.index), occupancy_map)
+                    # cv2.imshow("robot view " + str(self.index), np.array(occupancy_map))
                     # cv2.waitKey(1)
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
+                    self.control_data.velocity_x=0
+                    self.control_data.velocity_y=0
                 elif self.controller.name == "LocalExpertController":
 
                     position_lists_global = self.scene_data.position_list
