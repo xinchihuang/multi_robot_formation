@@ -18,9 +18,9 @@ def gabriel(pose_array):
                     gabriel_graph[v][u]=0
                     break
     return gabriel_graph
-def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_time=10):
+def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_time=10,time_interval=0.05):
     time_steps=raw_data.shape[1]
-    check_timesteps=check_time*20
+    check_timesteps=check_time/time_interval
     check_window=[]
     for time_step in range(time_steps):
         data=raw_data[:,time_step,:]
@@ -48,7 +48,7 @@ def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,chec
                 return time_step/20
             else:
                 check_window.pop(0)
-    return time_step/20
+    return time_step*time_interval
 def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=10):
     time_steps=raw_data.shape[1]
     realstop = 0
@@ -70,25 +70,30 @@ def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=1
         if realstop>=check_time*20:
             break
         # print(realstop)
-    return time_step/20
-def process_data(dir):
-    paths = os.walk(dir)
+    return time_step/10
+def process_data(root_path,robot_num):
     path_list=[]
-    for path, dir_lst, file_lst in paths:
-        for dir_name in dir_lst:
+    for path in os.listdir(root_path):
+        path_list.append(os.path.join(root_path, path))
 
-            path_list.append(os.path.join(path, dir_name))
     converge_time_all=[]
     average_formation_all=[]
     average_formation_error_all=[]
     unsuccess=0
     for path in path_list:
-        file=os.path.join(path, "pose_array_scene.npy")
-        raw_data=np.load(file)
-        print(raw_data.shape)
+        for i in range(robot_num):
+            if i==0:
+                file=os.path.join(path,str(i), "trace.npy")
+                raw_data=np.load(file)[:,0,:]
+                raw_data=np.expand_dims(raw_data,axis=0)
+            else:
+                file = os.path.join(path, str(i), "trace.npy")
+                data_i= np.load(file)[:,0,:]
+                data_i=np.expand_dims(data_i, axis=0)
+                raw_data=np.concatenate((raw_data,data_i),axis=0)
         sim_time=raw_data.shape[1]*0.05
         convergence_time = get_convergence_time_average(raw_data)
-        if convergence_time >= 100:
+        if convergence_time >= 50:
             unsuccess += 1
             print(path)
             continue
@@ -190,7 +195,8 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/GNN_data/training"
+root_dir="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test"
+
 
 # dir4= os.path.join(root_dir,"model_4")
 # converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)
@@ -227,8 +233,9 @@ root_dir="/home/xinchi/GNN_data/training"
 # average_formation_error_all_expert=[average_formation_error_all_4_e,average_formation_error_all_5_e,average_formation_error_all_6_e,average_formation_error_all_7_e,average_formation_error_all_8_e,average_formation_error_all_9_e]
 
 
-dir5= os.path.join(root_dir)
-converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5)
+dir5= os.path.join(root_dir,"ViT_5")
+
+converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5,5)
 converge_time_all_model=[converge_time_all_5]
 average_formation_all_model=[average_formation_all_5]
 average_formation_error_all_model=[average_formation_error_all_5]
@@ -244,9 +251,9 @@ average_formation_error_all_model=[average_formation_error_all_5]
 
 
 #
-# box_1(converge_time_all_model,"Converge time","Convergence Time(s)",root_dir)
-# box_1(average_formation_all_model,"Average distance","Distance(m)",root_dir)
-# box_1(average_formation_error_all_model,"Average group formation error","Formation Error(%)",root_dir)
-box_2(converge_time_all_model,converge_time_all_expert,"Converge time 5","Convergence Time(s)",root_dir)
-box_2(average_formation_all_model,average_formation_all_expert,"Average distance 5","Distance(m)",root_dir)
-box_2(average_formation_error_all_model,average_formation_error_all_expert,"Average group formation error 5","Formation Error(%)",root_dir)
+box_1(converge_time_all_model,"Converge time","Convergence Time(s)",root_dir)
+box_1(average_formation_all_model,"Average distance","Distance(m)",root_dir)
+box_1(average_formation_error_all_model,"Average group formation error","Formation Error(%)",root_dir)
+# box_2(converge_time_all_model,converge_time_all_expert,"Converge time 5","Convergence Time(s)",root_dir)
+# box_2(average_formation_all_model,average_formation_all_expert,"Average distance 5","Distance(m)",root_dir)
+# box_2(average_formation_error_all_model,average_formation_error_all_expert,"Average group formation error 5","Formation Error(%)",root_dir)

@@ -18,17 +18,17 @@ class Recorder:
     def record_sensor_data(self, sensor_data):
         """
 
-        :param sensor_data: Sensor data from robot sensor and simulator. Defined in robot_sensor_realsense.py(SensorData)
+        :param sensor_data: Sensor data from robot sensor and simulator.
         :return:
         """
         self.sensor_data[sensor_data.robot_index].append(sensor_data.occupancy_map)
 
     def record_robot_trace(self, sensor_data):
         """
-        :param sensor_data: Sensor data from robot sensor and simulator. Defined in robot_sensor_realsense.py(SensorData)
+        :param sensor_data: Sensor data from robot sensor and simulator.
         :return:
-        trace_data:[ [position],
-                     [orientation],
+        trace_data:[ [position](*x,*y,x),
+                     [orientation](alpha,beta,*theta),
                      [linear_velocity],
                      [angular_velocity] ]
         """
@@ -42,7 +42,7 @@ class Recorder:
     def record_controller_output(self, control_data):
         """
 
-        :param control_data: Control data from controller. Defined in controller.py (ControlData)
+        :param control_data: Control data from controller.
         :return:
         """
 

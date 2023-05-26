@@ -112,25 +112,26 @@ class Robot:
                 elif self.controller.name == "VitController":
                     position_lists_global = self.scene_data.position_list
                     orientation_list = self.scene_data.orientation_list
-                    if self.sensor_type=="real":
-                        occupancy_map=self.sensor_data.occupancy_map
-                        occupancy_map=preprocess(occupancy_map)
-                    else:
-                        occupancy_map_simulator = MapSimulator(local=True)
-                        (
-                            position_lists_local,
-                            self_orientation,
-                        ) = occupancy_map_simulator.global_to_local(
-                            np.array(position_lists_global), np.array(orientation_list)
-                        )
-                        occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
-
+                    # if self.sensor_type=="realn":
+                    #     occupancy_map=self.sensor_data.occupancy_map
+                    #     # occupancy_map=preprocess(occupancy_map)
+                    # else:
+                    occupancy_map_simulator = MapSimulator(local=True)
+                    (
+                        position_lists_local,
+                        self_orientation,
+                    ) = occupancy_map_simulator.global_to_local(
+                        np.array(position_lists_global), np.array(orientation_list)
+                    )
+                    occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
+                        # occupancy_map = preprocess(occupancy_map)
                     # cv2.imshow("robot view " + str(self.index), np.array(occupancy_map))
                     # cv2.waitKey(1)
+                    # print(self.index)
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
-                    self.control_data.velocity_x=0
-                    self.control_data.velocity_y=0
+                    # self.control_data.velocity_x=0
+                    # self.control_data.velocity_y=0
                 elif self.controller.name == "LocalExpertController":
 
                     position_lists_global = self.scene_data.position_list

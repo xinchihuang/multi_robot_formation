@@ -1,12 +1,14 @@
 import cv2
 import numpy as np
 import math
+from collections import defaultdict
 def preprocess(map,map_size=100,robot_size=0.2,scale=10):
     # Convert the image to grayscale
     # gray = cv2.cvtColor(map, cv2.COLOR_BGR2GRAY)
     # Threshold the image, let's consider values close to 0 as black (adjust according to your case)
     map = map.astype('uint8')
-    _, thresh = cv2.threshold(map, 128, 255, cv2.THRESH_BINARY_INV)
+    map=cv2.blur(map,(3,3))
+    _, thresh = cv2.threshold(map, 253, 255, cv2.THRESH_BINARY_INV)
     # Find contours in the thresholded image
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     robot_range=max(1, int(math.floor(map_size * robot_size / scale / 2)))
@@ -24,6 +26,8 @@ def preprocess(map,map_size=100,robot_size=0.2,scale=10):
             continue
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
+        # print(cX,cY)
+
         for m in range(-robot_range, robot_range, 1):
             for n in range(-robot_range, robot_range, 1):
                 occupancy_map[cY + m][cX + n] = 0
@@ -31,20 +35,20 @@ def preprocess(map,map_size=100,robot_size=0.2,scale=10):
                     robot_range:-robot_range, robot_range:-robot_range
                     ]
     return occupancy_map
+
+
+
 if __name__=="__main__":
-    map=cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/2.jpg")
-    reference=cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/2s.jpg")
+    map=cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/3.jpg")
+    reference=cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/3s.jpg")
     map = cv2.cvtColor(map, cv2.COLOR_BGR2GRAY)
     reference = cv2.cvtColor(reference, cv2.COLOR_BGR2GRAY)
-    processed=preprocess(reference)
-    cv2.imwrite("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/2preprocess.jpg",processed)
-    print(map)
-    print(reference)
-    processed = cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/2preprocess.jpg")
+    processed=preprocess(map)
+    cv2.imwrite("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/3preprocess.jpg",processed)
+    processed = cv2.imread("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/3preprocess.jpg")
     processed = cv2.cvtColor( processed, cv2.COLOR_BGR2GRAY)
 
     cv2.imshow("map",map)
     cv2.imshow("reference",reference)
     cv2.imshow("processed", processed)
-
     cv2.waitKey(0)

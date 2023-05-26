@@ -2,15 +2,14 @@
 A sensor template. Get information from simulator/real-world
 author: Xinchi Huang
 """
+import collections
 import math
-import numpy
 import numpy as np
 
 from vrep import vrep_interface
-import cv2
 from comm_data import SensorData
 
-
+# from ..utils.occupancy_map_simulator import MapSimulator
 
 class Sensor:
     """
@@ -60,13 +59,9 @@ class Sensor:
             return None
         x_world = world_point[0]
         y_world = world_point[1]
-        # print(x_world,y_world)
-        # x_map = min(int((self.max_x - y_world) / (2 * self.max_x) * self.occupancy_map_size),self.occupancy_map_size-1)
-        # y_map = min(self.occupancy_map_size-int((self.max_y - x_world) / (2 * self.max_y) * self.occupancy_map_size),self.occupancy_map_size-1)
 
         y_map = min(int(self.occupancy_map_size / 2) + int(x_world * self.occupancy_map_size / self.max_x / 2), self.occupancy_map_size - 1)
         x_map = min(int(self.occupancy_map_size / 2) - int(y_world * self.occupancy_map_size / self.max_y / 2), self.occupancy_map_size - 1)
-        # print(x_map,y_map)
         return [x_map, y_map]
 
     def process_raw_data(self, point_cloud):
@@ -86,12 +81,65 @@ class Sensor:
             point_map = self.world_to_map(point_world)
             if point_map == None:
                 continue
-            print("world point",self.robot_index)
-            print(x_world,y_world)
-            print("map point of robot", self.robot_index, self.robot_handle)
-            print(point_map)
+            # print("world point",self.robot_index)
+            # print(x_world,y_world)
+            # print("map point of robot", self.robot_index, self.robot_handle)
+            # print(point_map)
             occupancy_map[point_map[0]][point_map[1]] = 0
         return occupancy_map
+
+    def process_raw_data_new(self, point_cloud):
+        sensor_points = point_cloud
+        occupancy_map = (
+                np.ones((self.occupancy_map_size, self.occupancy_map_size)) * 255
+        )
+        # print(occupancy_map)
+        group=[]
+        for i in range(0, len(sensor_points), 3):
+            x_world = sensor_points[i + 0]
+            y_world = sensor_points[i + 2]
+            z_world = sensor_points[i + 1]
+
+            x_world, y_world = y_world, x_world
+            point_world = self.filter_data([x_world, y_world, z_world])
+            self.preprocess_point(point_world,group)
+        # print(group)
+        for i in range(len(group)):
+            point_center=group[i][0]
+            point_map = self.world_to_map(point_center)
+            # print("world point",self.robot_index)
+            # print(x_world,y_world)
+            # print("map point of robot", self.robot_index, self.robot_handle)
+            # print(point_map)
+            occupancy_map[point_map[0]][point_map[1]] = 0
+            occupancy_map[point_map[0]+1][point_map[1]] = 0
+            occupancy_map[point_map[0]][point_map[1]+1] = 0
+            occupancy_map[point_map[0]+1][point_map[1]+1] = 0
+        return occupancy_map
+    def preprocess_point(self,point,group):
+        if point==None:
+            return
+        ###(center,number)
+        x_world=point[0]
+        y_world=point[1]
+        for i in range(len(group)):
+            center=group[i][0]
+            number=group[i][1]
+            distance=((x_world-center[0])**2+(y_world-center[1])**2)**0.5
+
+            if distance<(2*self.min_range):
+
+                new_center_x = (number * center[0] + x_world) / (number + 1)
+                new_center_y = (number * center[1] + y_world) / (number + 1)
+
+                del group[i]
+
+                new_item=((new_center_x,new_center_y),number+1)
+                group.append(new_item)
+                return
+        new_item = ((x_world, y_world), 1)
+        group.append(new_item)
+        return
 
     def get_sensor_data(self):
         """
@@ -126,6 +174,9 @@ class Sensor:
         robot_sensor_data.angular_velocity = angular_velocity
 
         occupancy_map = self.process_raw_data(self.point_cloud)
+
+        # occupancy_map = self.process_raw_data_new(self.point_cloud)
+
         # ### fake data
         # global_positions = [[-epoch5, -epoch5, 0], [-epoch5, epoch5, 0], [epoch5, epoch5, 0], [epoch5, -epoch5, 0], [0, 0, 0]]
         # position_lists_local = occupancy_map_simulator.global_to_local(global_positions)
