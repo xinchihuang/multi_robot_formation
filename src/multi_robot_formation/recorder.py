@@ -62,17 +62,19 @@ class Recorder:
         if not os.path.exists(root):
             os.mkdir(root)
         num_dirs = len(os.listdir(root))
+        # print(num_dirs)
         simulation_path = os.path.join(root, str(num_dirs))
         os.mkdir(simulation_path)
-
-        for robot_index in self.sensor_data:
+        # print(simulation_path)
+        for robot_index in self.trace_data:
             robot_path = os.path.join(simulation_path, str(robot_index))
+            # print(robot_path)
             os.mkdir(robot_path)
             # save lidar readings
-            sensor_data_path = os.path.join(robot_path, "points.npy")
-            sensor_data = self.sensor_data[robot_index]
-            sensor_data_array = np.array(sensor_data)
-            np.save(sensor_data_path, sensor_data_array)
+            # sensor_data_path = os.path.join(robot_path, "points.npy")
+            # sensor_data = self.sensor_data[robot_index]
+            # sensor_data_array = np.array(sensor_data)
+            # np.save(sensor_data_path, sensor_data_array)
             # save trace
             trace_data_path = os.path.join(robot_path, "trace.npy")
             trace_data = self.trace_data[robot_index]

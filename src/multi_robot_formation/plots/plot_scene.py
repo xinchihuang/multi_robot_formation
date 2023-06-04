@@ -178,8 +178,8 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
     plt.title("Average relative Formation Error: "+str(formation_error/count/desired_distance))
     plt.xlabel("distance(m)")
     plt.ylabel("distance(m)")
-    plt.xlim(min(xlist)-5, min(xlist)+5)
-    plt.ylim(min(ylist)-5, min(ylist)+5)
+    plt.xlim(sum(xlist)/len(xlist)-10, sum(xlist)/len(xlist)+10)
+    plt.ylim(sum(ylist)/len(ylist)-10, sum(ylist)/len(ylist)+10)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"))
     plt.close()
@@ -251,4 +251,4 @@ def plot_load_data(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/3")
+    plot_load_data("/home/xinchi/saved_data/ViT_7_5.28/5")

@@ -8,9 +8,10 @@ from comm_data import ControlData
 import numpy as np
 
 class LocalExpertController:
-    def __init__(self,desired_distance=2):
+    def __init__(self,desired_distance=2,safe_margin=0.5):
         self.desired_distance = desired_distance
         self.name="LocalExpertController"
+        self.safe_margin=safe_margin
     def get_control(self,position_list_local):
         """
         :param position_list_local: local position list for training
@@ -37,7 +38,7 @@ class LocalExpertController:
                 distance = (position_array[i][0]** 2 + position_array[i][1]** 2)**0.5
                 # print(position_array[i])
                 # print(distance)
-                rate = (distance - self.desired_distance) / distance
+                rate = ((distance) - self.desired_distance) / (distance-self.safe_margin)
                 velocity_x = rate * (-position_array[i][0])
                 velocity_y = rate * (-position_array[i][1])
                 velocity_sum_x -= velocity_x

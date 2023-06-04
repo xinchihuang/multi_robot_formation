@@ -125,9 +125,8 @@ class Robot:
                     )
                     occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[self.index])
                         # occupancy_map = preprocess(occupancy_map)
-                    # cv2.imshow("robot view " + str(self.index), np.array(occupancy_map))
-                    # cv2.waitKey(1)
-                    # print(self.index)
+                    cv2.imshow("robot view " + str(self.index), np.array(occupancy_map))
+                    cv2.waitKey(1)
                     self.sensor_data.occupancy_map = occupancy_map
                     self.control_data=self.controller.get_control(self.index,self.sensor_data.occupancy_map)
                     # self.control_data.velocity_x=0

@@ -42,12 +42,13 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=5
+        self.num_robot=7
         self.desired_distance=2.0
-        self.initial_max_range=10
+        self.initial_max_range=5
         self.initial_min_range=1
         self.platform = "vrep"
         self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
+        # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
@@ -148,7 +149,7 @@ class Scene:
         for robot in self.robot_list:
             robot.scene_data = output
 
-    def reset_pose(self, max_disp_range, min_disp_range):
+    def reset_pose(self, max_disp_range, min_disp_range,max_sep_range=4):
         """
         Reset all robot poses in a circle
         :param max_disp_range: min distribute range
@@ -167,11 +168,20 @@ class Scene:
                 y = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
                 theta=2*math.pi*random.uniform(0,1)-math.pi
                 redo=False
+                min_distance=float("inf")
                 for j in range(len(pose_list)):
                     distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
                     if distance<min_disp_range:
                         redo=True
                         break
+                    # print(distance)
+                    if min_distance>distance:
+                        min_distance=distance
+                # print(len(pose_list),min_distance)
+                if len(pose_list)>0 and min_distance>max_sep_range:
+                    redo=True
+                # if min_distance>max_sep_range:
+                #     redo=True
                 if redo==False:
                     pose_list.append([x,y,theta])
                     break
@@ -218,9 +228,9 @@ class Scene:
             self.broadcast_all()
             vrep_interface.synchronize(self.client_id)
         data_recorder.save_to_file()
-        for robot in self.robot_list:
-            map = robot.sensor_data.occupancy_map
-            cv2.imwrite(str(robot.index)+".jpg",map)
+        # for robot in self.robot_list:
+        #     map = robot.sensor_data.occupancy_map
+        #     cv2.imwrite(str(robot.index)+".jpg",map)
         vrep_interface.stop(self.client_id)
         return 1
     def check_stop_condition(self):
@@ -241,8 +251,8 @@ class Scene:
     def stop(self):
         vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
-    for i in range(21):
+    for i in range(80):
         simulate_scene=Scene()
-        simulate_scene.reset_pose(5,1)
+        simulate_scene.reset_pose(5,1.5,4)
         simulate_scene.simulate(50)
         simulate_scene.stop()

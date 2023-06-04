@@ -18,7 +18,7 @@ def gabriel(pose_array):
                     gabriel_graph[v][u]=0
                     break
     return gabriel_graph
-def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_time=10,time_interval=0.05):
+def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_time=5,time_interval=0.05):
     time_steps=raw_data.shape[1]
     check_timesteps=check_time/time_interval
     check_window=[]
@@ -49,7 +49,7 @@ def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,chec
             else:
                 check_window.pop(0)
     return time_step*time_interval
-def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=10):
+def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=5):
     time_steps=raw_data.shape[1]
     realstop = 0
     for time_step in range(time_steps):
@@ -80,6 +80,7 @@ def process_data(root_path,robot_num):
     average_formation_all=[]
     average_formation_error_all=[]
     unsuccess=0
+
     for path in path_list:
         for i in range(robot_num):
             if i==0:
@@ -93,13 +94,11 @@ def process_data(root_path,robot_num):
                 raw_data=np.concatenate((raw_data,data_i),axis=0)
         sim_time=raw_data.shape[1]*0.05
         convergence_time = get_convergence_time_average(raw_data)
-        if convergence_time >= 50:
-            unsuccess += 1
-            print(path)
-            continue
         observe_data=raw_data[:,-400:,:2]
         time_steps=observe_data.shape[1]
         for time_step in range(time_steps):
+            crash=False
+            separate=False
             data=observe_data[:,time_step,:]
             gabriel_graph=gabriel(data)
             reference=np.ones(data.shape[1])
@@ -113,10 +112,27 @@ def process_data(root_path,robot_num):
                             distance=np.sqrt(np.square(data[i,0]-data[j,0])+np.square(data[i,1]-data[j,1]))
                             # print(distance)
                             distance_list.append(distance)
+                            if distance<1:
+                                crash=True
+                            if distance>5:
+                                separate=True
                             distance_error=np.abs(distance-reference)
                             distance_error_list.append(distance_error)
         average_formation = np.average(np.array(distance_list))
         average_formation_error = 100*np.average(np.array(distance_error_list)) / 2
+        if convergence_time >= 50:
+            unsuccess += 1
+            print(path,average_formation_error)
+            continue
+        if crash==True:
+            unsuccess += 1
+            print(path,average_formation_error)
+            continue
+        if crash==True:
+            unsuccess += 1
+            print(path,average_formation_error)
+            continue
+
         converge_time_all.append(convergence_time)
         average_formation_error_all.append(average_formation_error)
         average_formation_all.append(average_formation)
@@ -195,7 +211,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test"
+root_dir="/home/xinchi/saved_data"
 
 
 # dir4= os.path.join(root_dir,"model_4")
@@ -233,12 +249,12 @@ root_dir="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_forma
 # average_formation_error_all_expert=[average_formation_error_all_4_e,average_formation_error_all_5_e,average_formation_error_all_6_e,average_formation_error_all_7_e,average_formation_error_all_8_e,average_formation_error_all_9_e]
 
 
-dir5= os.path.join(root_dir,"ViT_5")
+dir_test= os.path.join(root_dir,"ViT_9_6.5")
 
-converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5,5)
-converge_time_all_model=[converge_time_all_5]
-average_formation_all_model=[average_formation_all_5]
-average_formation_error_all_model=[average_formation_error_all_5]
+converge_time_all,average_formation_all,average_formation_error_all=process_data(dir_test,9)
+converge_time_all_model=[converge_time_all]
+average_formation_all_model=[average_formation_all]
+average_formation_error_all_model=[average_formation_error_all]
 
 
 # dir= '/home/xinchi/6_robots/model_6'

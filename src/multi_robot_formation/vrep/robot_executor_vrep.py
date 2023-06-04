@@ -24,7 +24,7 @@ class Executor:
         self.point_cloud_handle = None
 
         self.centralized_k = 1
-        self.max_velocity = 1.2
+        self.max_velocity = 0.5
         self.wheel_adjustment = 10.25
 
     def velocity_transform(self, velocity_x, velocity_y, theta):

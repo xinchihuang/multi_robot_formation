@@ -75,7 +75,7 @@ class CentralizedController(Controller):
         for neighbor in neighbors:
 
             distance=((self_x - neighbor[1])**2+(self_y - neighbor[2])**2)**0.5
-            rate = (distance - self.desired_distance) / distance
+            rate = (distance-0.5 - self.desired_distance) / (distance-0.5)
             velocity_x = rate * (self_x - neighbor[1])
             velocity_y = rate * (self_y - neighbor[2])
             velocity_sum_x -= velocity_x
@@ -742,7 +742,7 @@ class VitController(Controller):
         control = (
             self.model(self_input_tensor,task="control").detach().cpu().numpy()
         )
-        print(control)
+        print(index,control)
         velocity_x = control[0][0]
         velocity_y = control[0][1]
         out_put.robot_index = index
