@@ -46,7 +46,7 @@ class RobotDatasetTrace(Dataset):
 
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
-        self.pose_array = np.empty(shape=(5, 1, 3))
+        self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
         self.reference_control_list = []
         self.neighbor_list = []
         self.scale = np.zeros((self.number_of_agents, 1))
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
     # data set
     trainset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "training"),
+        data_path_root=os.path.join(data_path_root, "training_7"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,
@@ -326,7 +326,7 @@ if __name__ == "__main__":
         random_range=(0.51,5)
     )
     evaluateset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "evaluating"),
+        data_path_root=os.path.join(data_path_root, "evaluating_7"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,

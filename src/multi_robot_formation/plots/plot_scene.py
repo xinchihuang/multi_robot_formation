@@ -131,17 +131,22 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(5, 3))
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key)
     # plt.legend()
-    plt.title("Relative distance gabreil")
-    plt.xlabel("time(s)")
-    plt.ylabel("distance(m)")
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.23,
+                        right=0.98,
+                        top=0.98,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.xlabel("time(s)", fontsize=20)
+    plt.ylabel("distance(m)", fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
     plt.grid()
-    plt.savefig(
-        os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png")
-    )
+    plt.savefig(os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
 
 
@@ -174,14 +179,22 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
             count+=1
             formation_error+=abs(distance-desired_distance)
 
+    plt.subplots_adjust(left=0.16,
+                        bottom=0.16,
+                        right=0.95,
+                        top=0.98,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.title("Average formation error: "+str(formation_error/count))
+    plt.xlabel("x(m)", fontsize=20)
+    plt.ylabel("y(m)", fontsize=20)
     plt.legend()
-    plt.title("Average relative Formation Error: "+str(formation_error/count/desired_distance))
-    plt.xlabel("distance(m)")
-    plt.ylabel("distance(m)")
-    plt.xlim(sum(xlist)/len(xlist)-10, sum(xlist)/len(xlist)+10)
-    plt.ylim(sum(ylist)/len(ylist)-10, sum(ylist)/len(ylist)+10)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xlim(-10, 10)
+    plt.ylim(-10, 10)
     plt.grid()
-    plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"))
+    plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
 
 
@@ -211,7 +224,60 @@ def plot_trace(position_array, save_path):
     plt.grid()
     plt.savefig(os.path.join(save_path, "robot_trace_" + str(rob_num) + ".png"))
     plt.close()
+def plot_triangle(ax,pos,theta,length,color):
+    x=pos[0]
+    y=pos[1]
+    p1=[x+2*length*math.cos(theta),y+2*length*math.sin(theta)]
+    p2=[x+length*math.cos(theta-2*math.pi/3),y+length*math.sin(theta-2*math.pi/3)]
+    p3 = [x + length * math.cos(theta + 2*math.pi / 3), y + length * math.sin(theta + 2*math.pi / 3)]
+    # ax.scatter(x,y,c=color)
+    ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
+    ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
+    ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
+def plot_trace_triangle(pose_array,orientation_array,save_path,stop_time=50):
+    rob_num = np.shape(pose_array)[0]
+    colors = itertools.cycle(mcolors.TABLEAU_COLORS)
+    fig,ax=plt.subplots(figsize=(5, 5))
+    for i in range(rob_num):
+        color = next(colors)
+        xtrace = []
+        ytrace = []
 
+        for p in range(0,stop_time*20-1,100):
+            pos=pose_array[i][p]
+            theta=orientation_array[i][p]
+            plot_triangle(ax, pos,theta, 0.3, color)
+            xtrace.append(pose_array[i][p][0])
+            ytrace.append(pose_array[i][p][1])
+            ax.plot(xtrace,ytrace,color=color,linestyle='--')
+    gabriel_graph = gabriel(pose_array)
+    position_array = pose_array[:, stop_time*20-1, :2]
+    for i in range(rob_num):
+        for j in range(i + 1, rob_num):
+            if gabriel_graph[i][j] == 0:
+                continue
+            xlist = [position_array[i][0], position_array[j][0]]
+            ylist = [position_array[i][1], position_array[j][1]]
+            distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
+            ax.plot(xlist, ylist,color="black")
+
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.11,
+                        right=0.98,
+                        top=0.98,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.xlabel("x(m)", fontsize=15)
+    plt.ylabel("y(m)", fontsize=15)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+
+    plt.xlim(-6, 6)
+    plt.ylim(-6, 6)
+    plt.grid()
+    plt.savefig(os.path.join(save_path, "robot_trace_" + str(rob_num) + ".png"))
+    plt.close()
+    # plt.show()
 
 def plot_load_data(root_dir,dt=0.05):
     """
@@ -233,10 +299,14 @@ def plot_load_data(root_dir,dt=0.05):
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
     position_array = trace_array[:, :, 0, :2]
+    orientation_array=trace_array[:, :, 1, 2]
+
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array, root_dir)
-    plot_trace(position_array, root_dir)
+    # plot_trace(position_array, root_dir)
+    # print(orientation_array)
+    plot_trace_triangle(position_array ,orientation_array, root_dir)
     velocity_array = None
     for robot_path in robot_path_list:
         velocity_array_single = np.load(
@@ -251,4 +321,4 @@ def plot_load_data(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/saved_data/ViT_7_5.28/5")
+    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/27")

@@ -137,13 +137,13 @@ def process_data(root_path,robot_num):
         average_formation_error_all.append(average_formation_error)
         average_formation_all.append(average_formation)
         # break
-    print(dir,unsuccess)
+    print(root_path,unsuccess)
     return converge_time_all,average_formation_all,average_formation_error_all
     # print(observe_data-reference)
 
 def box_1(data_m,title,ylabel,save_dir):
     fig = plt.figure(figsize=(5, 3))
-    labels=[4,5,6,7,8,9]
+    labels=[i+5 for i in range(len(data_m))]
     color_model='#1f77b4'
     color_expert='#ff7f0e'
     model=plt.boxplot(data_m,
@@ -213,22 +213,32 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
     plt.savefig(os.path.join(save_dir,title+'.png'))
 root_dir="/home/xinchi/saved_data"
 
-
 # dir4= os.path.join(root_dir,"model_4")
 # converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)
 # dir5= os.path.join(root_dir,"model_5")
-# converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5)
+# converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5,5)
 # dir6= os.path.join(root_dir,"model_6")
-# converge_time_all_6,average_formation_all_6,average_formation_error_all_6=process_data(dir6)
+# converge_time_all_6,average_formation_all_6,average_formation_error_all_6=process_data(dir6,6)
 # dir7= os.path.join(root_dir,"model_7")
-# converge_time_all_7,average_formation_all_7,average_formation_error_all_7=process_data(dir7)
+# converge_time_all_7,average_formation_all_7,average_formation_error_all_7=process_data(dir7,7)
 # dir8= os.path.join(root_dir,"model_8")
-# converge_time_all_8,average_formation_all_8,average_formation_error_all_8=process_data(dir8)
+# converge_time_all_8,average_formation_all_8,average_formation_error_all_8=process_data(dir8,8)
 # dir9= os.path.join(root_dir,"model_9")
-# converge_time_all_9,average_formation_all_9,average_formation_error_all_9=process_data(dir9)
+# converge_time_all_9,average_formation_all_9,average_formation_error_all_9=process_data(dir9,9)
 # converge_time_all_model=[converge_time_all_4,converge_time_all_5,converge_time_all_6,converge_time_all_7,converge_time_all_8,converge_time_all_9]
 # average_formation_all_model=[average_formation_all_4,average_formation_all_5,average_formation_all_6,average_formation_all_7,average_formation_all_8,average_formation_all_9]
 # average_formation_error_all_model=[average_formation_error_all_4,average_formation_error_all_5,average_formation_error_all_6,average_formation_error_all_7,average_formation_error_all_8,average_formation_error_all_9]
+converge_time_all_ViT=[]
+average_formation_all_ViT=[]
+average_formation_error_all_ViT=[]
+for num_robot in range(5,10):
+    path=os.path.join(root_dir,"ViT_"+str(num_robot))
+    converge_time_all, average_formation_all, average_formation_error_all = process_data(path, num_robot)
+    converge_time_all_ViT.append(converge_time_all)
+    average_formation_all_ViT.append(average_formation_all)
+    average_formation_error_all_ViT.append(average_formation_error_all)
+
+
 
 
 # dir= '/home/xinchi/6_robots/model_6'
@@ -249,12 +259,12 @@ root_dir="/home/xinchi/saved_data"
 # average_formation_error_all_expert=[average_formation_error_all_4_e,average_formation_error_all_5_e,average_formation_error_all_6_e,average_formation_error_all_7_e,average_formation_error_all_8_e,average_formation_error_all_9_e]
 
 
-dir_test= os.path.join(root_dir,"ViT_9_6.5")
-
-converge_time_all,average_formation_all,average_formation_error_all=process_data(dir_test,9)
-converge_time_all_model=[converge_time_all]
-average_formation_all_model=[average_formation_all]
-average_formation_error_all_model=[average_formation_error_all]
+# dir_test= os.path.join(root_dir,"ViT_9_6.5")
+#
+# converge_time_all,average_formation_all,average_formation_error_all=process_data(dir_test,9)
+# converge_time_all_model=[converge_time_all]
+# average_formation_all_model=[average_formation_all]
+# average_formation_error_all_model=[average_formation_error_all]
 
 
 # dir= '/home/xinchi/6_robots/model_6'
@@ -267,9 +277,9 @@ average_formation_error_all_model=[average_formation_error_all]
 
 
 #
-box_1(converge_time_all_model,"Converge time","Convergence Time(s)",root_dir)
-box_1(average_formation_all_model,"Average distance","Distance(m)",root_dir)
-box_1(average_formation_error_all_model,"Average group formation error","Formation Error(%)",root_dir)
+box_1(converge_time_all_ViT,"Converge time","Convergence Time(s)",root_dir)
+box_1(average_formation_all_ViT,"Average distance","Distance(m)",root_dir)
+box_1(average_formation_error_all_ViT,"Average group formation error","Formation Error(%)",root_dir)
 # box_2(converge_time_all_model,converge_time_all_expert,"Converge time 5","Convergence Time(s)",root_dir)
 # box_2(average_formation_all_model,average_formation_all_expert,"Average distance 5","Distance(m)",root_dir)
 # box_2(average_formation_error_all_model,average_formation_error_all_expert,"Average group formation error 5","Formation Error(%)",root_dir)
