@@ -282,7 +282,7 @@ if __name__ == "__main__":
     data_path_root = "/home/xinchi/GNN_data"
     save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
     desired_distance = 2.0
-    number_of_robot = 5
+    number_of_robot = 7
     map_size=100
     max_x = 5
     max_y = 5

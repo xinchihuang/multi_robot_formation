@@ -175,6 +175,8 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
             distance = math.sqrt(
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
+            if distance>4:
+                continue
             plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
             count+=1
             formation_error+=abs(distance-desired_distance)
@@ -321,4 +323,4 @@ def plot_load_data(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/27")
+    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/31")

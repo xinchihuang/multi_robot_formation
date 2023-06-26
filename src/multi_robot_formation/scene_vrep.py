@@ -42,7 +42,7 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=20
+        self.num_robot=30
         self.desired_distance=2.0
         self.initial_max_range=5
         self.initial_min_range=1
@@ -258,7 +258,7 @@ class Scene:
     def stop(self):
         vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
-    for i in range(10):
+    for i in range(1):
         simulate_scene=Scene()
         simulate_scene.reset_pose(10,1.5,4)
         simulate_scene.simulate(50)
