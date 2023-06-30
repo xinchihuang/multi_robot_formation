@@ -26,7 +26,7 @@ class Scene:
     Scene for multiple robots
     """
 
-    def __init__(self):
+    def __init__(self,controller_type="ViT"):
         """
         robot_list: A list contains all robot in the scene
         []
@@ -42,22 +42,24 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=30
+        self.num_robot=5
         self.desired_distance=2.0
         self.initial_max_range=5
         self.initial_min_range=1
         self.platform = "vrep"
         self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
-        self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
-        # self.controller = LocalExpertController(desired_distance=self.desired_distance)
+        if controller_type=="ViT":
+            self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+        elif controller_type=="Expert":
+            self.controller = LocalExpertController(desired_distance=self.desired_distance)
         for i in range(self.num_robot):
-            self.add_robot_vrep(i,controller=self.controller,desired_distance=self.desired_distance)
-        self.reset_pose(self.initial_max_range, self.initial_min_range)
+            self.add_robot_vrep(i,controller=self.controller)
+        # self.reset_pose(self.initial_max_range, self.initial_min_range)
 
 
 
-    def add_robot_vrep(self, robot_index,controller,desired_distance=1.0):
+    def add_robot_vrep(self, robot_index,controller):
         """
         Add a robot in the scene
         :param robot_index: The robot index
@@ -149,7 +151,7 @@ class Scene:
         for robot in self.robot_list:
             robot.scene_data = output
 
-    def reset_pose(self, max_disp_range, min_disp_range,max_sep_range=4):
+    def reset_pose(self, max_disp_range, min_disp_range,max_sep_range=4,pose_list=None):
         """
         Reset all robot poses in a circle
         :param max_disp_range: min distribute range
@@ -160,31 +162,31 @@ class Scene:
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
         """
-
-        pose_list=[]
-        for i in range(self.num_robot):
-            while True:
-                x = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
-                y = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
-                theta=2*math.pi*random.uniform(0,1)-math.pi
-                redo=False
-                min_distance=float("inf")
-                for j in range(len(pose_list)):
-                    distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
-                    if distance<min_disp_range:
+        if pose_list==None:
+            pose_list=[]
+            for i in range(self.num_robot):
+                while True:
+                    x = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
+                    y = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
+                    theta=2*math.pi*random.uniform(0,1)-math.pi
+                    redo=False
+                    min_distance=float("inf")
+                    for j in range(len(pose_list)):
+                        distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
+                        if distance<min_disp_range:
+                            redo=True
+                            break
+                        # print(distance)
+                        if min_distance>distance:
+                            min_distance=distance
+                    # print(len(pose_list),min_distance)
+                    if len(pose_list)>0 and min_distance>max_sep_range:
                         redo=True
+                    # if min_distance>max_sep_range:
+                    #     redo=True
+                    if redo==False:
+                        pose_list.append([x,y,theta])
                         break
-                    # print(distance)
-                    if min_distance>distance:
-                        min_distance=distance
-                # print(len(pose_list),min_distance)
-                if len(pose_list)>0 and min_distance>max_sep_range:
-                    redo=True
-                # if min_distance>max_sep_range:
-                #     redo=True
-                if redo==False:
-                    pose_list.append([x,y,theta])
-                    break
         # pose_list = [[-3, -3, 0],
         #              # [-3, 3, 0],
         #              # [3, 3, 0],
@@ -204,11 +206,11 @@ class Scene:
             vrep_interface.post_robot_pose(
                 self.client_id, robot_handle, position, orientation
             )
-
+        return pose_list
 
 
     ### sumilation related
-    def simulate(self,max_simulation_time,time_step=0.05):
+    def simulate(self,max_simulation_time,time_step=0.05,test_case="model"):
         simulation_time = 0
         data_recorder = Recorder()
         data_recorder.root_dir = "saved_data_test"
@@ -234,7 +236,7 @@ class Scene:
             self.check_stop_condition()
             self.broadcast_all()
             vrep_interface.synchronize(self.client_id)
-        data_recorder.save_to_file()
+        data_recorder.save_to_file(test_case)
         # for robot in self.robot_list:
         #     map = robot.sensor_data.occupancy_map
         #     cv2.imwrite(str(robot.index)+".jpg",map)
@@ -259,7 +261,19 @@ class Scene:
         vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
     for i in range(1):
-        simulate_scene=Scene()
-        simulate_scene.reset_pose(10,1.5,4)
-        simulate_scene.simulate(50)
+        # ### ViT controller
+        # simulate_scene=Scene("ViT")
+        # pos_list=simulate_scene.reset_pose(5,1.5,4)
+        # simulate_scene.simulate(50,test_case="ViT")
+        # simulate_scene.stop()
+        #
+        # ### Expert controller
+        # simulate_scene = Scene("Expert")
+        # simulate_scene.reset_pose(5, 1.5, 4)
+        # simulate_scene.simulate(50,test_case="Expert")
+        # simulate_scene.stop()
+
+        simulate_scene = Scene("ViT")
+        simulate_scene.reset_pose(5, 1.5, 4)
+        simulate_scene.simulate(50, test_case="Expert")
         simulate_scene.stop()

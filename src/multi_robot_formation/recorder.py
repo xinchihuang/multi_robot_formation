@@ -50,14 +50,14 @@ class Recorder:
             [control_data.velocity_x, control_data.velocity_y]
         )
 
-    def save_to_file(self):
+    def save_to_file(self,test_case=''):
         """
         Save recorded data to files
         :return:
         """
 
         present = os.getcwd()
-        root = os.path.join(present, self.root_dir)
+        root = os.path.join(present, self.root_dir,test_case)
 
         if not os.path.exists(root):
             os.mkdir(root)

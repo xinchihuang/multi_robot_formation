@@ -323,4 +323,4 @@ def plot_load_data(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/31")
+    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/ViT/1")
