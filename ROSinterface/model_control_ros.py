@@ -25,7 +25,7 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 class ModelControl:
     def __init__(self, topic):
 
-        self.model_path =os.path.abspath('..')+"/jetson/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.9.pth"
+        self.model_path =os.path.abspath('..')+"/jetson/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         self.desired_distance=1.0
 
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
