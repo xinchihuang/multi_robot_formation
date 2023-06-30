@@ -101,12 +101,15 @@ class ModelControl:
         if res == 'y':
             self.robot.executor.stop()
             exit(1)
-
+def stop_node(event):
+    rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
     # signal.signal(signal.SIGINT, handler)
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    time.sleep(0.5)
+
+    timer = rospy.Timer(rospy.Duration(10), stop_node)
+    # time.sleep(0.5)
     rospy.spin()
     rospy.on_shutdown(listener.stop())
