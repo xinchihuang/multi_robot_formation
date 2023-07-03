@@ -112,4 +112,4 @@ if __name__ == "__main__":
     timer = rospy.Timer(rospy.Duration(10), stop_node)
     # time.sleep(0.5)
     rospy.spin()
-    rospy.on_shutdown(listener.stop())
+    # rospy.on_shutdown(listener.stop())
