@@ -160,7 +160,7 @@ class Executor:
 
         if not (velocity_x<0.05 and velocity_y<0.05):
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=10
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=0
             )
             self.idle_frame=0
         else:
