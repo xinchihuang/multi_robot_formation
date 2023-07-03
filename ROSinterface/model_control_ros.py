@@ -96,11 +96,15 @@ class ModelControl:
             model_data=self.robot.controller.get_control(0,occupancy_map)
         self.robot.executor.execute_control(model_data)
 
-    def stop(self):
+    def keyboard_stop(self):
         res = input(" Do you really want to exit? y/n ")
         if res == 'y':
             self.robot.executor.stop()
             exit(1)
+    def timed_stop(self,event):
+        print("Time's up!")
+        self.robot.executor.stop()
+        exit(1)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
@@ -109,7 +113,7 @@ if __name__ == "__main__":
     topic = "/blobs_3d"
     listener = ModelControl(topic)
 
-    timer = rospy.Timer(rospy.Duration(10), stop_node)
+    timer = rospy.Timer(rospy.Duration(10), listener.timed_stop())
     # time.sleep(0.5)
     rospy.spin()
-    # rospy.on_shutdown(listener.stop())
+    rospy.on_shutdown(listener.keyboard_stop())
