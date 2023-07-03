@@ -114,8 +114,7 @@ if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    timer = rospy.Timer(rospy.Duration(10), listener.timed_stop)
-    # time.sleep(0.5)
     rospy.on_shutdown(listener.keyboard_stop())
+    timer = rospy.Timer(rospy.Duration(10), listener.timed_stop)
     rospy.spin()
 
