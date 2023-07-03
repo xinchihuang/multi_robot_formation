@@ -113,7 +113,7 @@ if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    rospy.Subscriber('keyboard_input', String, keyboard_stop)
+    rospy.Subscriber('keyboard_input', String, listener.keyboard_stop)
     timer = rospy.Timer(rospy.Duration(10), listener.timed_stop)
     rospy.spin()
 
