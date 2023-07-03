@@ -160,18 +160,18 @@ class Executor:
 
         if not (velocity_x<0.05 and velocity_y<0.05):
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=5
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=10
             )
             self.idle_frame=0
         else:
             self.idle_frame+=1
             if self.idle_frame>10:
                 msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                    speed_x=velocity_x, speed_y=velocity_y, speed_z=5
+                    speed_x=velocity_x, speed_y=velocity_y, speed_z=10
                 )
             else:
                 msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                    speed_x=velocity_x, speed_y=velocity_y, speed_z=5
+                    speed_x=velocity_x, speed_y=velocity_y, speed_z=10
                 )
         self.connector.send_to_robot(msg)
     def stop(self):
