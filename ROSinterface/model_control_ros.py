@@ -100,12 +100,12 @@ class ModelControl:
         res = input(" Do you really want to exit? y/n ")
         if res == 'y':
             self.robot.executor.stop()
-            exit(1)
+            # exit(1)
             rospy.signal_shutdown("Shut down!")
     def timed_stop(self,event):
         print("Time's up!")
         self.robot.executor.stop()
-        exit(1)
+        # exit(1)
         rospy.signal_shutdown("Time's up!")
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
