@@ -97,8 +97,7 @@ class ModelControl:
         self.robot.executor.execute_control(model_data)
 
     def keyboard_stop(self):
-        res = input(" Do you really want to exit? y/n ")
-        if res == 'y':
+        if data.data == 'q':
             self.robot.executor.stop()
             # exit(1)
             rospy.signal_shutdown("Shut down!")
@@ -114,7 +113,7 @@ if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "/blobs_3d"
     listener = ModelControl(topic)
-    rospy.on_shutdown(listener.keyboard_stop())
+    rospy.Subscriber('keyboard_input', String, keyboard_stop)
     timer = rospy.Timer(rospy.Duration(10), listener.timed_stop)
     rospy.spin()
 
