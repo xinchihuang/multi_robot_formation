@@ -116,5 +116,6 @@ if __name__ == "__main__":
     listener = ModelControl(topic)
     timer = rospy.Timer(rospy.Duration(10), listener.timed_stop)
     # time.sleep(0.5)
-    rospy.spin()
     rospy.on_shutdown(listener.keyboard_stop())
+    rospy.spin()
+
