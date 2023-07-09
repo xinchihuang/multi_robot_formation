@@ -36,24 +36,8 @@ class Robot:
         self.sensor = sensor
         self.executor = executor
         self.controller=controller
-
         self.sensor_type="real"
-        # if self.controller_type == "expert":
-        #     self.controller=CentralizedController()
-        # elif self.controller_type == "model_basic":
-        #     if self.sensor_type == "real":
-        #         self.controller=GnnMapBasicControllerSensor(self.model_path,desired_distance=self.desired_distance)
-        #     if self.sensor_type == "synthesise":
-        #         self.controller = GnnMapBasicControllerSynthesise(self.model_path,desired_distance=self.desired_distance)
-        # elif self.controller_type == "model_decentralized":
-        #     if self.sensor_type == "real":
-        #         self.controller=GnnMapDecentralizedControllerSensor(self.model_path,desired_distance=self.desired_distance)
-        #     if self.sensor_type == "synthesise":
-        #         self.controller = GnnMapDecentralizedControllerSynthesise(self.model_path,desired_distance=self.desired_distance)
-        # elif self.controller_type == "model_dummy":
-        #     self.controller=DummyController(self.model_path)
-        # elif self.controller_type == "vit":
-        #     self.controller = VitController(self.model_path)
+
 
 
 

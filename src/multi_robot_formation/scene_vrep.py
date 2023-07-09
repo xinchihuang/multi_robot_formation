@@ -26,7 +26,7 @@ class Scene:
     Scene for multiple robots
     """
 
-    def __init__(self,controller_type="ViT"):
+    def __init__(self,num_robot=5,desired_distance=2.0,initial_max_range=5,initial_min_range=1,controller_type="ViT"):
         """
         robot_list: A list contains all robot in the scene
         []
@@ -42,36 +42,28 @@ class Scene:
         self.position_list = None
         self.orientation_list = None
         self.client_id = vrep_interface.init_vrep()
-        self.num_robot=5
-        self.desired_distance=2.0
-        self.initial_max_range=5
-        self.initial_min_range=1
-        self.platform = "vrep"
-        self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
-        # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
-        if controller_type=="ViT":
-            self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
-        elif controller_type=="Expert":
-            self.controller = LocalExpertController(desired_distance=self.desired_distance)
-        for i in range(self.num_robot):
-            self.add_robot_vrep(i,controller=self.controller)
+        self.num_robot=num_robot
+        self.desired_distance=desired_distance
+        self.initial_max_range=initial_max_range
+        self.initial_min_range=initial_min_range
+        # self.platform = "vrep"
+        # self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
+        # # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
+        # if controller_type=="ViT":
+        #     self.controller = VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+        # elif controller_type=="Expert":
+        #     self.controller = LocalExpertController(desired_distance=self.desired_distance)
+        # for i in range(self.num_robot):
+        #     self.add_robot_vrep(i,controller=self.controller)
         # self.reset_pose(self.initial_max_range, self.initial_min_range)
 
 
-
-    def add_robot_vrep(self, robot_index,controller):
+    def add_robot_vrep(self, robot_index,new_robot):
         """
         Add a robot in the scene
         :param robot_index: The robot index
         :return:
         """
-        new_robot = Robot(
-            sensor=Sensor(),
-            executor=Executor(),
-            controller=controller,
-            platform=self.platform,
-
-        )
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
         new_robot.sensor.client_id = self.client_id
@@ -79,8 +71,6 @@ class Scene:
         new_robot.sensor.robot_handle = new_robot.executor.robot_handle
         new_robot.sensor.get_sensor_data()
         self.robot_list.append(new_robot)
-
-
     def update_scene_data(self):
         """
         Update the adjacency list(Gabriel Graph) of the scene. Record relative distance
@@ -127,7 +117,6 @@ class Scene:
         # for r in self.adjacency_list:
         #     for n in self.adjacency_list[r]:
         #         print("edge:", r, n[0], "distance:", n[epoch5])
-
     def broadcast_all(self):
         """
         Send observations to all robots for GNN control
@@ -150,7 +139,6 @@ class Scene:
         output.orientation_list = self.orientation_list
         for robot in self.robot_list:
             robot.scene_data = output
-
     def reset_pose(self, max_disp_range, min_disp_range,max_sep_range=4,pose_list=None):
         """
         Reset all robot poses in a circle
@@ -207,8 +195,6 @@ class Scene:
                 self.client_id, robot_handle, position, orientation
             )
         return pose_list
-
-
     ### sumilation related
     def simulate(self,max_simulation_time,time_step=0.05,test_case="model"):
         simulation_time = 0
@@ -272,6 +258,7 @@ if __name__ == "__main__":
         # simulate_scene.reset_pose(5, 1.5, 4)
         # simulate_scene.simulate(50,test_case="Expert")
         # simulate_scene.stop()
+
 
         simulate_scene = Scene("ViT")
         simulate_scene.reset_pose(5, 1.5, 4)
