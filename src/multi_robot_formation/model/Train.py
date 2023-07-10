@@ -282,10 +282,10 @@ if __name__ == "__main__":
     data_path_root = "/home/xinchi/GNN_data"
     save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
     desired_distance = 2.0
-    number_of_robot = 7
+    number_of_robot = 5
     map_size=100
-    max_x = 5
-    max_y = 5
+    max_x = 10
+    max_y = 10
     # dataset parameters
     local = True
     partial = False
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
     # data set
     trainset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "training_7"),
+        data_path_root=os.path.join(data_path_root, "training_5"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,
@@ -326,7 +326,7 @@ if __name__ == "__main__":
         random_range=(0.51,5)
     )
     evaluateset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "evaluating_7"),
+        data_path_root=os.path.join(data_path_root, "evaluating_5"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,
