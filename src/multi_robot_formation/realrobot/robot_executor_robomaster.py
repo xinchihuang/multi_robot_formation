@@ -149,16 +149,16 @@ class Executor:
         Use interface/APIs to execute control in real world
         :param control_data: Controls to be executed
         """
-        velocity_y = control_data.velocity_x * 1
-        velocity_x = control_data.velocity_y * 1
+        velocity_y = control_data.velocity_x
+        velocity_x = control_data.velocity_y
         print("index", control_data.robot_index)
         print("x", velocity_x)
         print("y", velocity_y)
 
-        velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x)>0.1 else velocity_x
+        velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x) > 0.1 else velocity_x
         velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
 
-        if not (velocity_x<0.05 and velocity_y<0.05):
+        if not (abs(velocity_x)<0.1 and abs(velocity_y)<0.1):
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=velocity_y, speed_z=0
             )
@@ -167,11 +167,11 @@ class Executor:
             self.idle_frame+=1
             if self.idle_frame>10:
                 msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                    speed_x=velocity_x, speed_y=velocity_y, speed_z=5
+                    speed_x=0, speed_y=0, speed_z=20
                 )
             else:
                 msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                    speed_x=velocity_x, speed_y=velocity_y, speed_z=0
+                    speed_x=0, speed_y=0, speed_z=0
                 )
         self.connector.send_to_robot(msg)
     def stop(self):
