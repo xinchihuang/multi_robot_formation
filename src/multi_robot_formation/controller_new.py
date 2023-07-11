@@ -34,6 +34,22 @@ class Controller:
     def __init__(self,desired_distance=2):
         self.desired_distance=desired_distance
         self.name=None
+
+class EmptyController(Controller):
+    def __init__(self):
+        super().__init__()
+        self.name = "EmptyController"
+    def get_control(self, index, occupancy_map):
+        """
+        :param index: Robots' index (type: int)
+        :return:Control data (type: ControlData)
+        """
+        print(self.name)
+        out_put = ControlData()
+        out_put.robot_index = index
+        out_put.velocity_x = 0
+        out_put.velocity_y = 0
+        return out_put
 class CentralizedController(Controller):
     """
     A centralized controller
@@ -730,8 +746,8 @@ class VitController(Controller):
         )
 
         self_input_occupancy_maps[0, 0, :, :] = occupancy_map
-        # cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
-        # cv2.waitKey(1)
+        cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
+        cv2.waitKey(1)
         self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
 
         if self.use_cuda:

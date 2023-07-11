@@ -26,9 +26,11 @@ def sort_pose(position_list):
 
 
 class DataGenerator:
-    def __init__(self, local=True, partial=True):
+    def __init__(self, max_x=5,max_y=5,local=True, partial=True):
         self.local = local
         self.partial = partial
+        self.max_x = max_x
+        self.max_y = max_y
 
     def update_adjacency_list(self, position_list):
         """
@@ -71,7 +73,7 @@ class DataGenerator:
     def generate_map_control(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
 
         (
             position_lists_local,
@@ -102,7 +104,7 @@ class DataGenerator:
     def generate_map_graph(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
         (
             position_lists_local,
             self_orientation,
@@ -129,7 +131,7 @@ class DataGenerator:
     def generate_map_position(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
         (
             position_lists_local,
             self_orientation,
@@ -155,7 +157,7 @@ class DataGenerator:
     def generate_map_all(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
 
         (
             position_lists_local,
@@ -207,7 +209,7 @@ class DataGenerator:
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(local=self.local, partial=self.partial)
+        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
 
         (
             position_lists_local,
@@ -264,19 +266,19 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    self_pose_array=[[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
-    self_orientation_array=[0,0,0,0,0]
-    data_generator=DataGenerator(partial=False)
-
-    occupancy_maps,ref_control_lists,adjacency_lists,position_lists_squeezed,neighbor_lists=data_generator.generate_map_all(self_pose_array,self_orientation_array)
-    print(ref_control_lists)
-    cv2.imshow("robot view (all)", occupancy_maps[0])
-    cv2.waitKey(0)
-    occupancy_maps, reference, adjacency_lists = data_generator.generate_map_control(
-        self_pose_array, self_orientation_array
-    )
-    print(reference)
-    cv2.imshow("robot view (control)", occupancy_maps[0])
-    cv2.waitKey(0)
+    # self_pose_array=[[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
+    # self_orientation_array=[0,0,0,0,0]
+    # data_generator=DataGenerator(partial=False)
+    #
+    # occupancy_maps,ref_control_lists,adjacency_lists,position_lists_squeezed,neighbor_lists=data_generator.generate_map_all(self_pose_array,self_orientation_array)
+    # print(ref_control_lists)
+    # cv2.imshow("robot view (all)", occupancy_maps[0])
+    # cv2.waitKey(0)
+    # occupancy_maps, reference, adjacency_lists = data_generator.generate_map_control(
+    #     self_pose_array, self_orientation_array
+    # )
+    # print(reference)
+    # cv2.imshow("robot view (control)", occupancy_maps[0])
+    # cv2.waitKey(0)
     pass
 

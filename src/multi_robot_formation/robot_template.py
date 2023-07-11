@@ -24,7 +24,7 @@ class Robot:
     """
 
     def __init__(
-        self, sensor, executor,controller, platform="vrep"
+        self, sensor, executor,controller, platform="vrep",sensor_range=5
     ):
         self.index = None
         self.GNN_model = None
@@ -37,7 +37,7 @@ class Robot:
         self.executor = executor
         self.controller=controller
         self.sensor_type="real"
-
+        self.sensor_range=sensor_range
 
 
 
@@ -70,7 +70,7 @@ class Robot:
                 elif self.controller.name== "GnnMapBasicControllerSynthesise":
                     position_lists_global = self.scene_data.position_list
                     orientation_list = self.scene_data.orientation_list
-                    occupancy_map_simulator = MapSimulator(local=True)
+                    occupancy_map_simulator = MapSimulator(max_x=self.sensor_range,max_y=self.sensor_range,local=True)
                     (
                         position_lists_local,
                         self_orientation,
@@ -85,7 +85,7 @@ class Robot:
                 elif self.controller.name == "GnnMapDecentralizedControllerSynthesise":
                         position_lists_global = self.scene_data.position_list
                         orientation_list = self.scene_data.orientation_list
-                        occupancy_map_simulator = MapSimulator(local=True)
+                        occupancy_map_simulator = MapSimulator(max_x=self.sensor_range,max_y=self.sensor_range,local=True)
                         (
                             position_lists_local,
                             self_orientation,
@@ -106,7 +106,7 @@ class Robot:
                     #     occupancy_map=self.sensor_data.occupancy_map
                     #     # occupancy_map=preprocess(occupancy_map)
                     # else:
-                    occupancy_map_simulator = MapSimulator(local=True)
+                    occupancy_map_simulator = MapSimulator(max_x=self.sensor_range,max_y=self.sensor_range,local=True)
                     (
                         position_lists_local,
                         self_orientation,
@@ -125,7 +125,7 @@ class Robot:
 
                     position_lists_global = self.scene_data.position_list
                     orientation_list = self.scene_data.orientation_list
-                    occupancy_map_simulator = MapSimulator(local=True)
+                    occupancy_map_simulator = MapSimulator(max_x=self.sensor_range,max_y=self.sensor_range,local=True)
                     (
                         position_lists_local,
                         self_orientation,

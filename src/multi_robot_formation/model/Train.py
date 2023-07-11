@@ -31,6 +31,8 @@ class RobotDatasetTrace(Dataset):
         local,
         partial,
         random_range,
+        max_x,
+        max_y,
         task_type="all",
 
     ):
@@ -44,6 +46,8 @@ class RobotDatasetTrace(Dataset):
         self.random_rate=0
         self.random_range=random_range
 
+        self.max_x = max_x
+        self.max_y = max_y
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
         self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
@@ -89,7 +93,7 @@ class RobotDatasetTrace(Dataset):
         #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
         #     )
 
-        data_generator = DataGenerator(local=self.local, partial=self.partial)
+        data_generator = DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
         if self.task_type=="all":
             # print(self.task_type)
             occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = data_generator.generate_map_all(
@@ -323,7 +327,9 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,5)
+        random_range=(0.51,5),
+        max_x=max_x,
+        max_y=max_y
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating_5"),
@@ -332,7 +338,9 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,5)
+        random_range=(0.51,5),
+        max_x=max_x,
+        max_y=max_y
     )
 
 
