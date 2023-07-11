@@ -746,8 +746,8 @@ class VitController(Controller):
         )
 
         self_input_occupancy_maps[0, 0, :, :] = occupancy_map
-        cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
-        cv2.waitKey(1)
+        # cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
+        # cv2.waitKey(1)
         self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
 
         if self.use_cuda:
