@@ -64,6 +64,7 @@ class Scene:
         :param robot_index: The robot index
         :return:
         """
+        print(new_robot.controller.name)
         new_robot.index = robot_index
         new_robot.executor.initialize(robot_index, self.client_id)
         new_robot.sensor.client_id = self.client_id
@@ -212,7 +213,6 @@ class Scene:
             for robot in self.robot_list:
                 sensor_data = robot.get_sensor_data()
                 control_data = robot.get_control_data()
-
                 robot.execute_control()
                 # record data
                 # data_recorder.record_sensor_data(sensor_data)

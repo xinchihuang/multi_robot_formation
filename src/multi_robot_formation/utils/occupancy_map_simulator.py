@@ -18,7 +18,7 @@ class MapSimulator:
         max_y=5,
         local=True,
         block=True,
-        partial=False,
+        partial=True,
         position_encoding=False
     ):
         """
@@ -48,6 +48,18 @@ class MapSimulator:
                         continue
                     self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
         self.observation_angle = 2 * math.pi / 3
+        self.get_settings()
+    def get_settings(self):
+        print("-----------------------------------")
+        print("Map simulator settings")
+        print("robot_size: ", self.robot_size)
+        print("max_height: ", self.max_height)
+        print("map_size: ",  self.map_size)
+        print("max_x: ", self.max_x)
+        print("max_y: ", self.max_y)
+        print("local: ", self.local)
+        print("block: ", self.block)
+        print("partial: ", self.partial)
 
     def arctan(self, x, y):
         if x == 0 and y > 0:
@@ -96,9 +108,6 @@ class MapSimulator:
         if self.partial:
             if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
                 return None
-
-
-
         return [x, y, z]
 
     def rotation(self, world_point, self_orientation):

@@ -37,17 +37,19 @@ class RobotDatasetTrace(Dataset):
 
     ):
 
-        self.transform = True
-        self.local = local
-        self.partial = partial
-        self.desired_distance = desired_distance
-        self.number_of_agents = number_of_agents
-        self.task_type=task_type
-        self.random_rate=0
-        self.random_range=random_range
-
+        #### map simulator settings
         self.max_x = max_x
         self.max_y = max_y
+        self.local = local
+        self.partial = partial
+
+        #### dataset settings
+        self.transform = True
+        self.desired_distance = desired_distance
+        self.number_of_agents = number_of_agents
+        self.task_type = task_type
+        self.random_rate = 0
+        self.random_range = random_range
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
         self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
@@ -65,6 +67,9 @@ class RobotDatasetTrace(Dataset):
                 self.pose_array = pose_array_i
                 continue
             self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=1)
+
+        self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        self.get_settings()
 
     def __len__(self):
         return self.pose_array.shape[1]
@@ -93,10 +98,10 @@ class RobotDatasetTrace(Dataset):
         #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
         #     )
 
-        data_generator = DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        # data_generator = DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
         if self.task_type=="all":
             # print(self.task_type)
-            occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = data_generator.generate_map_all(
+            occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
                 global_pose_array, self_orientation_array
             )
             if self.transform:
@@ -113,15 +118,15 @@ class RobotDatasetTrace(Dataset):
             }
         else:
             if self.task_type=="control":
-                occupancy_maps, reference,adjacency_lists = data_generator.generate_map_control(
+                occupancy_maps, reference,adjacency_lists = self.data_generator.generate_map_control(
                     global_pose_array, self_orientation_array
                 )
             elif self.task_type=="graph":
-                occupancy_maps, reference = data_generator.generate_map_graph(
+                occupancy_maps, reference = self.data_generator.generate_map_graph(
                     global_pose_array, self_orientation_array
                 )
             elif self.task_type=="position":
-                occupancy_maps, reference = data_generator.generate_map_position(
+                occupancy_maps, reference = self.data_generator.generate_map_position(
                     global_pose_array, self_orientation_array
                 )
 
@@ -132,6 +137,16 @@ class RobotDatasetTrace(Dataset):
                 "occupancy_maps": occupancy_maps,
                 "reference": reference,
             }
+    def get_settings(self):
+        print("-----------------------------------")
+        print("Dataset settings")
+        print("transform: ", self.transform)
+        print("desired_distance: ", self.desired_distance)
+        print("number_of_agents: ", self.number_of_agents)
+        print("task_type: ", self.task_type)
+        print("random_rate: ", self.random_rate)
+        print("random_range: ", self.random_range)
+        print("num_sample: ", self.num_sample)
 
 
 
@@ -292,7 +307,7 @@ if __name__ == "__main__":
     max_y = 10
     # dataset parameters
     local = True
-    partial = False
+    partial = True
 
     #trainer parameters
     criterion = "mse"
@@ -327,7 +342,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,5),
+        random_range=(0.51,10),
         max_x=max_x,
         max_y=max_y
     )
@@ -338,7 +353,7 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,5),
+        random_range=(0.51,10),
         max_x=max_x,
         max_y=max_y
     )
@@ -358,6 +373,8 @@ if __name__ == "__main__":
         use_cuda=use_cuda,
         task_type=task_type,
     )
+
+
     print(T.optimizer)
     T.train()
 

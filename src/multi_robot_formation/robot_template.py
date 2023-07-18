@@ -55,11 +55,11 @@ class Robot:
         Get controls
         :return: Control data
         """
-        if self.index==0 or self.index==1:
-            self.control_data.robot_index = self.index
-            self.control_data.velocity_x = 0
-            self.control_data.velocity_y = 0
-            return self.control_data
+        # if self.index==0 or self.index==1:
+        #     self.control_data.robot_index = self.index
+        #     self.control_data.velocity_x = 0
+        #     self.control_data.velocity_y = 0
+        #     return self.control_data
 
         if self.platform=="vrep":
             if not self.scene_data == None and not self.sensor_data == None and not self.scene_data.adjacency_list == None:

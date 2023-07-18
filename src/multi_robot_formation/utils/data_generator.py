@@ -31,6 +31,7 @@ class DataGenerator:
         self.partial = partial
         self.max_x = max_x
         self.max_y = max_y
+        self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
 
     def update_adjacency_list(self, position_list):
         """
@@ -73,7 +74,7 @@ class DataGenerator:
     def generate_map_control(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        occupancy_map_simulator = self.map_simulator
 
         (
             position_lists_local,
@@ -104,11 +105,11 @@ class DataGenerator:
     def generate_map_graph(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        # occupancy_map_simulator = self.map_simulator
         (
             position_lists_local,
             self_orientation,
-        ) = occupancy_map_simulator.global_to_local(
+        ) = self.map_simulator.global_to_local(
             global_pose_array, self_orientation_array
         )
         for i in range(len(position_lists_local)):
@@ -118,7 +119,7 @@ class DataGenerator:
 
         position_lists_local = np.array(position_lists_local)
 
-        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
+        occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
         neighbor_lists = []
         number_of_robot = position_lists_local.shape[0]
         for robot_index in range(number_of_robot):
@@ -131,7 +132,7 @@ class DataGenerator:
     def generate_map_position(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        occupancy_map_simulator = self.map_simulator
         (
             position_lists_local,
             self_orientation,
@@ -157,8 +158,7 @@ class DataGenerator:
     def generate_map_all(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
-
+        occupancy_map_simulator = self.map_simulator
         (
             position_lists_local,
             self_orientation,
@@ -209,7 +209,7 @@ class DataGenerator:
         global_pose_array = np.array(global_pose_array)
         number_of_robot = global_pose_array.shape[0]
         self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        occupancy_map_simulator = self.map_simulator
 
         (
             position_lists_local,

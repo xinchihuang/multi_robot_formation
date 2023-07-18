@@ -701,7 +701,6 @@ class VitController(Controller):
         self.name = "VitController"
         self.model_path = model_path
         self.num_robot = num_robot
-
         self.input_height = input_height
         self.input_width = input_width
 
@@ -709,7 +708,7 @@ class VitController(Controller):
         self.initialize_model()
     def initialize_model(self):
         """
-        Initialize GNN model
+        Initialize ViT model
         """
         # print(self.name)
         self.model = ViT(
@@ -736,18 +735,17 @@ class VitController(Controller):
         """
 
         :param index: Robots' index (type: int)
-        :param scene_data: Data from the scene (type: SceneData)
+        :param occupancy_map:
         :return:Control data (type: ControlData)
         """
-        print(self.name)
         out_put = ControlData()
         self_input_occupancy_maps = np.zeros(
             (1, 1, self.input_width, self.input_height)
         )
 
         self_input_occupancy_maps[0, 0, :, :] = occupancy_map
-        cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
-        cv2.waitKey(1)
+        # cv2.imshow("robot view " + str(index) + "(Synthesise)", occupancy_map)
+        # cv2.waitKey(1)
         self_input_tensor = torch.from_numpy(self_input_occupancy_maps).double()
 
         if self.use_cuda:

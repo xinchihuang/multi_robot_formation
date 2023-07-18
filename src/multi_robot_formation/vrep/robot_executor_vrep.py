@@ -27,6 +27,8 @@ class Executor:
         self.max_velocity = 0.5
         self.wheel_adjustment = 10.25
 
+        self.rotate_direction=1
+
     def velocity_transform(self, velocity_x, velocity_y, theta):
         """
         Transform robot velocity to wheels velocity
@@ -73,7 +75,40 @@ class Executor:
         self.motor_left_handle = motor_left_handle
         self.motor_right_handle = motor_right_handle
         self.point_cloud_handle = point_cloud_handle
+    def swing(self):
+        if self.rotate_direction=="clockwise":
+            omega_left = 1 * self.wheel_adjustment
+            omega_right = -1 * self.wheel_adjustment
+            vrep_interface.post_control(
+                self.client_id,
+                self.motor_left_handle,
+                self.motor_right_handle,
+                omega_left,
+                omega_right,
+            )
+        elif self.rotate_direction=="counter_clockwise":
+            omega_left = -1 * self.wheel_adjustment
+            omega_right = 1 * self.wheel_adjustment
+            vrep_interface.post_control(
+                self.client_id,
+                self.motor_left_handle,
+                self.motor_right_handle,
+                omega_left,
+                omega_right,
+            )
 
+    def rotate(self):
+        omega_left = 1 * self.wheel_adjustment
+        omega_right = -1 * self.wheel_adjustment
+        vrep_interface.post_control(
+            self.client_id,
+            self.motor_left_handle,
+            self.motor_right_handle,
+            omega_left,
+            omega_right,
+        )
+    def stop(self):
+        pass
     def execute_control(self, control_data):
         """
         Use interface/APIs to execute control in simulator/real world
@@ -87,6 +122,10 @@ class Executor:
         omega_left, omega_right = self.velocity_transform(velocity_x_global, velocity_v_global, theta_global)
         omega_left = omega_left * self.wheel_adjustment
         omega_right = omega_right * self.wheel_adjustment
+        # omega_left = 1 * self.wheel_adjustment
+        # omega_right = -1 * self.wheel_adjustment
+
+
         vrep_interface.post_control(
             self.client_id,
             self.motor_left_handle,
