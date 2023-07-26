@@ -6,17 +6,18 @@ author: Xinchi Huang
 import numpy as np
 
 
-def get_gabreil_graph(position_array, node_num):
+def get_gabreil_graph(position_array):
     """
     Return a gabreil graph of the scene
     :param position_array: A numpy array contains all robots' positions
     :param node_num: number of robots
     :return: A gabreil graph( 2D list)
     """
+    position_array=np.array(position_array)
+    node_num=len(position_array)
     gabriel_graph = [[1] * node_num for _ in range(node_num)]
     for u in range(node_num):
         for v in range(node_num):
-
             m = (position_array[u] + position_array[v]) / 2
             for w in range(node_num):
                 if w == v:
@@ -30,7 +31,7 @@ def get_gabreil_graph(position_array, node_num):
     return gabriel_graph
 
 
-def get_gabreil_graph_local(position_array, node_num):
+def get_gabreil_graph_local(position_array, node_num,view_angle=120):
     """
     Return a gabreil graph of the scene
     :param position_array: A numpy array contains all other robots' positions reative  to the given robot

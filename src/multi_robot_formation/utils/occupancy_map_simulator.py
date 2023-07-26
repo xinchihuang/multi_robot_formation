@@ -48,7 +48,7 @@ class MapSimulator:
                         continue
                     self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
         self.observation_angle = 2 * math.pi / 3
-        self.get_settings()
+        # self.get_settings()
     def get_settings(self):
         print("-----------------------------------")
         print("Map simulator settings")

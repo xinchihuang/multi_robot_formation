@@ -7,18 +7,22 @@ from vrep.robot_executor_vrep import Executor
 from vrep.robot_sensor_vrep import Sensor
 from robot_template import Robot
 from controller_new import *
+from model.LocalExpertController import LocalExpertControllerPartial
 
 ### ViT experiments
-for i in range(100):
+for i in range(1):
+    simulation_time=50
     num_robot=7
     desired_distance=2.0
     initial_max_range=5
-    initial_min_range=1
+    initial_min_range=1.5
+    max_sep_range=4
     sensor_range=10
     platform="vrep"
-    simulate_scene = Scene(num_robot=num_robot,desired_distance=desired_distance,initial_max_range=initial_max_range,initial_min_range=initial_min_range)
+    simulate_scene = Scene(num_robot=num_robot,desired_distance=desired_distance,initial_max_range=initial_max_range,initial_min_range=initial_min_range,max_sep_range=max_sep_range)
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
-    controller = VitController(model_path=model_path,desired_distance=desired_distance)
+    # controller = VitController(model_path=model_path,desired_distance=desired_distance)
+    controller = LocalExpertControllerPartial(desired_distance=desired_distance)
     for i in range(num_robot):
         new_robot = Robot(
             sensor=Sensor(),
@@ -28,8 +32,8 @@ for i in range(100):
             sensor_range=sensor_range
         )
         simulate_scene.add_robot_vrep(i,new_robot)
-    simulate_scene.reset_pose(7, 1.5, 4)
-    simulate_scene.simulate(50, test_case="ViT")
+    simulate_scene.reset_pose()
+    simulate_scene.simulate(simulation_time, test_case="ViT")
     simulate_scene.stop()
 
 

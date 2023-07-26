@@ -47,6 +47,49 @@ class LocalExpertController:
         out_put.velocity_y = velocity_sum_y
 
         return out_put
+
+class LocalExpertControllerPartial:
+    def __init__(self,desired_distance=2,safe_margin=0.5,view_range=5,view_angle=120):
+        self.desired_distance = desired_distance
+        self.name="LocalExpertControllerPartial"
+        self.safe_margin=safe_margin
+        self.view_range=view_range
+        self.view_angle=view_angle
+    def get_control(self,position_list_local):
+        """
+        :param position_list_local: local position list for training
+        """
+        position_array=np.array(position_list_local)
+        out_put = ControlData()
+        neighbor=np.ones(len(position_list_local))
+        for v in range(len(position_list_local)):
+            m = (position_array[v]) / 2
+            for w in range(len(position_list_local)):
+                if w == v:
+                    continue
+                if np.linalg.norm(position_array[w] - m) < np.linalg.norm(m):
+                    neighbor[v]=0
+        velocity_sum_x =0
+        velocity_sum_y =0
+        num_neighbors=0
+        for i in range(len(position_array)):
+            # print(neighbor)
+            if neighbor[i]==1:
+                num_neighbors+=1
+                if position_array[i][0]==float("inf") or position_array[i][1]==float("inf"):
+                    continue
+                distance = (position_array[i][0]** 2 + position_array[i][1]** 2)**0.5
+                # print(position_array[i])
+                # print(distance)
+                rate = ((distance) - self.desired_distance) / (distance-self.safe_margin)
+                velocity_x = rate * (-position_array[i][0])
+                velocity_y = rate * (-position_array[i][1])
+                velocity_sum_x -= velocity_x
+                velocity_sum_y -= velocity_y
+        out_put.velocity_x = velocity_sum_x
+        out_put.velocity_y = velocity_sum_y
+
+        return out_put
 # if __name__ == "__main__":
 #     pass
     # from utils.occupancy_map_simulator import MapSimulator

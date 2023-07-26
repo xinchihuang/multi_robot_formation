@@ -2,6 +2,8 @@
 A scene template
 author: Xinchi Huang
 """
+import copy
+import copyreg
 import math
 import random
 import sys
@@ -21,12 +23,27 @@ from comm_data import SceneData
 from recorder import Recorder
 from controller_new import *
 from model.LocalExpertController import LocalExpertController
+
+def get_vector_angle(v1,v2):
+    theta=v1[2]
+    v1=v1[:2]
+    v2=v2[:2]
+    vector1 = np.subtract(v1, v2)
+    vector2=np.array([math.cos(theta),math.sin(theta)])
+
+    dot_product = np.dot(vector1, vector2)
+    magnitude_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+    inner_angle_rad = np.arccos(dot_product / magnitude_product)
+    inner_angle_deg = np.degrees(inner_angle_rad)
+
+    return inner_angle_deg
+
 class Scene:
     """
     Scene for multiple robots
     """
 
-    def __init__(self,num_robot=5,desired_distance=2.0,initial_max_range=5,initial_min_range=1,controller_type="ViT"):
+    def __init__(self,num_robot=5,desired_distance=2.0,initial_max_range=5,initial_min_range=1,max_sep_range=4,controller_type="ViT"):
         """
         robot_list: A list contains all robot in the scene
         []
@@ -46,6 +63,7 @@ class Scene:
         self.desired_distance=desired_distance
         self.initial_max_range=initial_max_range
         self.initial_min_range=initial_min_range
+        self.max_sep_range=max_sep_range
         # self.platform = "vrep"
         # self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         # # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
@@ -92,7 +110,7 @@ class Scene:
         position_array = np.array(position_list)
 
         # Get Gabreil Graph
-        gabriel_graph = get_gabreil_graph(position_array, node_num)
+        gabriel_graph = get_gabreil_graph(position_array)
 
         # Create adjacency list
         new_adj_list = defaultdict(list)
@@ -140,13 +158,9 @@ class Scene:
         output.orientation_list = self.orientation_list
         for robot in self.robot_list:
             robot.scene_data = output
-    def reset_pose(self, max_disp_range, min_disp_range,max_sep_range=4,pose_list=None):
+    def reset_pose(self,pose_list=None):
         """
         Reset all robot poses in a circle
-        :param max_disp_range: min distribute range
-        :param min_disp_range: max distribute range
-
-
         pose_list:[[pos_x,pos_y,theta],[pos_x,pos_y,theta]]
         height: A default parameter for specific robot and simulator.
         Make sure the robot is not stuck in the ground
@@ -155,24 +169,35 @@ class Scene:
             pose_list=[]
             for i in range(self.num_robot):
                 while True:
-                    x = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
-                    y = 2 * random.uniform(0,1) * max_disp_range - max_disp_range
+                    x = 2 * random.uniform(0,1) * self.initial_max_range - self.initial_max_range
+                    y = 2 * random.uniform(0,1) * self.initial_max_range - self.initial_max_range
                     theta=2*math.pi*random.uniform(0,1)-math.pi
                     redo=False
                     min_distance=float("inf")
                     for j in range(len(pose_list)):
                         distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
-                        if distance<min_disp_range:
+                        if distance<self.initial_min_range:
                             redo=True
                             break
                         # print(distance)
                         if min_distance>distance:
                             min_distance=distance
+                        temp_pose_list=copy.deepcopy(pose_list)
+                        temp_pose_list.append([x,y,theta])
+                        temp_gabreil=get_gabreil_graph(temp_pose_list)
+                        if i>0:
+                            for neighbor in range(len(temp_gabreil[i])):
+                                if i==neighbor:
+                                    continue
+                                else:
+                                    if temp_gabreil[i][neighbor]==1:
+                                        inner_angle=get_vector_angle([x,y,theta],pose_list[neighbor])
+                                        if inner_angle>60:
+                                            redo=True
+                                            break
                     # print(len(pose_list),min_distance)
-                    if len(pose_list)>0 and min_distance>max_sep_range:
+                    if len(pose_list)>0 and min_distance>self.max_sep_range:
                         redo=True
-                    # if min_distance>max_sep_range:
-                    #     redo=True
                     if redo==False:
                         pose_list.append([x,y,theta])
                         break
@@ -246,21 +271,4 @@ class Scene:
     def stop(self):
         vrep_interface.stop(self.client_id)
 if __name__ == "__main__":
-    for i in range(1):
-        # ### ViT controller
-        # simulate_scene=Scene("ViT")
-        # pos_list=simulate_scene.reset_pose(5,1.5,4)
-        # simulate_scene.simulate(50,test_case="ViT")
-        # simulate_scene.stop()
-        #
-        # ### Expert controller
-        # simulate_scene = Scene("Expert")
-        # simulate_scene.reset_pose(5, 1.5, 4)
-        # simulate_scene.simulate(50,test_case="Expert")
-        # simulate_scene.stop()
-
-
-        simulate_scene = Scene("ViT")
-        simulate_scene.reset_pose(5, 1.5, 4)
-        simulate_scene.simulate(50, test_case="Expert")
-        simulate_scene.stop()
+    get_vector_angle([0,1,1],[1,0,0])
