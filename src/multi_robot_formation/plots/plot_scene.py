@@ -159,9 +159,11 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
     """
     rob_num = np.shape(pose_array)[0]
     gabriel_graph = gabriel(pose_array)
-    position_array = pose_array[:, -1, :2]
+    position_array = pose_array[:, -1, :]
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
+    # for i in range(len(position_array)):
+    #     plt.plot([position_array[i][0], position_array[i][1]],[position_array[i][0]+math.cos(position_array[i][2]), position_array[i][1]+math.sin(position_array[i][2])])
     xlist=[]
     ylist=[]
     formation_error=0
@@ -302,13 +304,15 @@ def plot_load_data(root_dir,dt=0.05):
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
     position_array = trace_array[:, :, 0, :2]
     orientation_array=trace_array[:, :, 1, 2]
+    # pose_array=np.concatenate(position_array,orientation_array,axis=3)
+    print(trace_array[:, :, 0, :])
 
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array, root_dir)
     # plot_trace(position_array, root_dir)
     # print(orientation_array)
-    plot_trace_triangle(position_array ,orientation_array, root_dir)
+    # plot_trace_triangle(position_array ,orientation_array, root_dir)
     velocity_array = None
     for robot_path in robot_path_list:
         velocity_array_single = np.load(

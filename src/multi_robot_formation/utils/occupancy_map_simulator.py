@@ -106,7 +106,7 @@ class MapSimulator:
         # if x < min_range and y < min_range and x > -min_range and y > -min_range:
         #     return None
         if self.partial:
-            if math.pi / 3 < self.arctan(x, y) or self.arctan(x, y) < - math.pi / 3:
+            if math.pi / 3 < math.atan2(y, x) or math.atan2(y, x) < - math.pi / 3:
                 return None
         return [x, y, z]
 
@@ -137,7 +137,7 @@ class MapSimulator:
             for robot_j in range(len(position_lists_local[self_i])):
                 x = position_lists_local[self_i][robot_j][0]
                 y = position_lists_local[self_i][robot_j][1]
-                theta = self.arctan(x, y)
+                theta = math.atan2(y, x)
 
                 block = False
                 for robot_k in range(len(position_lists_local[self_i])):
@@ -153,8 +153,8 @@ class MapSimulator:
                     x_k2 = x_k + (self.robot_size / 2) * math.sin(theta)
                     y_k2 = y_k - (self.robot_size / 2) * math.cos(theta)
 
-                    theta_k_1 = self.arctan(x_k1, y_k1)
-                    theta_k_2 = self.arctan(x_k2, y_k2)
+                    theta_k_1 = math.atan2(y_k1, x_k1)
+                    theta_k_2 = math.atan2(y_k2, x_k2)
                     if max(theta_k_1, theta_k_2) - min(theta_k_1, theta_k_2) < math.pi:
                         if (
                             theta_k_1 < theta < theta_k_2
@@ -295,5 +295,6 @@ class MapSimulator:
             maps.append(occupancy_map)
         return np.array(maps)
 
-
+if __name__ == "__main__":
+    print(math.degrees(math.atan2(1,-1)))
 # print(math.sin(arctan(-1.732,-1)))

@@ -28,7 +28,7 @@ def get_vector_angle(v1,v2):
     theta=v1[2]
     v1=v1[:2]
     v2=v2[:2]
-    vector1 = np.subtract(v1, v2)
+    vector1 = np.subtract(v2, v1)
     vector2=np.array([math.cos(theta),math.sin(theta)])
 
     dot_product = np.dot(vector1, vector2)
@@ -167,40 +167,81 @@ class Scene:
         """
         if pose_list==None:
             pose_list=[]
+
             for i in range(self.num_robot):
                 while True:
+                    redo = False
                     x = 2 * random.uniform(0,1) * self.initial_max_range - self.initial_max_range
                     y = 2 * random.uniform(0,1) * self.initial_max_range - self.initial_max_range
                     theta=2*math.pi*random.uniform(0,1)-math.pi
-                    redo=False
                     min_distance=float("inf")
+                    if i==0:
+                        pose_list.append([x, y, theta])
+                        break
                     for j in range(len(pose_list)):
                         distance=((x-pose_list[j][0])**2+(y-pose_list[j][1])**2)**0.5
                         if distance<self.initial_min_range:
                             redo=True
                             break
-                        # print(distance)
                         if min_distance>distance:
                             min_distance=distance
-                        temp_pose_list=copy.deepcopy(pose_list)
-                        temp_pose_list.append([x,y,theta])
-                        temp_gabreil=get_gabreil_graph(temp_pose_list)
-                        if i>0:
-                            for neighbor in range(len(temp_gabreil[i])):
-                                if i==neighbor:
-                                    continue
-                                else:
-                                    if temp_gabreil[i][neighbor]==1:
-                                        inner_angle=get_vector_angle([x,y,theta],pose_list[neighbor])
-                                        if inner_angle>60:
-                                            redo=True
-                                            break
-                    # print(len(pose_list),min_distance)
-                    if len(pose_list)>0 and min_distance>self.max_sep_range:
+                    if min_distance>self.max_sep_range:
                         redo=True
+                        continue
+                    temp_pose_list=copy.deepcopy(pose_list)
+                    temp_pose_list.append([x,y,theta])
+                    temp_gabreil=get_gabreil_graph(temp_pose_list)
+                    for neighbor in range(len(temp_gabreil[i])):
+                        if neighbor==i:
+                            continue
+                        if temp_gabreil[i][neighbor]==1:
+                            vector1 = np.array([pose_list[neighbor][0]-x,pose_list[neighbor][1]-y])
+                            vector2 = np.array([math.cos(theta), math.sin(theta)])
+                            dot_product = np.dot(vector1, vector2)
+                            magnitude_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+                            inner_angle_rad = np.arccos(dot_product / magnitude_product)
+                            inner_angle_deg = np.degrees(inner_angle_rad)
+                            if inner_angle_deg<60 or np.linalg.norm(vector1)>self.robot_list[0].sensor_range:
+                                redo = True
+                                break
+                    print(i,temp_gabreil[i])
+                    if i>=2 and sum(temp_gabreil[i])<=2:
+                        redo = True
+                        continue
                     if redo==False:
                         pose_list.append([x,y,theta])
                         break
+            gabreil_graph=get_gabreil_graph(pose_list)
+            print(gabreil_graph)
+            for i in range(len(gabreil_graph)):
+                neighbor_list=[]
+                print(gabreil_graph)
+                for j in range(len(gabreil_graph)):
+                    if i==j:
+                        continue
+                    if gabreil_graph[i][j]==1:
+                        neighbor_list.append(pose_list[j])
+                        gabreil_graph[i][j]=0
+                        gabreil_graph[j][i]=0
+                    if len(neighbor_list)==0:
+                        theta = math.atan2(pose_list[i][1], pose_list[i][0])
+                        pose_list[i][2] = theta
+
+                    elif len(neighbor_list)==1:
+                        v1x = neighbor_list[0][0] - pose_list[i][0]
+                        v1y = neighbor_list[0][1] - pose_list[i][1]
+                        theta = math.atan2(v1y, v1x)
+                        pose_list[i][2] = theta
+
+                    elif len(neighbor_list)>=2:
+                        v1x = neighbor_list[0][0] - pose_list[i][0]
+                        v1y = neighbor_list[0][1] - pose_list[i][1]
+                        v2x = neighbor_list[1][0] - pose_list[i][0]
+                        v2y = neighbor_list[1][1] - pose_list[i][1]
+                        theta=(math.atan2(v1y,v1x)+math.atan2(v2y,v2x))/2
+                        pose_list[i][2]=theta
+                        break
+        print(len(pose_list))
         # pose_list = [[-3, -3, 0],
         #              # [-3, 3, 0],
         #              # [3, 3, 0],

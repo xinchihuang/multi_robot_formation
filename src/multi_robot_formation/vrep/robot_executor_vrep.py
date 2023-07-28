@@ -29,7 +29,7 @@ class Executor:
 
         self.rotate_direction=1
 
-    def velocity_transform(self, velocity_x, velocity_y, theta):
+    def velocity_transform(self, velocity_x, velocity_y, theta,omega):
         """
         Transform robot velocity to wheels velocity
         :param velocity_x:  robot velocity x (float)
@@ -61,6 +61,10 @@ class Executor:
 
         wheel_velocity_left = alpha * wheel_velocity_left
         wheel_velocity_right = alpha * wheel_velocity_right
+
+        # wheel_velocity_left=wheel_velocity_left-omega/2
+        # wheel_velocity_right=wheel_velocity_right+omega/2
+
         return wheel_velocity_left, wheel_velocity_right
 
     def initialize(self, robot_index, client_id):
@@ -117,9 +121,10 @@ class Executor:
         velocity_x_local = control_data.velocity_x
         velocity_y_local = control_data.velocity_y
         theta_global = control_data.orientation[2]
+        omega=control_data.omega
         velocity_x_global=velocity_x_local*math.cos(theta_global)-velocity_y_local*math.sin(theta_global)
         velocity_v_global=velocity_x_local*math.sin(theta_global)+velocity_y_local*math.cos(theta_global)
-        omega_left, omega_right = self.velocity_transform(velocity_x_global, velocity_v_global, theta_global)
+        omega_left, omega_right = self.velocity_transform(velocity_x_global, velocity_v_global, theta_global,omega)
         omega_left = omega_left * self.wheel_adjustment
         omega_right = omega_right * self.wheel_adjustment
         # omega_left = 1 * self.wheel_adjustment

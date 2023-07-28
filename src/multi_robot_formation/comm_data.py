@@ -10,6 +10,7 @@ class ControlData:
 
         self.velocity_x = 0
         self.velocity_y = 0
+        self.omega=0
 
 
 class SensorData:

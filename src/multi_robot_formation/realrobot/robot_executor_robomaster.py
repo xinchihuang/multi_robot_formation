@@ -151,10 +151,11 @@ class Executor:
         """
         velocity_y = control_data.velocity_x
         velocity_x = control_data.velocity_y
+        omega=control_data.omega
         print("index", control_data.robot_index)
         print("x", velocity_x)
         print("y", velocity_y)
-
+        print("z", omega)
         velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x) > 0.1 else velocity_x
         velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
         if velocity_x==0 and velocity_y==0:
