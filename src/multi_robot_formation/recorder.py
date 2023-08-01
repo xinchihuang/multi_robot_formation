@@ -78,6 +78,7 @@ class Recorder:
             # save trace
             trace_data_path = os.path.join(robot_path, "trace.npy")
             trace_data = self.trace_data[robot_index]
+            print(trace_data)
             trace_data_array = np.array(trace_data)
             np.save(trace_data_path, trace_data_array)
             # save control

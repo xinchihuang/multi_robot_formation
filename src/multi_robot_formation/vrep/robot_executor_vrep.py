@@ -45,6 +45,11 @@ class Executor:
 
         wheel_velocity_left = M11 * velocity_x + M12 * velocity_y
         wheel_velocity_right = M21 * velocity_x + M22 * velocity_y
+        # omega0 = wheel_velocity_right-wheel_velocity_left
+        # omega_d=(omega-omega0)/2
+        # wheel_velocity_left=wheel_velocity_left-omega_d/2
+        # wheel_velocity_right=wheel_velocity_right+omega_d/2
+
 
         if (
             math.fabs(wheel_velocity_right) >= math.fabs(wheel_velocity_left)
@@ -61,9 +66,6 @@ class Executor:
 
         wheel_velocity_left = alpha * wheel_velocity_left
         wheel_velocity_right = alpha * wheel_velocity_right
-
-        # wheel_velocity_left=wheel_velocity_left-omega/2
-        # wheel_velocity_right=wheel_velocity_right+omega/2
 
         return wheel_velocity_left, wheel_velocity_right
 

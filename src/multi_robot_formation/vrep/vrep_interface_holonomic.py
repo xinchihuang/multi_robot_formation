@@ -5,12 +5,6 @@ author: Xinchi Huang
 
 from vrep import sim as vrep
 
-object_names = [
-    "Pioneer_p3dx",
-    "Pioneer_p3dx_leftMotor",
-    "Pioneer_p3dx_rightMotor",
-    "velodyneVPL_16",
-]
 
 
 def init_vrep():
@@ -43,23 +37,18 @@ def get_vrep_handle(client_id, robot_index):
     if robot_index == 0:
         handle_name_suffix = ""
     _, robot_handle = vrep.simxGetObjectHandle(
-        client_id, "Pioneer_p3dx" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
+        client_id, "Omnirob" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
     )
-    _, motor_left_handle = vrep.simxGetObjectHandle(
-        client_id,
-        "Pioneer_p3dx_leftMotor" + handle_name_suffix,
-        vrep.simx_opmode_oneshot_wait,
-    )
-    _, motor_right_handle = vrep.simxGetObjectHandle(
-        client_id,
-        "Pioneer_p3dx_rightMotor" + handle_name_suffix,
-        vrep.simx_opmode_oneshot_wait,
-    )
-    _, point_cloud_handle = vrep.simxGetObjectHandle(
-        client_id, "velodyneVPL_16" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
-    )
+    _, omniRob_FL_handle = vrep.simxGetObjectHandle(client_id, 'Omnirob_FLwheel_motor'+ handle_name_suffix, vrep.simx_opmode_oneshot_wait)
+    _, omniRob_FR_handle = vrep.simxGetObjectHandle(client_id, 'Omnirob_FRwheel_motor'+ handle_name_suffix, vrep.simx_opmode_oneshot_wait)
+    _, omniRob_RL_handle = vrep.simxGetObjectHandle(client_id, 'Omnirob_RLwheel_motor'+ handle_name_suffix, vrep.simx_opmode_oneshot_wait)
+    _, omniRob_RR_handle = vrep.simxGetObjectHandle(client_id, 'Omnirob_RRwheel_motor'+ handle_name_suffix, vrep.simx_opmode_oneshot_wait)
 
-    return robot_handle, motor_left_handle, motor_right_handle, point_cloud_handle
+    # _, point_cloud_handle = vrep.simxGetObjectHandle(
+    #     client_id, "velodyneVPL_16" + handle_name_suffix, vrep.simx_opmode_oneshot_wait
+    # )
+
+    return robot_handle, omniRob_FL_handle,omniRob_FR_handle,omniRob_RL_handle, omniRob_RR_handle
 
 
 def get_robot_pose(client_id, robot_handle):
@@ -112,15 +101,6 @@ def get_sensor_data(client_id, robot_handle, robot_index):
     return vel, omega, velodyne_points
 
 
-def post_robot_setting():
-    """
-    Not finished yet
-    :return:
-    """
-
-    return 1
-
-
 def post_robot_pose(client_id, robot_handle, position, orientation):
     """
     Set robot's pose in the simulator
@@ -138,7 +118,7 @@ def post_robot_pose(client_id, robot_handle, position, orientation):
 
 
 def post_control(
-    client_id, motor_left_handle, motor_right_handle, omega_left, omega_right
+    client_id, omniRob_FL_handle,omniRob_FR_handle,omniRob_RL_handle, omniRob_RR_handle,vfl,vfr,vrl,vrr
 ):
     """
 
@@ -148,12 +128,12 @@ def post_control(
     :param omega1: Robot left wheel's angle velocity
     :param omega2: Robot right wheel's angle velocity
     """
-    vrep.simxSetJointTargetVelocity(
-        client_id, motor_left_handle, omega_left, vrep.simx_opmode_oneshot
-    )
-    vrep.simxSetJointTargetVelocity(
-        client_id, motor_right_handle, omega_right, vrep.simx_opmode_oneshot
-    )
+    print(vfl,vfr,vrl,vrr)
+    vrep.simxSetJointTargetVelocity(client_id, omniRob_FL_handle, vfl, vrep.simx_opmode_oneshot)
+    vrep.simxSetJointTargetVelocity(client_id, omniRob_FR_handle, vfr, vrep.simx_opmode_oneshot)
+    vrep.simxSetJointTargetVelocity(client_id, omniRob_RL_handle, vrl, vrep.simx_opmode_oneshot)
+    vrep.simxSetJointTargetVelocity(client_id, omniRob_RR_handle, vrr, vrep.simx_opmode_oneshot)
+
 
 
 def synchronize(clinet_id):

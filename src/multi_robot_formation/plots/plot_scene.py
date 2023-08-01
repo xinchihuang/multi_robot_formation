@@ -150,7 +150,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
+def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_distance=2):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -160,10 +160,15 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
     rob_num = np.shape(pose_array)[0]
     gabriel_graph = gabriel(pose_array)
     position_array = pose_array[:, -1, :]
+    print(orientation_array)
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
-    # for i in range(len(position_array)):
-    #     plt.plot([position_array[i][0], position_array[i][1]],[position_array[i][0]+math.cos(position_array[i][2]), position_array[i][1]+math.sin(position_array[i][2])])
+    for i in range(len(position_array)):
+        plt.plot([position_array[i][0], position_array[i][0] + math.cos(orientation_array[i][2] + math.pi / 3)],
+                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] + math.pi / 3)])
+        plt.plot([position_array[i][0], position_array[i][0] + math.cos(orientation_array[i][2] - math.pi / 3)],
+                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] - math.pi / 3)])
+
     xlist=[]
     ylist=[]
     formation_error=0
@@ -177,7 +182,7 @@ def plot_formation_gabreil(pose_array, save_path,desired_distance=2):
             distance = math.sqrt(
                 (xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2
             )
-            if distance>4:
+            if distance>5:
                 continue
             plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
             count+=1
@@ -296,27 +301,28 @@ def plot_load_data(root_dir,dt=0.05):
             robot_path_list.append(name)
     trace_array = None
     for robot_path in robot_path_list:
-        trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"))
+        trace_array_single = np.load(os.path.join(root_dir, robot_path, "trace.npy"),allow_pickle=True)
         trace_array_single = np.expand_dims(trace_array_single, axis=0)
         if isinstance(trace_array, type(None)):
             trace_array = trace_array_single
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
-    position_array = trace_array[:, :, 0, :2]
+    # print(trace_array)
+    position_array = trace_array[:, :, 0, :]
     orientation_array=trace_array[:, :, 1, 2]
     # pose_array=np.concatenate(position_array,orientation_array,axis=3)
     print(trace_array[:, :, 0, :])
 
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array, root_dir)
+    plot_formation_gabreil(position_array,orientation_array, root_dir)
     # plot_trace(position_array, root_dir)
     # print(orientation_array)
     # plot_trace_triangle(position_array ,orientation_array, root_dir)
     velocity_array = None
     for robot_path in robot_path_list:
         velocity_array_single = np.load(
-            os.path.join(root_dir, robot_path, "control.npy")
+            os.path.join(root_dir, robot_path, "control.npy"),allow_pickle=True
         )
         velocity_array_single = np.expand_dims(velocity_array_single, axis=0)
         if isinstance(velocity_array, type(None)):
@@ -327,4 +333,4 @@ def plot_load_data(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/ViT/1")
+    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/Expert/56")

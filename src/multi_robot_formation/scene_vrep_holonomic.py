@@ -10,9 +10,7 @@ sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robo
 print(sys.path)
 from collections import defaultdict
 
-from vrep import vrep_interface
-
-
+from vrep import vrep_interface_holonomic as vrep_interface
 
 from utils.gabreil_graph import get_gabreil_graph
 
@@ -35,7 +33,7 @@ def get_vector_angle(v1,v2):
 
     return inner_angle_deg
 
-class Scene:
+class SceneHolonomic:
     """
     Scene for multiple robots
     """
@@ -285,10 +283,12 @@ class Scene:
         num_robot = len(self.robot_list)
 
         for i in range(num_robot):
-            pos_height = 0.1587
+            pos_height = 0.4
             position = [pose_list[i][0], pose_list[i][1], pos_height]
             orientation = [0, 0, pose_list[i][2]]
+
             robot_handle = self.robot_list[i].executor.robot_handle
+            print(robot_handle)
             vrep_interface.post_robot_pose(
                 self.client_id, robot_handle, position, orientation
             )
@@ -312,7 +312,7 @@ class Scene:
                 control_data = robot.get_control_data()
                 robot.execute_control()
                 # record data
-                # data_recorder.record_sensor_data(sensor_data)
+                data_recorder.record_sensor_data(sensor_data)
                 data_recorder.record_robot_trace(sensor_data)
                 data_recorder.record_controller_output(control_data)
 
