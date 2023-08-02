@@ -170,8 +170,8 @@ class SensorHolonomic:
         robot_sensor_data.robot_index = self.robot_index
         robot_sensor_data.position = position
         robot_sensor_data.orientation = orientation
-        # robot_sensor_data.linear_velocity = linear_velocity
-        # robot_sensor_data.angular_velocity = angular_velocity
+        robot_sensor_data.linear_velocity = 0
+        robot_sensor_data.angular_velocity = 0
 
         occupancy_map = self.process_raw_data(self.point_cloud)
 

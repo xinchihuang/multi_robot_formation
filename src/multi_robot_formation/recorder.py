@@ -27,14 +27,20 @@ class Recorder:
         """
         :param sensor_data: Sensor data from robot sensor and simulator.
         :return:
-        trace_data:[ [position](*x,*y,x),
+        trace_data:[ [position](*x,*y,z),
                      [orientation](alpha,beta,*theta),
                      [linear_velocity],
                      [angular_velocity] ]
         """
+
         trace_data = []
-        trace_data.append(sensor_data.position)
-        trace_data.append(sensor_data.orientation)
+        # trace_data.append(sensor_data.position)
+        # trace_data.append(sensor_data.orientation)
+        # trace_data.append(sensor_data.linear_velocity)
+        # trace_data.append(sensor_data.angular_velocity)
+        trace_data.append(sensor_data.position[0])
+        trace_data.append(sensor_data.position[1])
+        trace_data.append(sensor_data.orientation[2])
         trace_data.append(sensor_data.linear_velocity)
         trace_data.append(sensor_data.angular_velocity)
         self.trace_data[sensor_data.robot_index].append(trace_data)
@@ -78,7 +84,6 @@ class Recorder:
             # save trace
             trace_data_path = os.path.join(robot_path, "trace.npy")
             trace_data = self.trace_data[robot_index]
-            print(trace_data)
             trace_data_array = np.array(trace_data)
             np.save(trace_data_path, trace_data_array)
             # save control

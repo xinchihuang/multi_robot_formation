@@ -80,14 +80,11 @@ class CentralizedController(Controller):
         #     out_put.velocity_x = 0
         #     out_put.velocity_y = 0
         #     return out_put
-
-
         self_x = self_pose[0]
         self_y = self_pose[1]
         theta=self_pose[2]
         velocity_sum_x = 0
         velocity_sum_y = 0
-
         for neighbor in neighbors:
 
             distance=((self_x - neighbor[1])**2+(self_y - neighbor[2])**2)**0.5

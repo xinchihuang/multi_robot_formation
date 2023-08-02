@@ -9,14 +9,14 @@ import cv2
 
 
 class DataCollector:
-    def __init__(self, topic):
-        self.topic = topic
+    def __init__(self, listen_topic,pub_topic):
+        self.topic = listen_topic
         # self.bridge = CvBridge()
         self.sub = rospy.Subscriber(self.topic, PointCloud2, self.DataCollectorCallback)
         self.map_size = 100
         self.range = 5
         self.height = 2
-        self.pub= rospy.Publisher('rm_0/cmd_vel', Twist, queue_size=10)
+        self.pub= rospy.Publisher(pub_topic, Twist, queue_size=10)
 
     def point_to_map(self, points):
 
@@ -53,7 +53,14 @@ class DataCollector:
 
 if __name__ == "__main__":
 
-    rospy.init_node("collect_data")
-    topic = "/D435_camera_1/depth/color/points"
-    listener = DataCollector(topic)
+    rospy.init_node("collect_data0")
+    listen_topic = "/D435_camera_0/depth/color/points"
+    pub_topic='rm_0/cmd_vel'
+    listener = DataCollector(listen_topic,pub_topic)
+    rospy.spin()
+
+    rospy.init_node("collect_data4")
+    listen_topic = "/D435_camera_4/depth/color/points"
+    pub_topic = 'rm_4/cmd_vel'
+    listener = DataCollector(listen_topic, pub_topic)
     rospy.spin()

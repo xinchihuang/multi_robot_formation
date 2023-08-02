@@ -160,7 +160,7 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     rob_num = np.shape(pose_array)[0]
     gabriel_graph = gabriel(pose_array)
     position_array = pose_array[:, -1, :]
-    print(orientation_array)
+    print(pose_array.shape)
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
     for i in range(len(position_array)):
@@ -200,8 +200,8 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     plt.legend()
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
+    plt.xlim(-20, 20)
+    plt.ylim(-20, 20)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
@@ -307,11 +307,11 @@ def plot_load_data(root_dir,dt=0.05):
             trace_array = trace_array_single
             continue
         trace_array = np.concatenate((trace_array, trace_array_single), axis=0)
-    # print(trace_array)
-    position_array = trace_array[:, :, 0, :]
-    orientation_array=trace_array[:, :, 1, 2]
+    print(trace_array.shape)
+    position_array = trace_array[:, :, :2]
+    orientation_array=trace_array[:, :, 2]
     # pose_array=np.concatenate(position_array,orientation_array,axis=3)
-    print(trace_array[:, :, 0, :])
+    print(position_array)
 
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)

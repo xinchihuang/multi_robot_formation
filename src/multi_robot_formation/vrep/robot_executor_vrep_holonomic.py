@@ -71,7 +71,7 @@ class ExecutorHolonomic:
 
         # omega_left = 1 * self.wheel_adjustment
         # omega_right = -1 * self.wheel_adjustment
-        print(vfl,vfr,vrl,vrr)
+
 
         vrep_interface_holonomic.post_control(
             self.client_id,

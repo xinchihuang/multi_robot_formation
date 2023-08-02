@@ -15,7 +15,7 @@ from model.LocalExpertController import LocalExpertControllerPartial
 
 ### ViT experiments
 for i in range(1):
-    simulation_time=0.1
+    simulation_time=50
     num_robot=5
     desired_distance=4.0
     initial_max_range=10
