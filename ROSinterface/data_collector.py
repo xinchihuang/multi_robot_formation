@@ -105,6 +105,7 @@ class DataCollector:
         velocity_sum_x = 0
         velocity_sum_y = 0
         velocity_sum_omega=0
+        robot_orientation = pose_list[robot_id][2]
         for i in range(len(neighbor_list)):
             if i==robot_id or neighbor_list[i]==0:
                 continue
@@ -112,7 +113,6 @@ class DataCollector:
             print(robot_id,i,distance)
             if distance>self.sensor_range:
                 continue
-            robot_orientation=pose_list[robot_id][2]
             vector1 = np.array([pose_list[i][0]- pose_list[robot_id][0], pose_list[i][1]- pose_list[robot_id][1]])
             vector2 = np.array([math.cos(robot_orientation), math.sin(robot_orientation)])
             dot_product = np.dot(vector1, vector2)
@@ -131,7 +131,11 @@ class DataCollector:
             velocity_sum_x -= velocity_x
             velocity_sum_y -= velocity_y
             velocity_sum_omega -= velocity_omega
-        return velocity_sum_x,velocity_sum_y,velocity_sum_omega
+        vx = velocity_sum_x * math.cos(robot_orientation) + velocity_sum_y * math.sin(robot_orientation)
+        vy = -velocity_sum_x * math.sin(robot_orientation) + velocity_sum_y * math.cos(robot_orientation)
+        # return velocity_sum_x,velocity_sum_y,velocity_sum_omega
+
+        return vx, vy, velocity_sum_omega
 
 
     def DataCollectorCallback(self, *argv):
@@ -164,12 +168,12 @@ class DataCollector:
             control_list.append(self.expert_control_local(pose_list,index))
         for index in range(0,self.robot_num):
             msg=Twist()
-            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<0.1 else 0.1*abs(control_list[index][0])/control_list[index][0]
-            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<0.1 else 0.1*abs(control_list[index][1])/control_list[index][1]
+            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<1 else 1*abs(control_list[index][0])/control_list[index][0]
+            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<1 else 1*abs(control_list[index][1])/control_list[index][1]
             # msg.linear.x = 1
             # msg.linear.y = 0
             msg.linear.z = 0
-            msg.angular.z = control_list[index][2] if abs(control_list[index][2])<0.1 else 0.1*abs(control_list[index][2])/control_list[index][2]
+            msg.angular.z = control_list[index][2] if abs(control_list[index][2])<1 else 1*abs(control_list[index][2])/control_list[index][2]
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
 
@@ -189,7 +193,7 @@ if __name__ == "__main__":
     state_msg.pose.position.x = 3
     state_msg.pose.position.y = 3
     state_msg.pose.position.z = 0
-    q=Quaternion.from_euler(0, 0, 0, degrees=True)
+    q=Quaternion.from_euler(0, 0, -135, degrees=True)
     state_msg.pose.orientation.x = q.x
     state_msg.pose.orientation.y = q.y
     state_msg.pose.orientation.z = q.z
@@ -228,7 +232,7 @@ if __name__ == "__main__":
     state_msg.pose.position.x = 3
     state_msg.pose.position.y = -3
     state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    q = Quaternion.from_euler(0, 0, 135, degrees=True)
     state_msg.pose.orientation.x = q.x
     state_msg.pose.orientation.y = q.y
     state_msg.pose.orientation.z = q.z
@@ -241,7 +245,7 @@ if __name__ == "__main__":
     state_msg.pose.position.x = -3
     state_msg.pose.position.y = -3
     state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    q = Quaternion.from_euler(0, 0, 45, degrees=True)
     state_msg.pose.orientation.x = q.x
     state_msg.pose.orientation.y = q.y
     state_msg.pose.orientation.z = q.z
