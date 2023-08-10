@@ -15,11 +15,8 @@ import message_filters
 import collections
 from squaternion import Quaternion
 
-
-from multi_robot_formation.controller_new import CentralizedController,GnnMapDecentralizedControllerSynthesise
-from multi_robot_formation.comm_data import SceneData,SensorData,ControlData
-from multi_robot_formation.utils.data_generator import DataGenerator
 from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local
+from multi_robot_formation.utils.initial_pose import initialize_pose
 class DataCollector:
     def __init__(self, robot_num):
         self.robot_num=robot_num
@@ -48,14 +45,14 @@ class DataCollector:
 
         self.sensor_range=5
         self.sensor_angle=120
+        self.max_velocity=1
+        self.max_omega=1
 
         self.desired_distance=2
         self.trace=[]
         self.observation_list=[]
         self.reference_control=[]
         self.time_step=0
-
-
 
     def point_to_map(self, points):
 
@@ -99,9 +96,8 @@ class DataCollector:
         return velocity_sum_x,velocity_sum_y
     def expert_control_local(self,pose_list,robot_id):
         desired_distance=self.desired_distance
-        gabreil_graph=get_gabreil_graph(pose_list)
-        print("___________")
-        neighbor_list=gabreil_graph[robot_id]
+        gabreil_graph_local=get_gabreil_graph_local(pose_list,self.sensor_range,self.sensor_angle)
+        neighbor_list=gabreil_graph_local[robot_id]
         velocity_sum_x = 0
         velocity_sum_y = 0
         velocity_sum_omega=0
@@ -111,23 +107,21 @@ class DataCollector:
                 continue
             distance = ((pose_list[robot_id][0]-pose_list[i][0]) ** 2 + (pose_list[robot_id][1]-pose_list[i][1]) ** 2) ** 0.5
             print(robot_id,i,distance)
-            if distance>self.sensor_range:
-                continue
-            vector1 = np.array([pose_list[i][0]- pose_list[robot_id][0], pose_list[i][1]- pose_list[robot_id][1]])
-            vector2 = np.array([math.cos(robot_orientation), math.sin(robot_orientation)])
-            dot_product = np.dot(vector1, vector2)
-            magnitude_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
-            inner_angle_rad = np.arccos(dot_product / magnitude_product)
-            inner_angle_deg = np.degrees(inner_angle_rad)
-            if inner_angle_deg > self.sensor_angle/2 :
-                continue
+            # if distance>self.sensor_range:
+            #     continue
+            # vector1 = np.array([pose_list[i][0]- pose_list[robot_id][0], pose_list[i][1]- pose_list[robot_id][1]])
+            # vector2 = np.array([math.cos(robot_orientation), math.sin(robot_orientation)])
+            # dot_product = np.dot(vector1, vector2)
+            # magnitude_product = np.linalg.norm(vector1) * np.linalg.norm(vector2)
+            # inner_angle_rad = np.arccos(dot_product / magnitude_product)
+            # inner_angle_deg = np.degrees(inner_angle_rad)
+            # if inner_angle_deg > self.sensor_angle/2 :
+            #     continue
 
             rate = (distance - desired_distance) / distance
             velocity_x = rate * (pose_list[robot_id][0]-pose_list[i][0])
             velocity_y = rate * (pose_list[robot_id][1]-pose_list[i][1])
-
             velocity_omega = robot_orientation-math.atan2((pose_list[i][1]-pose_list[robot_id][1]), (pose_list[i][0]- pose_list[robot_id][0]))
-
             velocity_sum_x -= velocity_x
             velocity_sum_y -= velocity_y
             velocity_sum_omega -= velocity_omega
@@ -164,16 +158,17 @@ class DataCollector:
             pose_list.append(pose_index)
         self.trace.append(pose_list)
         # print(self.trace)
+        print("___________")
         for index in range(0, self.robot_num):
             control_list.append(self.expert_control_local(pose_list,index))
         for index in range(0,self.robot_num):
             msg=Twist()
-            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<1 else 1*abs(control_list[index][0])/control_list[index][0]
-            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<1 else 1*abs(control_list[index][1])/control_list[index][1]
+            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<self.max_velocity else self.max_velocity*abs(control_list[index][0])/control_list[index][0]
+            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<self.max_velocity else self.max_velocity*abs(control_list[index][1])/control_list[index][1]
             # msg.linear.x = 1
             # msg.linear.y = 0
             msg.linear.z = 0
-            msg.angular.z = control_list[index][2] if abs(control_list[index][2])<1 else 1*abs(control_list[index][2])/control_list[index][2]
+            msg.angular.z = control_list[index][2] if abs(control_list[index][2])<self.max_omega else self.max_omega*abs(control_list[index][2])/control_list[index][2]
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
 
@@ -187,72 +182,86 @@ class DataCollector:
 
 if __name__ == "__main__":
 
-
-    state_msg = ModelState()
-    state_msg.model_name = 'rm_0'
-    state_msg.pose.position.x = 3
-    state_msg.pose.position.y = 3
-    state_msg.pose.position.z = 0
-    q=Quaternion.from_euler(0, 0, -135, degrees=True)
-    state_msg.pose.orientation.x = q.x
-    state_msg.pose.orientation.y = q.y
-    state_msg.pose.orientation.z = q.z
-    state_msg.pose.orientation.w = q.w
-    rospy.wait_for_service('/gazebo/set_model_state')
-    set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    resp = set_state(state_msg)
-    state_msg = ModelState()
-    state_msg.model_name = 'rm_1'
-    state_msg.pose.position.x = -3
-    state_msg.pose.position.y = 3
-    state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 0, degrees=True)
-    state_msg.pose.orientation.x = q.x
-    state_msg.pose.orientation.y = q.y
-    state_msg.pose.orientation.z = q.z
-    state_msg.pose.orientation.w = q.w
-    rospy.wait_for_service('/gazebo/set_model_state')
-    set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    set_state(state_msg)
-    state_msg = ModelState()
-    state_msg.model_name = 'rm_2'
-    state_msg.pose.position.x = 0
-    state_msg.pose.position.y = 0
-    state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 0, degrees=True)
-    state_msg.pose.orientation.x = q.x
-    state_msg.pose.orientation.y = q.y
-    state_msg.pose.orientation.z = q.z
-    state_msg.pose.orientation.w = q.w
-    rospy.wait_for_service('/gazebo/set_model_state')
-    set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    set_state(state_msg)
-    state_msg = ModelState()
-    state_msg.model_name = 'rm_3'
-    state_msg.pose.position.x = 3
-    state_msg.pose.position.y = -3
-    state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 135, degrees=True)
-    state_msg.pose.orientation.x = q.x
-    state_msg.pose.orientation.y = q.y
-    state_msg.pose.orientation.z = q.z
-    state_msg.pose.orientation.w = q.w
-    rospy.wait_for_service('/gazebo/set_model_state')
-    set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    set_state(state_msg)
-    state_msg = ModelState()
-    state_msg.model_name = 'rm_4'
-    state_msg.pose.position.x = -3
-    state_msg.pose.position.y = -3
-    state_msg.pose.position.z = 0
-    q = Quaternion.from_euler(0, 0, 45, degrees=True)
-    state_msg.pose.orientation.x = q.x
-    state_msg.pose.orientation.y = q.y
-    state_msg.pose.orientation.z = q.z
-    state_msg.pose.orientation.w = q.w
-    rospy.wait_for_service('/gazebo/set_model_state')
-    set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
-    set_state(state_msg)
+    pose_list=initialize_pose(5)
+    for i in range(len(pose_list)):
+        state_msg = ModelState()
+        state_msg.model_name = 'rm_{}'.format(i)
+        state_msg.pose.position.x = pose_list[i][0]
+        state_msg.pose.position.y = pose_list[i][1]
+        state_msg.pose.position.z = 0
+        q=Quaternion.from_euler(0, 0, pose_list[i][2], degrees=False)
+        state_msg.pose.orientation.x = q.x
+        state_msg.pose.orientation.y = q.y
+        state_msg.pose.orientation.z = q.z
+        state_msg.pose.orientation.w = q.w
+        rospy.wait_for_service('/gazebo/set_model_state')
+        set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+        resp = set_state(state_msg)
+    # state_msg = ModelState()
+    # state_msg.model_name = 'rm_0'
+    # state_msg.pose.position.x = 3
+    # state_msg.pose.position.y = 3
+    # state_msg.pose.position.z = 0
+    # q=Quaternion.from_euler(0, 0, -135, degrees=True)
+    # state_msg.pose.orientation.x = q.x
+    # state_msg.pose.orientation.y = q.y
+    # state_msg.pose.orientation.z = q.z
+    # state_msg.pose.orientation.w = q.w
+    # rospy.wait_for_service('/gazebo/set_model_state')
+    # set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+    # resp = set_state(state_msg)
+    # state_msg = ModelState()
+    # state_msg.model_name = 'rm_1'
+    # state_msg.pose.position.x = -3
+    # state_msg.pose.position.y = 3
+    # state_msg.pose.position.z = 0
+    # q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    # state_msg.pose.orientation.x = q.x
+    # state_msg.pose.orientation.y = q.y
+    # state_msg.pose.orientation.z = q.z
+    # state_msg.pose.orientation.w = q.w
+    # rospy.wait_for_service('/gazebo/set_model_state')
+    # set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+    # set_state(state_msg)
+    # state_msg = ModelState()
+    # state_msg.model_name = 'rm_2'
+    # state_msg.pose.position.x = 0
+    # state_msg.pose.position.y = 0
+    # state_msg.pose.position.z = 0
+    # q = Quaternion.from_euler(0, 0, 0, degrees=True)
+    # state_msg.pose.orientation.x = q.x
+    # state_msg.pose.orientation.y = q.y
+    # state_msg.pose.orientation.z = q.z
+    # state_msg.pose.orientation.w = q.w
+    # rospy.wait_for_service('/gazebo/set_model_state')
+    # set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+    # set_state(state_msg)
+    # state_msg = ModelState()
+    # state_msg.model_name = 'rm_3'
+    # state_msg.pose.position.x = 3
+    # state_msg.pose.position.y = -3
+    # state_msg.pose.position.z = 0
+    # q = Quaternion.from_euler(0, 0, 135, degrees=True)
+    # state_msg.pose.orientation.x = q.x
+    # state_msg.pose.orientation.y = q.y
+    # state_msg.pose.orientation.z = q.z
+    # state_msg.pose.orientation.w = q.w
+    # rospy.wait_for_service('/gazebo/set_model_state')
+    # set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+    # set_state(state_msg)
+    # state_msg = ModelState()
+    # state_msg.model_name = 'rm_4'
+    # state_msg.pose.position.x = -3
+    # state_msg.pose.position.y = -3
+    # state_msg.pose.position.z = 0
+    # q = Quaternion.from_euler(0, 0, 45, degrees=True)
+    # state_msg.pose.orientation.x = q.x
+    # state_msg.pose.orientation.y = q.y
+    # state_msg.pose.orientation.z = q.z
+    # state_msg.pose.orientation.w = q.w
+    # rospy.wait_for_service('/gazebo/set_model_state')
+    # set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
+    # set_state(state_msg)
 
     rospy.init_node("collect_data")
     robot_num = 5

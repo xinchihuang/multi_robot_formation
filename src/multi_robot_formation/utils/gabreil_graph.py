@@ -10,7 +10,6 @@ def get_gabreil_graph(position_array):
     """
     Return a gabreil graph of the scene
     :param position_array: A numpy array contains all robots' positions
-    :param node_num: number of robots
     :return: A gabreil graph( 2D list)
     """
     position_array=np.array(position_array)[:,:2]
@@ -60,6 +59,7 @@ def global_to_local(position_lists_global, self_orientation_global):
         position_list_local_i = []
         for j in range(len(position_lists_global)):
             if i == j:
+                position_list_local_i.append([0,0,0])
                 continue
             point_local_raw = [
                 position_lists_global[j][0] - x_self,
@@ -73,33 +73,39 @@ def global_to_local(position_lists_global, self_orientation_global):
         position_lists_local.append(position_list_local_i)
 
 
-    return position_lists_local, self_orientation_global
+    return np.array(position_lists_local), np.array(self_orientation_global)
+
+
 
 #### not finished
-def get_gabreil_graph_local(position_array):
-
+def get_gabreil_graph_local(position_array,view_range=5,view_angle=120):
     position_array = np.array(position_array)
     self_orientation_global=position_array[:,2]
-    position_lists_local, self_orientation_global=global_to_local(position_array, self_orientation_global)
-    print(position_lists_local)
-    node_num=position_array.shape[0]
-
+    position_array_local, self_orientation_global=global_to_local(position_array, self_orientation_global)
+    node_num=position_array_local.shape[0]
     gabriel_graph = [[1] * node_num for _ in range(node_num)]
-    for i in range(1,node_num):
-        for j in range(1,node_num):
-            gabriel_graph[i][j]=0
     self_position=np.zeros((1,3))
     for u in range(node_num):
-        if position_array[u][0]==float("inf") or position_array[u][1]==float("inf"):
-            continue
-        m = (position_array[u] + self_position) / 2
-        for w in range(node_num):
-            if w == u:
+        for v in range(node_num):
+            if u==v:
+                gabriel_graph[u][v] = 0
                 continue
-            if np.linalg.norm(position_array[w] - m) < np.linalg.norm(
-                position_array[u] - m
-            ):
-                gabriel_graph[u][0] = 0
-                gabriel_graph[0][u] = 0
-                break
+            m = (position_array_local[u][v] + self_position) / 2
+            if np.linalg.norm(position_array_local[u][v]) > view_range:
+                gabriel_graph[u][v] = 0
+                continue
+            if abs(np.degrees(math.atan2(position_array_local[u][v][1], position_array_local[u][v][0]))) > view_angle / 2:
+                # print(position_array_local[u])
+                # print(u,v)
+                # print(np.degrees(math.atan2(position_array_local[u][v][1], position_array_local[u][v][0])))
+                gabriel_graph[u][v] = 0
+                continue
+            for w in range(node_num):
+                if w == v:
+                    continue
+                if np.linalg.norm(position_array_local[u][w] - m) < np.linalg.norm(
+                    position_array_local[u][v] - m
+                ):
+                    gabriel_graph[u][v] = 0
+                    break
     return gabriel_graph
