@@ -9,7 +9,7 @@ sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robo
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
 print(sys.path)
 print(os.getcwd())
-from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local
+from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local,global_to_local
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 from multi_robot_formation.comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
@@ -69,102 +69,12 @@ class DataGenerator:
         node_num = position_array.shape[0]
         gabriel_graph = get_gabreil_graph_local(position_array, node_num)
         return gabriel_graph[0]
-
-
-    def generate_map_control(self, global_pose_array, self_orientation_array):
-        global_pose_array = np.array(global_pose_array)
-        self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = self.map_simulator
-
-        (
-            position_lists_local,
-            self_orientation,
-        ) = occupancy_map_simulator.global_to_local(
-            global_pose_array, self_orientation_array
-        )
-
-        for i in range(len(position_lists_local)):
-            while len(position_lists_local[i])<len(position_lists_local)-1:
-                position_lists_local[i].append([float("inf"),float("inf"),0])
-
-
-        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
-        ref_control_list = []
-        adjacency_lists = []
-        number_of_robot = global_pose_array.shape[0]
-        for robot_index in range(number_of_robot):
-            controller = LocalExpertController()
-            control_i=controller.get_control(position_lists_local[robot_index])
-            velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
-            ref_control_list.append([velocity_x, velocity_y])
-        return (
-            np.array(occupancy_maps),
-            np.array(ref_control_list),
-            np.array(adjacency_lists),
-        )
-    def generate_map_graph(self, global_pose_array, self_orientation_array):
-        global_pose_array = np.array(global_pose_array)
-        self_orientation_array = np.array(self_orientation_array)
-        # occupancy_map_simulator = self.map_simulator
-        (
-            position_lists_local,
-            self_orientation,
-        ) = self.map_simulator.global_to_local(
-            global_pose_array, self_orientation_array
-        )
-        for i in range(len(position_lists_local)):
-            while len(position_lists_local[i]) < len(position_lists_local) - 1:
-                position_lists_local[i].append([float("inf"), float("inf"), 0])
-            position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))
-
-        position_lists_local = np.array(position_lists_local)
-
-        occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
-        neighbor_lists = []
-        number_of_robot = position_lists_local.shape[0]
-        for robot_index in range(number_of_robot):
-            neighbor_list_i = self.update_neighbor(position_lists_local[robot_index])
-            neighbor_lists.append(neighbor_list_i)
-        return (
-            np.array(occupancy_maps),
-            np.array(neighbor_lists),
-        )
-    def generate_map_position(self, global_pose_array, self_orientation_array):
-        global_pose_array = np.array(global_pose_array)
-        self_orientation_array = np.array(self_orientation_array)
-        occupancy_map_simulator = self.map_simulator
-        (
-            position_lists_local,
-            self_orientation,
-        ) = occupancy_map_simulator.global_to_local(
-            global_pose_array, self_orientation_array
-        )
-        for i in range(len(position_lists_local)):
-            while len(position_lists_local[i]) < len(position_lists_local) - 1:
-                position_lists_local[i].append([float("inf"), float("inf"), 0])
-            position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))
-        position_lists_local = np.array(position_lists_local)
-        occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
-
-
-
-        selected=position_lists_local[:, :, :2]
-        position_lists_squeezed=np.reshape(selected,(selected.shape[0],selected.shape[1]*selected.shape[2]))
-        position_lists_squeezed[position_lists_squeezed==float("inf")]=0
-        return (
-            np.array(occupancy_maps),
-            np.array(position_lists_squeezed),
-        )
     def generate_map_all(self, global_pose_array, self_orientation_array):
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = self.map_simulator
-        (
-            position_lists_local,
-            self_orientation,
-        ) = occupancy_map_simulator.global_to_local(
-            global_pose_array, self_orientation_array
-        )
+        position_lists_local, self_orientation = global_to_local(global_pose_array, self_orientation_array)
+
 
         for i in range(len(position_lists_local)):
             while len(position_lists_local[i]) < len(position_lists_local) - 1:
@@ -176,10 +86,10 @@ class DataGenerator:
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
             controller = LocalExpertController()
-            control_i = controller.get_control(position_lists_local[robot_index])
-            velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
+            control_i = controller.get_control(global_pose_array,robot_index,)
+            velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
 
-            ref_control_list.append([velocity_x, velocity_y])
+            ref_control_list.append([velocity_x, velocity_y,omega])
 
         # for i in range(len(position_lists_local)):
         #     position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))

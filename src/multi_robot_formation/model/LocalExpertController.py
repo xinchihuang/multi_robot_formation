@@ -7,8 +7,9 @@ print(sys.path)
 from comm_data import ControlData
 import numpy as np
 import math
+from ..utils.gabreil_graph import get_gabreil_graph_local
 
-class LocalExpertController:
+class LocalExpertControllerOld:
     def __init__(self,desired_distance=2,safe_margin=0.5):
         self.desired_distance = desired_distance
         self.name="LocalExpertController"
@@ -101,33 +102,67 @@ class LocalExpertControllerPartial:
         out_put.velocity_y = velocity_sum_y
         out_put.omega = omerga_sum
         return out_put
-# if __name__ == "__main__":
-#     pass
-    # from utils.occupancy_map_simulator import MapSimulator
-    # import cv2
-    # import math
-    #
-    # pose_list=[[1.9944112300872803, -0.6254140138626099, 0.13870394229888916],
-    #  [0.04576008766889572, 2.247776985168457, 0.13883700966835022],
-    #  [2.7606122493743896, 1.425128698348999, 0.13866473734378815],
-    #  [3.1266531944274902, -0.45182839035987854, 0.1386488378047943],
-    #  [0.13337856531143188, 1.7551246881484985, 0.13878744840621948]]
-    # orientation_list=[1.3544921875, 1.2664210796356201, 0.7540764212608337, -3.134005069732666, 2.650866985321045]
-    # # pose_list = [[0.2 ,0, 0], [0, 0, 0]]
-    # position_lists_global = pose_list
-    # # orientation_list = [0,0,0,0,0]
-    # occupancy_map_simulator = MapSimulator(local=True)
-    # (
-    #     position_lists_local,
-    #     self_orientation,
-    # ) = occupancy_map_simulator.global_to_local(
-    #     np.array(position_lists_global), np.array(orientation_list)
-    # )
-    # print(position_lists_local[1])
-    # occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[1])
-    #
-    # controller=LocalExpertController()
-    # out=controller.get_control(position_lists_local[1])
-    # print(out.velocity_x,out.velocity_y)
-    # cv2.imshow("robot view " + "(Synthesise)", occupancy_map)
-    # cv2.waitKey(0)
+
+class LocalExpertController:
+    def __init__(self,desired_distance=2,safe_margin=0.5):
+        self.desired_distance = desired_distance
+        self.name="LocalExpertController"
+        self.safe_margin=safe_margin
+    def leading_angle(self,gamma1,gamma2):
+        if gamma1>=gamma2:
+            return gamma1 - gamma2
+        else:
+            return gamma1 - gamma2+math.pi*2
+    def get_control(self,pose_list,robot_id,sensor_range,sensor_angle):
+        """
+        :param position_list: local position list for training
+        """
+        out_put = ControlData()
+        desired_distance = self.desired_distance
+        gabreil_graph_local = get_gabreil_graph_local(pose_list, sensor_range, sensor_angle)
+        neighbor_list = gabreil_graph_local[robot_id]
+        velocity_sum_x = 0
+        velocity_sum_y = 0
+        velocity_sum_omega = 0
+        robot_orientation = pose_list[robot_id][2]
+        for neighbor_id in range(len(neighbor_list)):
+            if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
+                continue
+            distance = ((pose_list[robot_id][0] - pose_list[neighbor_id][0]) ** 2 + (
+                        pose_list[robot_id][1] - pose_list[neighbor_id][1]) ** 2) ** 0.5
+            rate = (distance - desired_distance) / distance
+            velocity_x = rate * (pose_list[robot_id][0] - pose_list[neighbor_id][0])
+            velocity_y = rate * (pose_list[robot_id][1] - pose_list[neighbor_id][1])
+            velocity_omega = robot_orientation - math.atan2((pose_list[neighbor_id][1] - pose_list[robot_id][1]),
+                                                            (pose_list[neighbor_id][0] - pose_list[robot_id][0]))
+            velocity_sum_x -= velocity_x
+            velocity_sum_y -= velocity_y
+            velocity_sum_omega -= velocity_omega
+
+        velocity_sum_omega=0
+        gamma_list=[]
+        for neighbor_id in range(len(neighbor_list)):
+            if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
+                continue
+            gamma = -robot_orientation + math.atan2((pose_list[neighbor_id][1] - pose_list[robot_id][1]),
+                                                            (pose_list[neighbor_id][0] - pose_list[robot_id][0]))
+            gamma_list.append(gamma)
+
+        if len(gamma_list)>=1:
+            gamma_d=(max(gamma_list)+min(gamma_list))
+            print(gamma_list,gamma_d)
+            for gamma in gamma_list:
+                gamma_L=gamma+sensor_angle/2
+                gamma_R=gamma-sensor_angle/2
+                omega=(gamma_d/self.leading_angle(0,gamma_R))+(gamma_d/self.leading_angle(gamma_L,0))
+                print(gamma_d,omega,self.leading_angle(0, gamma_R), self.leading_angle(gamma_L, 0))
+                velocity_sum_omega+=omega
+            print(robot_id,velocity_sum_omega)
+
+        vx = velocity_sum_x * math.cos(robot_orientation) + velocity_sum_y * math.sin(robot_orientation)
+        vy = -velocity_sum_x * math.sin(robot_orientation) + velocity_sum_y * math.cos(robot_orientation)
+        out_put.velocity_x=vx
+        out_put.velocity_y=vy
+        out_put.omega=velocity_sum_omega
+        return out_put
+

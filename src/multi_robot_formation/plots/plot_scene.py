@@ -84,6 +84,7 @@ def plot_relative_distance(dt, pose_array, save_path):
     rob_num = np.shape(pose_array)[0]
     distance_dict = {}
     xlist = []
+
     for i in range(np.shape(pose_array)[1]):
         xlist.append(i * dt)
     for i in range(rob_num):
@@ -94,6 +95,7 @@ def plot_relative_distance(dt, pose_array, save_path):
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
+    print(distance_dict)
     plt.figure(figsize=(10, 10))
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key)
@@ -165,9 +167,9 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     plt.scatter(position_array[:, 0], position_array[:, 1])
     for i in range(len(position_array)):
         plt.plot([position_array[i][0], position_array[i][0] + math.cos(orientation_array[i][2] + math.pi / 3)],
-                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] + math.pi / 3)])
+                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] + math.pi / 3)],color="gray")
         plt.plot([position_array[i][0], position_array[i][0] + math.cos(orientation_array[i][2] - math.pi / 3)],
-                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] - math.pi / 3)])
+                 [position_array[i][1], position_array[i][1] + math.sin(orientation_array[i][2] - math.pi / 3)],color="gray")
 
     xlist=[]
     ylist=[]
@@ -200,8 +202,8 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     plt.legend()
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.xlim(-20, 20)
-    plt.ylim(-20, 20)
+    plt.xlim(-10, 10)
+    plt.ylim(-10, 10)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
@@ -315,7 +317,7 @@ def plot_load_data(root_dir,dt=0.05):
 
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array,orientation_array, root_dir)
+    # plot_formation_gabreil(position_array,orientation_array, root_dir)
     # plot_trace(position_array, root_dir)
     # print(orientation_array)
     # plot_trace_triangle(position_array ,orientation_array, root_dir)
@@ -330,7 +332,23 @@ def plot_load_data(root_dir,dt=0.05):
             continue
         velocity_array = np.concatenate((velocity_array, velocity_array_single), axis=0)
     plot_wheel_speed(dt, velocity_array, root_dir)
+def plot_load_data_gazebo(root_dir,dt=0.05):
+    """
+
+    :param dt: Time interval
+    :param dir: Root dir
+    :return:
+    """
+    position_array = np.load(os.path.join(root_dir, "trace.npy"))
+    orientation_array=position_array[:,:,2]
+
+    position_array=np.transpose(position_array,(1,0,2))
+    plot_relative_distance(dt, position_array, root_dir)
+    plot_relative_distance_gabreil(dt, position_array, root_dir)
+    plot_formation_gabreil(position_array,orientation_array, root_dir)
 
 
 if __name__ == "__main__":
-    plot_load_data("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_data_test/Expert/56")
+    plot_load_data_gazebo("/home/xinchi/gazebo_data/348")
+    # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
+    # print(trace_array.shape)

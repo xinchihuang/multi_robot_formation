@@ -116,27 +116,6 @@ class RobotDatasetTrace(Dataset):
                 "reference_position": reference_position,
                 "reference_neighbor": reference_neighbor,
             }
-        else:
-            if self.task_type=="control":
-                occupancy_maps, reference,adjacency_lists = self.data_generator.generate_map_control(
-                    global_pose_array, self_orientation_array
-                )
-            elif self.task_type=="graph":
-                occupancy_maps, reference = self.data_generator.generate_map_graph(
-                    global_pose_array, self_orientation_array
-                )
-            elif self.task_type=="position":
-                occupancy_maps, reference = self.data_generator.generate_map_position(
-                    global_pose_array, self_orientation_array
-                )
-
-            if self.transform:
-                occupancy_maps = torch.from_numpy(occupancy_maps).double()
-                reference = torch.from_numpy(reference).double()
-            return {
-                "occupancy_maps": occupancy_maps,
-                "reference": reference,
-            }
     def get_settings(self):
         print("-----------------------------------")
         print("Dataset settings")

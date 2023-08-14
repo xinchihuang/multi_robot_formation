@@ -7,7 +7,7 @@ import math
 import numpy as np
 import cv2
 from .preprocess import preprocess
-
+from ..utils.gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
 class MapSimulator:
     def __init__(
         self,
@@ -16,6 +16,7 @@ class MapSimulator:
         map_size=100,
         max_x=5,
         max_y=5,
+        sensor_view_angle=math.pi/3,
         local=True,
         block=True,
         partial=True,
@@ -35,6 +36,7 @@ class MapSimulator:
         self.map_size = map_size
         self.max_x = max_x
         self.max_y = max_y
+        self.sensor_view_angle=sensor_view_angle
         self.local = local
         self.block = block
         self.partial = partial
@@ -47,7 +49,6 @@ class MapSimulator:
                         self.position_encoding_matrix[i][j]=1
                         continue
                     self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
-        self.observation_angle = 2 * math.pi / 3
         # self.get_settings()
     def get_settings(self):
         print("-----------------------------------")
@@ -60,152 +61,218 @@ class MapSimulator:
         print("local: ", self.local)
         print("block: ", self.block)
         print("partial: ", self.partial)
-
-    def arctan(self, x, y):
-        if x == 0 and y > 0:
-            theta = math.pi / 2
-        elif x == 0 and y < 0:
-            theta = -math.pi / 2
-        elif x == 0 and y == 0:
-            theta = 0
-        elif x > 0 and y == 0:
-            theta = 0
-        elif x < 0 and y == 0:
-            theta = math.pi
-        else:
-            theta = math.atan(y / x)
-            if x > 0 and y > 0:
-                pass
-            elif x < 0 and y > 0:
-                theta = theta + math.pi
-            elif x < 0 and y < 0:
-                theta = theta - math.pi
-            elif x > 0 and y < 0:
-                theta = theta
-        return theta
-
-    def data_filter(self, world_point):
+        print("sensor_angel: ",self.sensor_view_angle)
+    def world_to_map(self, world_point, map_size, max_x, max_y):
         """
-        Filter out the points that out of sensor range
-        :param world_point: Points in world coordinate
-        :return: Points within sensor range
-        """
+        Transform points from world coordinate to map coordinate
+        :param world_point: points' world coordinate
+        :param map_size: The size of occupancy map
+        :param max_x: Max world x coordinate
+        :param max_y: Max world y coordinate
+        :return: points in map coordinate
 
-        x = world_point[0]
-        y = world_point[1]
-        z = world_point[2]
-        min_range = 2 * self.robot_size
-        if (
-            x > self.max_x
-            or x < -self.max_x
-            or y > self.max_y
-            or y < -self.max_y
-            or z < -self.max_height
-        ):  #
-            return None
-        # if x < min_range and y < min_range and x > -min_range and y > -min_range:
+        """
+        # if world_point == None:
         #     return None
-        if self.partial:
-            if math.pi / 3 < math.atan2(y, x) or math.atan2(y, x) < - math.pi / 3:
-                return None
-        return [x, y, z]
+        x_world = world_point[0]
+        y_world = world_point[1]
 
-    def rotation(self, world_point, self_orientation):
-        """
-        Rotate the points according to the robot orientation to transform other robot's position from global to local
-        :param world_point: Other robot's positions
-        :param self_orientation: Robot orientation
-        :return:
-        """
-        x = world_point[0]
-        y = world_point[1]
-        z = world_point[2]
-        theta = self_orientation
-        x_relative = math.cos(theta) * x + math.sin(theta) * y
-        y_relative = -math.sin(theta) * x + math.cos(theta) * y
-        return [x_relative, y_relative, z]
 
-    def blocking(self, position_lists_local):
-        """
-        Handle the blocking case, Remove the further robots
-        :param position_lists_local:
-        :return:
-        """
-        out_position_lists_local = []
-        for self_i in range(len(position_lists_local)):
-            position_lists_i = []
-            for robot_j in range(len(position_lists_local[self_i])):
-                x = position_lists_local[self_i][robot_j][0]
-                y = position_lists_local[self_i][robot_j][1]
-                theta = math.atan2(y, x)
+        # x_map = int((max_x - x_world) / (2 * max_x) * map_size)
+        # y_map = int((max_y + x_world) / (2 * max_y) * map_size)
 
-                block = False
-                for robot_k in range(len(position_lists_local[self_i])):
-                    if robot_k == robot_j:
-                        continue
-                    x_k = position_lists_local[self_i][robot_k][0]
-                    y_k = position_lists_local[self_i][robot_k][1]
-                    if x**2 + y**2 < x_k**2 + y_k**2:
-                        continue
-                    x_k1 = x_k - (self.robot_size / 2) * math.sin(theta)
-                    y_k1 = y_k + (self.robot_size / 2) * math.cos(theta)
+        y_map = min(int(map_size/2)+int(x_world*map_size/max_x/2), map_size-1)
+        x_map = min(int(map_size/2)-int(y_world*map_size/max_y/2), map_size-1)
 
-                    x_k2 = x_k + (self.robot_size / 2) * math.sin(theta)
-                    y_k2 = y_k - (self.robot_size / 2) * math.cos(theta)
+        if 0 <= x_map < map_size and 0 <= y_map < map_size:
+            return [x_map, y_map]
+        return None
 
-                    theta_k_1 = math.atan2(y_k1, x_k1)
-                    theta_k_2 = math.atan2(y_k2, x_k2)
-                    if max(theta_k_1, theta_k_2) - min(theta_k_1, theta_k_2) < math.pi:
-                        if (
-                            theta_k_1 < theta < theta_k_2
-                            or theta_k_2 < theta < theta_k_1
-                        ):
-                            block = True
-                    else:
-                        if theta > max(theta_k_1, theta_k_2) or theta < min(
-                            theta_k_1, theta_k_2
-                        ):
-                            block = True
-                if block == False:
-                    position_lists_i.append(position_lists_local[self_i][robot_j])
-            out_position_lists_local.append(position_lists_i)
-        return out_position_lists_local
+    def generate_map_one(
+        self,
+        position_list_local,
+    ):
 
-    def global_to_local(self, position_lists_global, self_orientation_global):
         """
-        Get each robot's observation from global absolute position
-        :param position_lists_global: Global absolute position of all robots in the world
-        :return: A list of local observations
+        Generate occupancy map
+        :param position_list_local: All robots' map coordinate relative to the observer robot [x,y,z]
+        :param self_orientation: Observer robots' orientation (float)
+        :param robot_size: Size of robot in occupancy map
+        :param max_height: points' horizontal range
+        :param map_size: The size of occupancy map
+        :param max_x: Max world x coordinate
+        :param max_y: Max world y coordinate
+        :return: occupancy map
         """
-        position_lists_local = []
-        self_pose_list = []
-        for i in range(len(position_lists_global)):
-            x_self = position_lists_global[i][0]
-            y_self = position_lists_global[i][1]
-            z_self = position_lists_global[i][2]
-            self_pose_list.append([x_self, y_self, z_self])
-            position_list_local_i = []
-            for j in range(len(position_lists_global)):
-                if i == j:
+
+        scale = min(self.max_x, self.max_y)
+        robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale / 2)))
+
+        occupancy_map = (
+            np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
+        )
+        try:
+            for world_points in position_list_local:
+                if is_valid_point(world_points,sensor_range=self.max_x,sensor_view_angle=self.sensor_view_angle)==False:
                     continue
-                point_local_raw = [
-                    position_lists_global[j][0] - x_self,
-                    position_lists_global[j][1] - y_self,
-                    position_lists_global[j][2] - z_self,
-                ]
-                if self.local:
-                    point_local_rotated = self.rotation(
-                        point_local_raw, self_orientation_global[i]
-                    )
-                    point_local_raw = point_local_rotated
-                point_local = self.data_filter(point_local_raw)
-                if not point_local == None:
-                    position_list_local_i.append(point_local)
-            position_lists_local.append(position_list_local_i)
-        if self.block:
-            position_lists_local = self.blocking(position_lists_local)
+                map_points = self.world_to_map(world_points, self.map_size, self.max_x, self.max_y)
+                if map_points == None:
+                    continue
+                x = map_points[0]
+                y = map_points[1]
+                for m in range(-robot_range, robot_range, 1):
+                    for n in range(-robot_range, robot_range, 1):
+                        occupancy_map[x + m][y + n] = 0
+        except:
+            pass
+        occupancy_map = occupancy_map[
+            robot_range:-robot_range, robot_range:-robot_range
+        ]
+        if self.position_encoding:
+            occupancy_map=occupancy_map*self.position_encoding_matrix
+        occupancy_map = preprocess(occupancy_map)
+        return occupancy_map
 
-        return position_lists_local, self_orientation_global
+
+    def generate_maps(
+        self,
+        position_lists_local,
+    ):
+
+        """
+        Generate occupancy map
+        :param position_lists_local: All robots' map coordinate
+        :param self_orientation_list: All robots' orientation (map coordinate)
+        :return: A list of occupancy maps
+        """
+        maps = []
+        for robot_index in range(len(position_lists_local)):
+            occupancy_map = self.generate_map_one(
+                position_lists_local[robot_index])
+            maps.append(occupancy_map)
+        return np.array(maps)
+
+    # def data_filter(self, world_point):
+    #     """
+    #     Filter out the points that out of sensor range
+    #     :param world_point: Points in world coordinate
+    #     :return: Points within sensor range
+    #     """
+    #
+    #     x = world_point[0]
+    #     y = world_point[1]
+    #     z = world_point[2]
+    #     min_range = 2 * self.robot_size
+    #     if (
+    #         x > self.max_x
+    #         or x < -self.max_x
+    #         or y > self.max_y
+    #         or y < -self.max_y
+    #         or z < -self.max_height
+    #     ):  #
+    #         return None
+    #     # if x < min_range and y < min_range and x > -min_range and y > -min_range:
+    #     #     return None
+    #     if self.partial:
+    #         if math.pi / 3 < math.atan2(y, x) or math.atan2(y, x) < - math.pi / 3:
+    #             return None
+    #     return [x, y, z]
+
+    # def rotation(self, world_point, self_orientation):
+    #     """
+    #     Rotate the points according to the robot orientation to transform other robot's position from global to local
+    #     :param world_point: Other robot's positions
+    #     :param self_orientation: Robot orientation
+    #     :return:
+    #     """
+    #     x = world_point[0]
+    #     y = world_point[1]
+    #     z = world_point[2]
+    #     theta = self_orientation
+    #     x_relative = math.cos(theta) * x + math.sin(theta) * y
+    #     y_relative = -math.sin(theta) * x + math.cos(theta) * y
+    #     return [x_relative, y_relative, z]
+    # def blocking(self, position_lists_local):
+    #     """
+    #     Handle the blocking case, Remove the further robots
+    #     :param position_lists_local:
+    #     :return:
+    #     """
+    #     out_position_lists_local = []
+    #     for self_i in range(len(position_lists_local)):
+    #         position_lists_i = []
+    #         for robot_j in range(len(position_lists_local[self_i])):
+    #             x = position_lists_local[self_i][robot_j][0]
+    #             y = position_lists_local[self_i][robot_j][1]
+    #             theta = math.atan2(y, x)
+    #
+    #             block = False
+    #             for robot_k in range(len(position_lists_local[self_i])):
+    #                 if robot_k == robot_j:
+    #                     continue
+    #                 x_k = position_lists_local[self_i][robot_k][0]
+    #                 y_k = position_lists_local[self_i][robot_k][1]
+    #                 if x**2 + y**2 < x_k**2 + y_k**2:
+    #                     continue
+    #                 x_k1 = x_k - (self.robot_size / 2) * math.sin(theta)
+    #                 y_k1 = y_k + (self.robot_size / 2) * math.cos(theta)
+    #
+    #                 x_k2 = x_k + (self.robot_size / 2) * math.sin(theta)
+    #                 y_k2 = y_k - (self.robot_size / 2) * math.cos(theta)
+    #
+    #                 theta_k_1 = math.atan2(y_k1, x_k1)
+    #                 theta_k_2 = math.atan2(y_k2, x_k2)
+    #                 if max(theta_k_1, theta_k_2) - min(theta_k_1, theta_k_2) < math.pi:
+    #                     if (
+    #                         theta_k_1 < theta < theta_k_2
+    #                         or theta_k_2 < theta < theta_k_1
+    #                     ):
+    #                         block = True
+    #                 else:
+    #                     if theta > max(theta_k_1, theta_k_2) or theta < min(
+    #                         theta_k_1, theta_k_2
+    #                     ):
+    #                         block = True
+    #             if block == False:
+    #                 position_lists_i.append(position_lists_local[self_i][robot_j])
+    #         out_position_lists_local.append(position_lists_i)
+    #     return out_position_lists_local
+
+    # def global_to_local(self, position_lists_global, self_orientation_global):
+    #     """
+    #     Get each robot's observation from global absolute position
+    #     :param position_lists_global: Global absolute position of all robots in the world
+    #     :return: A list of local observations
+    #     """
+    #     position_lists_local = []
+    #     self_pose_list = []
+    #     for i in range(len(position_lists_global)):
+    #         x_self = position_lists_global[i][0]
+    #         y_self = position_lists_global[i][1]
+    #         z_self = position_lists_global[i][2]
+    #         self_pose_list.append([x_self, y_self, z_self])
+    #         position_list_local_i = []
+    #         for j in range(len(position_lists_global)):
+    #             if i == j:
+    #                 continue
+    #             point_local_raw = [
+    #                 position_lists_global[j][0] - x_self,
+    #                 position_lists_global[j][1] - y_self,
+    #                 position_lists_global[j][2] - z_self,
+    #             ]
+    #             if self.local:
+    #                 point_local_rotated = self.rotation(
+    #                     point_local_raw, self_orientation_global[i]
+    #                 )
+    #                 point_local_raw = point_local_rotated
+    #             point_local = self.data_filter(point_local_raw)
+    #             if not point_local == None:
+    #                 position_list_local_i.append(point_local)
+    #         position_lists_local.append(position_list_local_i)
+    #     if self.block:
+    #         position_lists_local = self.blocking(position_lists_local)
+    #
+    #     return position_lists_local, self_orientation_global
 
     def world_to_map(self, world_point, map_size, max_x, max_y):
         """

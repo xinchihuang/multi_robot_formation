@@ -1,6 +1,11 @@
 import random
 import math
-from ..utils.gabreil_graph import get_gabreil_graph_local
+import os
+
+import numpy as np
+
+from ..utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+# from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 def dfs(node, visited, adjacency_matrix, component):
     visited[node] = True
     component.add(node)
@@ -31,24 +36,28 @@ def is_graph_balanced(adjacency_matrix):
             return False
 
     return True
-# Example adjacency matrix
-adjacency_matrix = [
-    [0, 1, 0, 1, 0],
-    [0, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0]
-]
+def is_gabriel(graph_global,graph_local):
+    for i in range(len(graph_global)):
+        for j in range(i+1,len(graph_global)):
+            # print(i, j,graph_global[i][j])
+            if graph_global[i][j]==1:
+                if graph_local[i][j]==0 and graph_local[j][i]==0:
+                    return False
+    return True
 
-def check_valid_initial_graph(graph):
+
+def check_valid_initial_graph(graph_global,graph_local):
     valid=True
-    connected_component=find_weakly_connected_components(graph)
+    connected_component=find_weakly_connected_components(graph_local)
     if len(connected_component)>1:
         valid=False
-    if is_graph_balanced(graph)==False:
+    if is_graph_balanced(graph_local)==False:
+        valid=False
+    if is_gabriel(graph_global,graph_local)==False:
         valid=False
     return valid
 def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
+
     while True:
         pose_list = []
         for i in range(num_robot):
@@ -68,14 +77,61 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
                         break
                     if min_distance > distance:
                         min_distance = distance
-                if redo==True:
+                if redo==False:
                     pose_list.append([x,y,theta])
                     break
 
-        gabriel_graph=get_gabreil_graph_local(pose_list)
-        if check_valid_initial_graph(gabriel_graph)==True:
+        gabriel_graph_global = get_gabreil_graph(pose_list)
+        gabriel_graph_local=get_gabreil_graph_local(pose_list)
+
+        if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
+            for line in gabriel_graph_global:
+                print(line)
+            print("----------")
+            for line in gabriel_graph_local:
+                print(line)
             break
     return pose_list
-# if __name__ == "__main__":
-#     pose_list=initialize_pose(5)
-#     print(pose_list)
+def initial_from_data(root):
+    print(os.listdir(root))
+    for i in range(len(os.listdir(root))):
+        if i==0:
+            pose_array_data=np.load(os.path.join(root,os.listdir(root)[i]))
+        else:
+            print()
+            pose_array_data=np.concatenate((pose_array_data,np.load(os.path.join(root,os.listdir(root)[i]))))
+    print(pose_array_data.shape)
+def generate_valid_pose(root,num_robot=5):
+    if not os.path.exists(root):
+        os.mkdir(root)
+    count = len(os.listdir(root))*100
+    pose_list_to_save=[]
+    while True:
+        pose_list=initialize_pose(num_robot)
+        pose_list_to_save.append(pose_list)
+        count+=1
+        print(count)
+        if count%100==0:
+            pose_file = os.path.join(root, str(count + 100))
+            pose_array=np.array(pose_list_to_save)
+            np.save(pose_file,pose_array)
+            pose_list_to_save=[]
+class PoseDataLoader:
+    def __init__(self,root):
+        for i in range(len(os.listdir(root))):
+            if i == 0:
+                pose_array_data = np.load(os.path.join(root, os.listdir(root)[i]))
+            else:
+                pose_array_data = np.concatenate((pose_array_data, np.load(os.path.join(root, os.listdir(root)[i]))))
+        self.data=pose_array_data
+    def __getitem__(self, item):
+        return self.data[item]
+    def __len__(self):
+        return len(self.data)
+
+
+
+if __name__ == "__main__":
+    initialize_pose(5)
+    # generate_valid_pose("poses")
+    # initial_from_data("poses")

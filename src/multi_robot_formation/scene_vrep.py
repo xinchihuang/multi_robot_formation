@@ -342,5 +342,5 @@ class Scene:
                     )
     def stop(self):
         vrep_interface.stop(self.client_id)
-if __name__ == "__main__":
-    get_vector_angle([0,1,1],[1,0,0])
+# if __name__ == "__main__":
+#     get_vector_angle([0,1,1],[1,0,0])
