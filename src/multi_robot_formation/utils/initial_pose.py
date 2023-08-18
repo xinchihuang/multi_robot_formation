@@ -49,9 +49,9 @@ def is_gabriel(graph_global,graph_local):
 def check_valid_initial_graph(graph_global,graph_local):
     valid=True
     connected_component=find_weakly_connected_components(graph_local)
+    if is_graph_balanced(graph_local) == False:
+        valid = False
     if len(connected_component)>1:
-        valid=False
-    if is_graph_balanced(graph_local)==False:
         valid=False
     if is_gabriel(graph_global,graph_local)==False:
         valid=False
@@ -132,6 +132,6 @@ class PoseDataLoader:
 
 
 if __name__ == "__main__":
-    initialize_pose(5)
-    # generate_valid_pose("poses")
+    # initialize_pose(5)
+    generate_valid_pose("poses")
     # initial_from_data("poses")
