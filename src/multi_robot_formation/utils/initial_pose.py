@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 
-# from ..utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
-from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+from ..utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+# from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 def dfs(node, visited, adjacency_matrix, component):
     visited[node] = True
     component.add(node)
