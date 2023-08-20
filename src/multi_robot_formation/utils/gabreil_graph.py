@@ -52,7 +52,7 @@ def rotation(world_point, self_orientation):
     x_relative = math.cos(theta) * x + math.sin(theta) * y
     y_relative = -math.sin(theta) * x + math.cos(theta) * y
     return [x_relative, y_relative, z]
-def global_to_local(position_lists_global, self_orientation_global):
+def global_to_local(position_lists_global):
     """
     Get each robot's observation from global absolute position
     :param position_lists_global: Global absolute position of all robots in the world
@@ -73,20 +73,19 @@ def global_to_local(position_lists_global, self_orientation_global):
                 0
             ]
             point_local_rotated = rotation(
-                point_local_raw, self_orientation_global[i]
+                point_local_raw, position_lists_global[i][2]
             )
             position_list_local_i.append(point_local_rotated)
         position_lists_local.append(position_list_local_i)
 
-    return np.array(position_lists_local), np.array(self_orientation_global)
+    return np.array(position_lists_local)
 
 
 
 #### not finished
 def get_gabreil_graph_local(position_array,view_range=5,view_angle=2*math.pi/3):
     position_array = np.array(position_array)
-    self_orientation_global=position_array[:,2]
-    position_array_local, self_orientation_global=global_to_local(position_array, self_orientation_global)
+    position_array_local=global_to_local(position_array)
     # print(position_array_local)
     node_num=position_array_local.shape[0]
     gabriel_graph = [[1] * node_num for _ in range(node_num)]

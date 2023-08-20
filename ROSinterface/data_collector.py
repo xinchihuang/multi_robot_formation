@@ -166,11 +166,9 @@ class DataCollector:
 
 
 if __name__ == "__main__":
-    # pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses")
-    # print(pose_data.data)
-    # pose_list=initialize_pose(5)
-    # pose_list=pose_data[random.randint(0,len(pose_data))]
-    # print(pose_list)
+    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses")
+    pose_list=pose_data[random.randint(0,len(pose_data))]
+    print(pose_list)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
@@ -178,14 +176,14 @@ if __name__ == "__main__":
     controller = LocalExpertController()
     # pose_list = initialize_pose(5)
 
-    pose_list = [[-2, -2, math.pi/4],
-                 [-2, 2, -math.pi/4],
-                 [2, 2, -3*math.pi/4],
-                 [2, -2, 3*math.pi/4],
-                 [0, 0, 0],
-                 # [3, -3, 0],
-                 # [0, 0, 0],
-                 ]
+    # pose_list = [[-2, -2, math.pi/4],
+    #              [-2, 2, -math.pi/4],
+    #              [2, 2, -3*math.pi/4],
+    #              [2, -2, 3*math.pi/4],
+    #              [0, 0, 0],
+    #              # [3, -3, 0],
+    #              # [0, 0, 0],
+    #              ]
 
     listener = DataCollector(robot_num,controller)
 
