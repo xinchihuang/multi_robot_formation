@@ -116,6 +116,7 @@ def generate_valid_pose(root,num_robot=7):
             pose_array=np.array(pose_list_to_save)
             np.save(pose_file,pose_array)
             pose_list_to_save=[]
+
 class PoseDataLoader:
     def __init__(self,root):
         for i in range(len(os.listdir(root))):
