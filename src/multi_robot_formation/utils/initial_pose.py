@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 
-from ..utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
-# from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+# from ..utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 def dfs(node, visited, adjacency_matrix, component):
     visited[node] = True
     component.add(node)
@@ -101,7 +101,7 @@ def initial_from_data(root):
             print()
             pose_array_data=np.concatenate((pose_array_data,np.load(os.path.join(root,os.listdir(root)[i]))))
     print(pose_array_data.shape)
-def generate_valid_pose(root,num_robot=7):
+def generate_valid_pose(root,num_robot=5):
     if not os.path.exists(root):
         os.mkdir(root)
     count = len(os.listdir(root))*100
