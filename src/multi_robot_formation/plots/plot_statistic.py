@@ -185,7 +185,7 @@ def process_data_gazebo(root_path,robot_num=5):
                             distance=np.sqrt(np.square(data[i,0]-data[j,0])+np.square(data[i,1]-data[j,1]))
                             # print(distance)
                             distance_list.append(distance)
-                            if distance<1:
+                            if distance<0.2:
                                 crash=True
                             if distance>5:
                                 separate=True
@@ -201,9 +201,9 @@ def process_data_gazebo(root_path,robot_num=5):
             unsuccess += 1
             print(path,average_formation_error)
             continue
-        if crash==True:
+        if average_formation_error>20:
             unsuccess += 1
-            print(path,average_formation_error)
+            print(path, average_formation_error)
             continue
 
         converge_time_all.append(convergence_time)

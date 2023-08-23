@@ -16,6 +16,7 @@ from multi_robot_formation.comm_data import ControlData, SensorData, SceneData
 from multi_robot_formation.controller_new import *
 from multi_robot_formation.model.LocalExpertController import LocalExpertController
 import copy
+import math
 def sort_pose(position_list):
     global_pose_array = np.array(position_list)
     temp = copy.deepcopy(global_pose_array)
@@ -32,6 +33,7 @@ class DataGenerator:
         self.max_x = max_x
         self.max_y = max_y
         self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+        self.sensor_angle=2*math.pi/3
 
     def update_adjacency_list(self, position_list):
         """
@@ -70,10 +72,15 @@ class DataGenerator:
         gabriel_graph = get_gabreil_graph_local(position_array, node_num)
         return gabriel_graph[0]
     def generate_map_all(self, global_pose_array, self_orientation_array):
+        """
+        Generate a set of data for training
+        :param global_pose_array: Robot's global pose, shape:(number of robot,3) [x,y,theta]
+        :return: A list of local observations
+        """
         global_pose_array = np.array(global_pose_array)
         self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = self.map_simulator
-        position_lists_local, self_orientation = global_to_local(global_pose_array, self_orientation_array)
+        position_lists_local= global_to_local(global_pose_array)
 
 
         for i in range(len(position_lists_local)):
@@ -86,7 +93,7 @@ class DataGenerator:
         number_of_robot = global_pose_array.shape[0]
         for robot_index in range(number_of_robot):
             controller = LocalExpertController()
-            control_i = controller.get_control(global_pose_array,robot_index,)
+            control_i = controller.get_control(global_pose_array,robot_index,self.max_x,self.sensor_angle)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
 
             ref_control_list.append([velocity_x, velocity_y,omega])

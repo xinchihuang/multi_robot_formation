@@ -83,7 +83,7 @@ def global_to_local(position_lists_global):
 
 
 #### not finished
-def get_gabreil_graph_local(position_array,view_range=5,view_angle=math.pi/2):
+def get_gabreil_graph_local(position_array,view_range=5,view_angle=2*math.pi/3):
     position_array = np.array(position_array)
     position_array_local=global_to_local(position_array)
     # print(position_array_local)

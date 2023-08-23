@@ -349,6 +349,6 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data_gazebo("/home/xinchi/gazebo_data/348")
+    plot_load_data_gazebo("/home/xinchi/gazebo_data/588")
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

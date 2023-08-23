@@ -138,13 +138,13 @@ class ViT(nn.Module):
         x = x.mean(dim = 1) if self.pool == 'mean' else x[:, 0]
 
         x = self.to_latent(x)
-
-        if task=="position":
-            return self.mlp_position(x)
-        if task=="graph":
-            return self.mlp_graph(x)
-        if task=="control":
-            return self.mlp_control(x)
+        return self.mlp_control(x)
+        # if task=="position":
+        #     return self.mlp_position(x)
+        # if task=="graph":
+        #     return self.mlp_graph(x)
+        # if task=="control":
+        #     return self.mlp_control(x)
 
 
 

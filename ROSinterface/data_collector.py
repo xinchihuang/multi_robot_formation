@@ -166,7 +166,7 @@ class DataCollector:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses")
+    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses_5")
     pose_list=pose_data[random.randint(0,len(pose_data))]
     print(pose_list)
     rospy.wait_for_service('/gazebo/set_model_state')

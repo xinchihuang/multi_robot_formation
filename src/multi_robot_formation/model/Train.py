@@ -61,12 +61,14 @@ class RobotDatasetTrace(Dataset):
         for sample_index in tqdm(range(self.num_sample)):
             data_sample_path = os.path.join(data_path_root, str(sample_index))
             pose_array_i = np.load(
-                os.path.join(data_sample_path, "pose_array_scene.npy")
+                os.path.join(data_sample_path, "trace.npy")
             )
             if self.pose_array.shape[1] == 1:
                 self.pose_array = pose_array_i
                 continue
-            self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=1)
+            # print(pose_array_i.shape)
+            self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=0)
+        self.pose_array=np.transpose(self.pose_array,(1,0,2))
 
         self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
         self.get_settings()
@@ -78,19 +80,20 @@ class RobotDatasetTrace(Dataset):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
+        # print("pose array",idx,self.pose_array.shape)
         global_pose_array = self.pose_array[:, idx, :]
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
         use_random = random.uniform(0, 1)
-        if use_random < self.random_rate:
-            global_pose_array = np.random.uniform(self.random_range[0], self.random_range[1], size=(self.number_of_agents,3))
-            if random.uniform(0, 1)<0.5:
-                global_pose_array=global_pose_array*-1
-            global_pose_array[:, 2] = 0
-            self_orientation_array = (
-                    2 * math.pi * np.random.random(self.number_of_agents) - math.pi
-            )
+        # if use_random < self.random_rate:
+        #     global_pose_array = np.random.uniform(self.random_range[0], self.random_range[1], size=(self.number_of_agents,3))
+        #     if random.uniform(0, 1)<0.5:
+        #         global_pose_array=global_pose_array*-1
+        #     global_pose_array[:, 2] = 0
+        #     self_orientation_array = (
+        #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
+        #     )
         # if use_random < 0.2:
         #     global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
         #     global_pose_array[:, 2] = 0
@@ -99,23 +102,23 @@ class RobotDatasetTrace(Dataset):
         #     )
 
         # data_generator = DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
-        if self.task_type=="all":
+        # if self.task_type=="all":
             # print(self.task_type)
-            occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
-                global_pose_array, self_orientation_array
-            )
-            if self.transform:
-                occupancy_maps = torch.from_numpy(occupancy_maps).double()
-                reference_control = torch.from_numpy(reference_control).double()
-                reference_position = torch.from_numpy(reference_position).double()
-                reference_neighbor= torch.from_numpy(reference_neighbor).double()
+        occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
+            global_pose_array, self_orientation_array
+        )
+        if self.transform:
+            occupancy_maps = torch.from_numpy(occupancy_maps).double()
+            reference_control = torch.from_numpy(reference_control).double()
+            reference_position = torch.from_numpy(reference_position).double()
+            reference_neighbor= torch.from_numpy(reference_neighbor).double()
 
-            return {
-                "occupancy_maps": occupancy_maps,
-                "reference_control": reference_control,
-                "reference_position": reference_position,
-                "reference_neighbor": reference_neighbor,
-            }
+        return {
+            "occupancy_maps": occupancy_maps,
+            "reference_control": reference_control,
+            "reference_position": reference_position,
+            "reference_neighbor": reference_neighbor,
+        }
     def get_settings(self):
         print("-----------------------------------")
         print("Dataset settings")
@@ -126,6 +129,7 @@ class RobotDatasetTrace(Dataset):
         print("random_rate: ", self.random_rate)
         print("random_range: ", self.random_range)
         print("num_sample: ", self.num_sample)
+        print("data_shape:" , self.pose_array.shape)
 
 
 
@@ -203,19 +207,16 @@ class Trainer:
             total_loss = 0
             total = 0
 
-            random_rate=0.1*self.epoch
-            trainloader.random_rate=random_rate
-            for iter, batch in enumerate(tqdm(trainloader)):
+            # random_rate=0.1*self.epoch
+            # trainloader.random_rate=random_rate
+            for _, batch in enumerate(tqdm(trainloader)):
                 occupancy_maps = batch["occupancy_maps"]
-                reference = batch["reference"]
+                reference = batch["reference_control"]
                 if self.use_cuda:
                     occupancy_maps = occupancy_maps.to("cuda")
                     reference = reference.to("cuda")
                 self.optimizer.zero_grad()
-                # print(occupancy_maps.shape)
-
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1),self.task_type)
-                # print(reference[:, 0])
                 loss = self.criterion(outs, reference[:, 0])
                 for i in range(1, self.number_of_agent):
                     outs = self.model(torch.unsqueeze(occupancy_maps[:,i,:,:],1),self.task_type)
@@ -244,7 +245,7 @@ class Trainer:
                     total_eval = 0
                     for iter_eval, batch_eval in enumerate(evaluateloader):
                         occupancy_maps = batch_eval["occupancy_maps"]
-                        reference = batch_eval["reference"]
+                        reference = batch_eval["reference_control"]
                         if use_cuda:
                             occupancy_maps = occupancy_maps.to("cuda")
                             reference = reference.to("cuda")
@@ -266,7 +267,7 @@ class Trainer:
                     )
                     print("loss_eval ", total_loss_eval)
                     print("total_eval ", total_eval)
-            self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit"+str(random_rate)+".pth")
+            self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth")
         # return total_loss / total
 
     def save(self, save_path):
@@ -277,7 +278,7 @@ class Trainer:
 if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
-    data_path_root = "/home/xinchi/GNN_data"
+    data_path_root = "/home/xinchi/gazebo_data"
     save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
     desired_distance = 2.0
     number_of_robot = 5
@@ -293,16 +294,16 @@ if __name__ == "__main__":
     optimizer = "rms"
     batch_size = 128
     learning_rate= 0.01
-    max_epoch=10
+    max_epoch=1
     use_cuda = True
 
 
-    task_type="control"
+    task_type="all"
     # model
     model=ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 2,
+        num_classes = 3,
         dim = 256,
         depth = 3,
         heads = 8,
@@ -315,7 +316,7 @@ if __name__ == "__main__":
 
     # data set
     trainset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "training_5"),
+        data_path_root=os.path.join(data_path_root, "training"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,
@@ -326,7 +327,7 @@ if __name__ == "__main__":
         max_y=max_y
     )
     evaluateset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "evaluating_5"),
+        data_path_root=os.path.join(data_path_root, "evaluating"),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         local=local,
