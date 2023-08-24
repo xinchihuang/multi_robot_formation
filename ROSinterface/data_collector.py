@@ -20,6 +20,7 @@ from squaternion import Quaternion
 from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local
 from multi_robot_formation.utils.initial_pose import initialize_pose,PoseDataLoader
 from multi_robot_formation.model.LocalExpertController import LocalExpertController
+
 class DataCollector:
     def __init__(self, robot_num,controller=None):
         self.robot_num=robot_num
@@ -49,7 +50,7 @@ class DataCollector:
 
         self.sensor_range=5
         self.sensor_angle=2*math.pi/3
-        self.max_velocity=0.1
+        self.max_velocity=1
         self.max_omega=1
 
         self.desired_distance=2
@@ -149,10 +150,16 @@ class DataCollector:
             msg=Twist()
             msg.linear.x = control_list[index][0] if abs(control_list[index][0])<self.max_velocity else self.max_velocity*abs(control_list[index][0])/control_list[index][0]
             msg.linear.y = control_list[index][1] if abs(control_list[index][1])<self.max_velocity else self.max_velocity*abs(control_list[index][1])/control_list[index][1]
-            # msg.linear.x = 1
-            # msg.linear.y = 0
-            msg.linear.z = 0
+            # msg.linear.x = 0
+            # msg.linear.y = 1
+            # msg.linear.z = 0
             msg.angular.z = control_list[index][2] if abs(control_list[index][2])<self.max_omega else self.max_omega*abs(control_list[index][2])/control_list[index][2]
+
+
+            print(msg.linear.x,msg.linear.y,msg.angular.z)
+            print(control_list[index])
+            # msg.angular.z = 1
+
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
 
@@ -184,6 +191,12 @@ if __name__ == "__main__":
     #              # [3, -3, 0],
     #              # [0, 0, 0],
     #              ]
+ #
+ #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
+ # [-0.11962687 ,-2.94522615 ,-2.78613711],
+ # [-4.51360495  ,1.04370626  ,0.72373201],
+ # [ 0.34727331  ,1.90429804 ,-1.54858546],
+ # [-2.34736724  ,2.89713682 ,-1.14321162]]
 
     listener = DataCollector(robot_num,controller)
 

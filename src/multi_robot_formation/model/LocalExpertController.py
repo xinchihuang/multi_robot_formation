@@ -51,7 +51,7 @@ class LocalExpertControllerOld:
         return out_put
 
 class LocalExpertControllerPartial:
-    def __init__(self,desired_distance=2,safe_margin=0.5,view_range=5,view_angle=120):
+    def __init__(self,desired_distance=2,safe_margin=0.05,view_range=5,view_angle=120):
         self.desired_distance = desired_distance
         self.name="LocalExpertControllerPartial"
         self.safe_margin=safe_margin
@@ -113,7 +113,7 @@ class LocalExpertController:
             return gamma1 - gamma2
         else:
             return gamma1 - gamma2+math.pi*2
-    def get_control(self,pose_list,robot_id,sensor_range,sensor_angle,safe_margin=0.5,K_f=1,K_m=1,K_omega=1):
+    def get_control(self,pose_list,robot_id,sensor_range,sensor_angle,safe_margin=0.05,K_f=1,K_m=10,K_omega=1):
         """
         :param position_list: local position list for training
         """
