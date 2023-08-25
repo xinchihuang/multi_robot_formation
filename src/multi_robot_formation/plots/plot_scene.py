@@ -161,7 +161,7 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     """
     rob_num = np.shape(pose_array)[0]
     gabriel_graph = gabriel(pose_array)
-    position_array = pose_array[:, 0, :]
+    position_array = pose_array[:, -1, :]
     print(position_array)
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
@@ -349,6 +349,6 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 
 
 if __name__ == "__main__":
-    plot_load_data_gazebo("/home/xinchi/gazebo_data/evaluating/143")
+    plot_load_data_gazebo("/home/xinchi/gazebo_data/evaluating/178")
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)
