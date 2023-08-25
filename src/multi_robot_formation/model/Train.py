@@ -30,9 +30,9 @@ class RobotDatasetTrace(Dataset):
         number_of_agents,
         local,
         partial,
-        random_range,
         max_x,
         max_y,
+        sensor_view_angle,
         task_type="all",
 
     ):
@@ -49,7 +49,6 @@ class RobotDatasetTrace(Dataset):
         self.number_of_agents = number_of_agents
         self.task_type = task_type
         self.random_rate = 0
-        self.random_range = random_range
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
         self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
@@ -70,7 +69,9 @@ class RobotDatasetTrace(Dataset):
             self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=0)
         self.pose_array=np.transpose(self.pose_array,(1,0,2))
 
-        self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
+
+        self.sensor_view_angle=sensor_view_angle
+        self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial,sensor_angle=self.sensor_view_angle)
         self.get_settings()
 
     def __len__(self):
@@ -85,7 +86,7 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
-        use_random = random.uniform(0, 1)
+        # use_random = random.uniform(0, 1)
         # if use_random < self.random_rate:
         #     global_pose_array = np.random.uniform(self.random_range[0], self.random_range[1], size=(self.number_of_agents,3))
         #     if random.uniform(0, 1)<0.5:
@@ -127,9 +128,10 @@ class RobotDatasetTrace(Dataset):
         print("number_of_agents: ", self.number_of_agents)
         print("task_type: ", self.task_type)
         print("random_rate: ", self.random_rate)
-        print("random_range: ", self.random_range)
+        # print("random_range: ", self.random_range)
         print("num_sample: ", self.num_sample)
         print("data_shape:" , self.pose_array.shape)
+        print("sensor_view_angle: ",self.sensor_view_angle)
 
 
 
@@ -283,8 +285,9 @@ if __name__ == "__main__":
     desired_distance = 2.0
     number_of_robot = 5
     map_size=100
-    max_x = 10
-    max_y = 10
+    max_x = 5
+    max_y =5
+    sensor_view_angle=math.pi/2
     # dataset parameters
     local = True
     partial = True
@@ -322,9 +325,9 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,10),
         max_x=max_x,
-        max_y=max_y
+        max_y=max_y,
+        sensor_view_angle=sensor_view_angle
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -333,9 +336,9 @@ if __name__ == "__main__":
         local=local,
         partial=partial,
         task_type=task_type,
-        random_range=(0.51,10),
         max_x=max_x,
-        max_y=max_y
+        max_y=max_y,
+        sensor_view_angle=sensor_view_angle
     )
 
 

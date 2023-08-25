@@ -27,13 +27,13 @@ def sort_pose(position_list):
 
 
 class DataGenerator:
-    def __init__(self, max_x=5,max_y=5,local=True, partial=True):
+    def __init__(self, max_x=5,max_y=5,local=True, partial=True,sensor_angle=2*math.pi/3):
         self.local = local
         self.partial = partial
         self.max_x = max_x
         self.max_y = max_y
         self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
-        self.sensor_angle=2*math.pi/3
+        self.sensor_angle=sensor_angle
 
     def update_adjacency_list(self, position_list):
         """
