@@ -7,7 +7,8 @@ print(sys.path)
 from comm_data import ControlData
 import numpy as np
 import math
-from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+# from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
 
 class LocalExpertControllerOld:
     def __init__(self,desired_distance=2,safe_margin=0.5):
@@ -52,22 +53,23 @@ class LocalExpertControllerOld:
 
 
 class LocalExpertController:
-    def __init__(self,desired_distance=2):
+    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.05,K_f=1,K_m=10,K_omega=1):
+        self.name = "LocalExpertController"
         self.desired_distance = desired_distance
-        self.name="LocalExpertController"
+        self.sensor_range = sensor_range
+        self.sensor_angle = sensor_angle
+        self.safe_margin =safe_margin
+        self.K_f = K_f
+        self.K_m = K_m
+        self.K_omega = K_omega
 
-    def leading_angle(self,gamma1,gamma2):
-        if gamma1>=gamma2:
-            return gamma1 - gamma2
-        else:
-            return gamma1 - gamma2+math.pi*2
-    def get_control(self,pose_list,robot_id,sensor_range,sensor_angle,safe_margin=0.05,K_f=1,K_m=10,K_omega=1):
+    def get_control(self,robot_id,pose_list):
         """
         :param position_list: local position list for training
         """
         out_put = ControlData()
         desired_distance = self.desired_distance
-        gabreil_graph_local = get_gabreil_graph_local(pose_list, sensor_range, sensor_angle)
+        gabreil_graph_local = get_gabreil_graph_local(pose_list, self.sensor_range, self.sensor_angle)
         pose_array_local=global_to_local(pose_list)
         neighbor_list = gabreil_graph_local[robot_id]
         velocity_sum_x = 0
@@ -92,38 +94,46 @@ class LocalExpertController:
             # print(robot_id,neighbor_id,position_local[1],position_local[0],velocity_omega)
 
             gamma = math.atan2(position_local[1], (position_local[0]))
-            distance_left = position_local[0] * math.sin(sensor_angle / 2) + position_local[1] * math.cos(
-                sensor_angle / 2)
-            if distance_left > safe_margin:
+            distance_left = position_local[0] * math.sin(self.sensor_angle / 2) + position_local[1] * math.cos(
+                self.sensor_angle / 2)
+            if distance_left > self.safe_margin:
                 rate_l=0
             else:
-                rate_l = (safe_margin - distance_left) / distance_left
-            velocity_x_l = rate_l * position_local[0]*(-math.sin(sensor_angle/2))
-            velocity_y_l = rate_l * position_local[1] * (-math.cos(sensor_angle / 2))
+                rate_l = (self.safe_margin - distance_left) / distance_left
+            velocity_x_l = rate_l * position_local[0]*(-math.sin(self.sensor_angle/2))
+            velocity_y_l = rate_l * position_local[1] * (-math.cos(self.sensor_angle / 2))
 
-            distance_right = position_local[0] * math.sin(sensor_angle / 2) - position_local[1] * math.cos(
-                sensor_angle / 2)
-            if distance_right > safe_margin:
+            distance_right = position_local[0] * math.sin(self.sensor_angle / 2) - position_local[1] * math.cos(
+                self.sensor_angle / 2)
+            if distance_right > self.safe_margin:
                 rate_r=0
             else:
-                rate_r = (safe_margin - distance_right) / distance_right
-            velocity_x_r = rate_r * position_local[0] * (-math.sin(sensor_angle / 2))
-            velocity_y_r = rate_r * position_local[1] * (math.cos(sensor_angle / 2))
+                rate_r = (self.safe_margin - distance_right) / distance_right
+            velocity_x_r = rate_r * position_local[0] * (-math.sin(self.sensor_angle / 2))
+            velocity_y_r = rate_r * position_local[1] * (math.cos(self.sensor_angle / 2))
 
-            distance_sensor = sensor_range - ((position_local[0]) ** 2 + (position_local[1])**2 )** 0.5
-            if distance_sensor > safe_margin:
+            distance_sensor = self.sensor_range - ((position_local[0]) ** 2 + (position_local[1])**2 )** 0.5
+            if distance_sensor > self.safe_margin:
                 rate_s=0
             else:
-                rate_s = (safe_margin - distance_sensor) / distance_sensor
+                rate_s = (self.safe_margin - distance_sensor) / distance_sensor
             velocity_x_s = rate_s * position_local[0] * (math.cos(gamma))
             velocity_y_s = rate_s * position_local[1] * (math.sin(gamma))
 
-
-            velocity_sum_x += K_f*velocity_x_f+K_m*(velocity_x_l+velocity_x_r+velocity_x_s)
-            velocity_sum_y += K_f*velocity_y_f+K_m*(velocity_y_l+velocity_y_r+velocity_y_s)
-            velocity_sum_omega += K_omega*velocity_omega
+            velocity_sum_x += self.K_f*velocity_x_f+self.K_m*(velocity_x_l+velocity_x_r+velocity_x_s)
+            velocity_sum_y += self.K_f*velocity_y_f+self.K_m*(velocity_y_l+velocity_y_r+velocity_y_s)
+            velocity_sum_omega += self.K_omega*velocity_omega
         out_put.velocity_x=velocity_sum_x
         out_put.velocity_y=velocity_sum_y
         out_put.omega=velocity_sum_omega
         return out_put
 
+# pose_lists=[[-1.12931571  ,1.32345932  ,0.        ],
+#  [-2.51703116  ,2.77701291  ,0.        ],
+#  [-0.54381906  ,3.21032015  ,0.        ],
+#  [-3.5840113   ,4.28758138  ,0.        ],
+#  [-1.6970137   ,4.79284693  ,0.        ]]
+# controller=LocalExpertController()
+# control_i = controller.get_control(1,pose_lists)
+# velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
+# print([velocity_x, velocity_y,omega])

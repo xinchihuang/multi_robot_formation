@@ -19,7 +19,7 @@ from vit_model import ViT
 from utils.data_generator import DataGenerator
 from utils.preprocess import preprocess
 
-
+import cv2
 
 
 class RobotDatasetTrace(Dataset):
@@ -106,8 +106,10 @@ class RobotDatasetTrace(Dataset):
         # if self.task_type=="all":
             # print(self.task_type)
         occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
-            global_pose_array, self_orientation_array
+            global_pose_array
         )
+
+
         if self.transform:
             occupancy_maps = torch.from_numpy(occupancy_maps).double()
             reference_control = torch.from_numpy(reference_control).double()
@@ -231,7 +233,6 @@ class Trainer:
 
                 ### save and evaluating
                 if iteration % 100 == 0:
-
                     print(
                         "Average training_data loss at iteration "
                         + str(iteration)
@@ -243,32 +244,32 @@ class Trainer:
                     total_loss = 0
                     total = 0
                     self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
-                    total_loss_eval = 0
-                    total_eval = 0
-                    for iter_eval, batch_eval in enumerate(evaluateloader):
-                        occupancy_maps = batch_eval["occupancy_maps"]
-                        reference = batch_eval["reference_control"]
-                        if use_cuda:
-                            occupancy_maps = occupancy_maps.to("cuda")
-                            reference = reference.to("cuda")
-                        self.optimizer.zero_grad()
-                        # print(occupancy_maps.shape)
-
-                        outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),self.task_type)
-                        loss = self.criterion(outs, reference[:, 0])
-
-                        for i in range(1, self.number_of_agent):
-                            outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),self.task_type)
-                            loss += self.criterion(outs, reference[:, i])
-                        self.optimizer.step()
-                        total_loss_eval += loss.item()
-                        total_eval += occupancy_maps.size(0) * self.number_of_agent
-                    print(
-                        "Average evaluating_data loss at iteration " + str(iteration) + ":",
-                        total_loss_eval / total_eval,
-                    )
-                    print("loss_eval ", total_loss_eval)
-                    print("total_eval ", total_eval)
+                    # total_loss_eval = 0
+                    # total_eval = 0
+                    # for iter_eval, batch_eval in enumerate(evaluateloader):
+                    #     occupancy_maps = batch_eval["occupancy_maps"]
+                    #     reference = batch_eval["reference_control"]
+                    #     if use_cuda:
+                    #         occupancy_maps = occupancy_maps.to("cuda")
+                    #         reference = reference.to("cuda")
+                    #     self.optimizer.zero_grad()
+                    #     # print(occupancy_maps.shape)
+                    #
+                    #     outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),self.task_type)
+                    #     loss = self.criterion(outs, reference[:, 0])
+                    #
+                    #     for i in range(1, self.number_of_agent):
+                    #         outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),self.task_type)
+                    #         loss += self.criterion(outs, reference[:, i])
+                    #     self.optimizer.step()
+                    #     total_loss_eval += loss.item()
+                    #     total_eval += occupancy_maps.size(0) * self.number_of_agent
+                    # print(
+                    #     "Average evaluating_data loss at iteration " + str(iteration) + ":",
+                    #     total_loss_eval / total_eval,
+                    # )
+                    # print("loss_eval ", total_loss_eval)
+                    # print("total_eval ", total_eval)
             self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth")
         # return total_loss / total
 

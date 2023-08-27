@@ -685,7 +685,7 @@ class DummyController(Controller):
 
         return out_put
 class VitController(Controller):
-    def __init__(self, model_path, desired_distance=1.0, num_robot=10, input_height=100, input_width=100, use_cuda=True):
+    def __init__(self, model_path, desired_distance=2.0, num_robot=5, input_height=100, input_width=100, use_cuda=True):
         """
         :param desired_distance: Desired formation distance (type: float)
         :param num_robot: The number of robots (type: int)
@@ -711,7 +711,7 @@ class VitController(Controller):
         self.model = ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 2,
+        num_classes = 3,
         dim = 256,
         depth = 3,
         heads = 8,
@@ -756,9 +756,11 @@ class VitController(Controller):
         print(index,control)
         velocity_x = control[0][0]
         velocity_y = control[0][1]
+        omega=control[0][2]
         out_put.robot_index = index
         out_put.velocity_x = velocity_x
         out_put.velocity_y = velocity_y
+        out_put.omega=omega
 
         return out_put
 

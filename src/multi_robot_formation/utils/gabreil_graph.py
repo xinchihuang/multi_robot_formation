@@ -5,9 +5,11 @@ author: Xinchi Huang
 
 import numpy as np
 import math
-def is_valid_point(point_local,sensor_range=5,sensor_view_angle=2*math.pi/3):
+def is_valid_point(point_local,sensor_range=5,sensor_view_angle=math.pi/2):
     # print(point_local)
     point_local=np.array(point_local[:2])
+    if point_local[0]==0 and point_local[1]==0:
+        return False
     if np.linalg.norm(point_local)>sensor_range:
         return False
     if abs(math.atan2(point_local[1], point_local[0]))> sensor_view_angle / 2:
@@ -56,7 +58,7 @@ def global_to_local(position_lists_global):
     """
     Get each robot's observation from global absolute position
     :param position_lists_global: Global absolute position of all robots in the world
-    :return: A list of local observations
+    :return: A list of local observations: shape:(number of robot,number of robot-1,3)
     """
     position_lists_local = []
     for i in range(len(position_lists_global)):
@@ -83,7 +85,7 @@ def global_to_local(position_lists_global):
 
 
 #### not finished
-def get_gabreil_graph_local(position_array,view_range=5,view_angle=2*math.pi/3):
+def get_gabreil_graph_local(position_array,view_range=5,view_angle=math.pi/2):
     position_array = np.array(position_array)
     position_array_local=global_to_local(position_array)
     # print(position_array_local)
@@ -123,6 +125,8 @@ def get_gabreil_graph_local(position_array,view_range=5,view_angle=2*math.pi/3):
 #              # [3, -3, 0],
 #              # [0, 0, 0],
 #              ]
+# pose_list_local=global_to_local(pose_list)
+# print(pose_list_local)
 
 # graph=get_gabreil_graph_local(pose_list)
 # for l in graph:

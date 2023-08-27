@@ -27,13 +27,20 @@ def sort_pose(position_list):
 
 
 class DataGenerator:
-    def __init__(self, max_x=5,max_y=5,local=True, partial=True,sensor_angle=2*math.pi/3):
+    def __init__(self, desired_distance=2,max_x=5,max_y=5,local=True, partial=True,safe_margin=0.05,sensor_angle=math.pi/2,K_f=1,K_m=10,K_omega=1):
+        self.desired_distance=desired_distance
         self.local = local
         self.partial = partial
         self.max_x = max_x
         self.max_y = max_y
-        self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
-        self.sensor_angle=sensor_angle
+        self.safe_margin=safe_margin
+        self.K_f = K_f
+        self.K_m = K_m
+        self.K_omega = K_omega
+
+        self.sensor_angle = sensor_angle
+        self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial,sensor_view_angle=self.sensor_angle)
+
 
     def update_adjacency_list(self, position_list):
         """
@@ -71,14 +78,14 @@ class DataGenerator:
         node_num = position_array.shape[0]
         gabriel_graph = get_gabreil_graph_local(position_array, node_num)
         return gabriel_graph[0]
-    def generate_map_all(self, global_pose_array, self_orientation_array):
+    def generate_map_all(self, global_pose_array):
         """
         Generate a set of data for training
         :param global_pose_array: Robot's global pose, shape:(number of robot,3) [x,y,theta]
         :return: A list of local observations
         """
         global_pose_array = np.array(global_pose_array)
-        self_orientation_array = np.array(self_orientation_array)
+        # self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = self.map_simulator
         position_lists_local= global_to_local(global_pose_array)
 
@@ -91,13 +98,18 @@ class DataGenerator:
         ref_control_list = []
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
+        controller = LocalExpertController(desired_distance=self.desired_distance,sensor_range=self.max_x,sensor_angle=self.sensor_angle,safe_margin=self.safe_margin,K_f=self.K_f,K_m=self.K_m,K_omega=self.K_omega)
         for robot_index in range(number_of_robot):
-            controller = LocalExpertController()
-            control_i = controller.get_control(global_pose_array,robot_index,self.max_x,self.sensor_angle)
+            control_i = controller.get_control(robot_index,global_pose_array)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
 
             ref_control_list.append([velocity_x, velocity_y,omega])
 
+        # print(global_pose_array)
+        # print(ref_control_list[1])
+        # print(global_to_local(global_pose_array)[1])
+        # cv2.imshow("robot view ", np.array(occupancy_maps[1]))
+        # cv2.waitKey(0)
         # for i in range(len(position_lists_local)):
         #     position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))
         # position_lists_local = np.array(position_lists_local)

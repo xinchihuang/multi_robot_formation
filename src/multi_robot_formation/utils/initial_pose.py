@@ -93,12 +93,10 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
             break
     return pose_list
 def initial_from_data(root):
-    print(os.listdir(root))
     for i in range(len(os.listdir(root))):
         if i==0:
             pose_array_data=np.load(os.path.join(root,os.listdir(root)[i]))
         else:
-            print()
             pose_array_data=np.concatenate((pose_array_data,np.load(os.path.join(root,os.listdir(root)[i]))))
     print(pose_array_data.shape)
 def generate_valid_pose(root,num_robot=5):

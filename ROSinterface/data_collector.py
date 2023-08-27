@@ -17,11 +17,13 @@ import message_filters
 import collections
 from squaternion import Quaternion
 
-from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local
+from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global_to_local
 from multi_robot_formation.utils.initial_pose import initialize_pose,PoseDataLoader
+from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 from multi_robot_formation.model.LocalExpertController import LocalExpertController
+from multi_robot_formation.controller_new import VitController
 
-class DataCollector:
+class Simulation:
     def __init__(self, robot_num,controller=None):
         self.robot_num=robot_num
         self.sub_topic_list = []
@@ -38,19 +40,18 @@ class DataCollector:
         # print(self.sub_topic_list)
         self.controller=controller
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
-        ts.registerCallback(self.DataCollectorCallback)
+        ts.registerCallback(self.SimulateCallback)
 
         self.save_data_root="/home/xinchi/gazebo_data"
         self.upper_bound=0.12
         self.lower_bound=-0.12
         self.map_size = 100
-        self.range = 5
         self.height = 2
         self.max_time_step=1000
 
         self.sensor_range=5
-        self.sensor_angle=2*math.pi/3
-        self.max_velocity=1
+        self.sensor_angle=math.pi/2
+        self.max_velocity=0.1
         self.max_omega=1
 
         self.desired_distance=2
@@ -59,14 +60,14 @@ class DataCollector:
         self.reference_control=[]
         self.time_step=0
 
-    def point_to_map(self, points):
-        occupancy_map = np.ones((self.map_size, self.map_size))
-        for point in points:
-            x_map = int((-point[2] / self.range) * self.map_size/2 + self.map_size / 2)
-            y_map = int((point[0] / self.range) * self.map_size/2 + self.map_size / 2)
-            if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
-                occupancy_map[x_map][y_map] = 0
-        return occupancy_map
+    # def point_to_map(self, points):
+    #     occupancy_map = np.ones((self.map_size, self.map_size))
+    #     for point in points:
+    #         x_map = int((-point[2] / self.range) * self.map_size/2 + self.map_size / 2)
+    #         y_map = int((point[0] / self.range) * self.map_size/2 + self.map_size / 2)
+    #         if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
+    #             occupancy_map[x_map][y_map] = 0
+    #     return occupancy_map
     def save_to_file(self):
         root=self.save_data_root
         if not os.path.exists(root):
@@ -80,48 +81,48 @@ class DataCollector:
         # np.save(os.path.join(data_path,"observation.npy"),observation_array)
         np.save(os.path.join(data_path, "trace.npy"), trace_array)
         np.save(os.path.join(data_path, "reference.npy"), reference_control_array)
-    def expert_control_global(self,pose_list,robot_id):
-        desired_distance=self.desired_distance
-        gabreil_graph=get_gabreil_graph(pose_list)
-        neighbor_list=gabreil_graph[robot_id]
-        velocity_sum_x = 0
-        velocity_sum_y = 0
-        for i in range(len(neighbor_list)):
-            if i==robot_id or neighbor_list[i]==0:
-                continue
-            distance = ((pose_list[robot_id][0]-pose_list[i][0]) ** 2 + (pose_list[robot_id][1]-pose_list[i][1]) ** 2) ** 0.5
-            rate = (distance - desired_distance) / distance
-            velocity_x = rate * (pose_list[robot_id][0]-pose_list[i][0])
-            velocity_y = rate * (pose_list[robot_id][1]-pose_list[i][1])
-            velocity_sum_x -= velocity_x
-            velocity_sum_y -= velocity_y
-        return velocity_sum_x,velocity_sum_y
-    def expert_control_local(self,pose_list,robot_id):
-        desired_distance=self.desired_distance
-        gabreil_graph_local=get_gabreil_graph_local(pose_list,self.sensor_range,self.sensor_angle)
-        neighbor_list=gabreil_graph_local[robot_id]
-        velocity_sum_x = 0
-        velocity_sum_y = 0
-        velocity_sum_omega=0
-        robot_orientation = pose_list[robot_id][2]
-        for i in range(len(neighbor_list)):
-            if i==robot_id or neighbor_list[i]==0:
-                continue
-            distance = ((pose_list[robot_id][0]-pose_list[i][0]) ** 2 + (pose_list[robot_id][1]-pose_list[i][1]) ** 2) ** 0.5
-            rate = (distance - desired_distance) / distance
-            velocity_x = rate * (pose_list[robot_id][0]-pose_list[i][0])
-            velocity_y = rate * (pose_list[robot_id][1]-pose_list[i][1])
-            velocity_omega = robot_orientation-math.atan2((pose_list[i][1]-pose_list[robot_id][1]), (pose_list[i][0]- pose_list[robot_id][0]))
-            velocity_sum_x -= velocity_x
-            velocity_sum_y -= velocity_y
-            velocity_sum_omega -= velocity_omega
-        vx = velocity_sum_x * math.cos(robot_orientation) + velocity_sum_y * math.sin(robot_orientation)
-        vy = -velocity_sum_x * math.sin(robot_orientation) + velocity_sum_y * math.cos(robot_orientation)
+    # def expert_control_global(self,pose_list,robot_id):
+    #     desired_distance=self.desired_distance
+    #     gabreil_graph=get_gabreil_graph(pose_list)
+    #     neighbor_list=gabreil_graph[robot_id]
+    #     velocity_sum_x = 0
+    #     velocity_sum_y = 0
+    #     for i in range(len(neighbor_list)):
+    #         if i==robot_id or neighbor_list[i]==0:
+    #             continue
+    #         distance = ((pose_list[robot_id][0]-pose_list[i][0]) ** 2 + (pose_list[robot_id][1]-pose_list[i][1]) ** 2) ** 0.5
+    #         rate = (distance - desired_distance) / distance
+    #         velocity_x = rate * (pose_list[robot_id][0]-pose_list[i][0])
+    #         velocity_y = rate * (pose_list[robot_id][1]-pose_list[i][1])
+    #         velocity_sum_x -= velocity_x
+    #         velocity_sum_y -= velocity_y
+    #     return velocity_sum_x,velocity_sum_y
+    # def expert_control_local(self,pose_list,robot_id):
+    #     desired_distance=self.desired_distance
+    #     gabreil_graph_local=get_gabreil_graph_local(pose_list,self.sensor_range,self.sensor_angle)
+    #     neighbor_list=gabreil_graph_local[robot_id]
+    #     velocity_sum_x = 0
+    #     velocity_sum_y = 0
+    #     velocity_sum_omega=0
+    #     robot_orientation = pose_list[robot_id][2]
+    #     for i in range(len(neighbor_list)):
+    #         if i==robot_id or neighbor_list[i]==0:
+    #             continue
+    #         distance = ((pose_list[robot_id][0]-pose_list[i][0]) ** 2 + (pose_list[robot_id][1]-pose_list[i][1]) ** 2) ** 0.5
+    #         rate = (distance - desired_distance) / distance
+    #         velocity_x = rate * (pose_list[robot_id][0]-pose_list[i][0])
+    #         velocity_y = rate * (pose_list[robot_id][1]-pose_list[i][1])
+    #         velocity_omega = robot_orientation-math.atan2((pose_list[i][1]-pose_list[robot_id][1]), (pose_list[i][0]- pose_list[robot_id][0]))
+    #         velocity_sum_x -= velocity_x
+    #         velocity_sum_y -= velocity_y
+    #         velocity_sum_omega -= velocity_omega
+    #     vx = velocity_sum_x * math.cos(robot_orientation) + velocity_sum_y * math.sin(robot_orientation)
+    #     vy = -velocity_sum_x * math.sin(robot_orientation) + velocity_sum_y * math.cos(robot_orientation)
+    #
+    #     return vx, vy, velocity_sum_omega
 
-        return vx, vy, velocity_sum_omega
 
-
-    def DataCollectorCallback(self, *argv):
+    def SimulateCallback(self, *argv):
         # print(argv)
         pose_list = []
         control_list=[]
@@ -140,11 +141,22 @@ class DataCollector:
                 distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
                             pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
                 print(i, j, distance)
-        for index in range(0, self.robot_num):
 
             # control_list.append(self.expert_control_local(pose_list,index))
-            control_data=self.controller.get_control(pose_list, index,self.sensor_range,self.sensor_angle)
-            control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
+        if self.controller.name=="LocalExpertController":
+            for index in range(0, self.robot_num):
+                control_data=self.controller.get_control(index, pose_list)
+                control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
+        elif self.controller.name=="VitController":
+            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= self.sensor_angle, local=True)
+            position_lists_local=global_to_local(pose_list)
+            for index in range(0, self.robot_num):
+                print(position_lists_local[index])
+                occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[index])
+                # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
+                # cv2.waitKey(1)
+                control_data = self.controller.get_control(index, occupancy_map)
+                control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
             # print(control_list)
         for index in range(0,self.robot_num):
             msg=Twist()
@@ -156,8 +168,8 @@ class DataCollector:
             msg.angular.z = control_list[index][2] if abs(control_list[index][2])<self.max_omega else self.max_omega*abs(control_list[index][2])/control_list[index][2]
 
 
-            print(msg.linear.x,msg.linear.y,msg.angular.z)
-            print(control_list[index])
+            # print(msg.linear.x,msg.linear.y,msg.angular.z)
+            # print(control_list[index])
             # msg.angular.z = 1
 
             self.pub_topic_dict[index].publish(msg)
@@ -173,24 +185,36 @@ class DataCollector:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses_5")
+    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses")
     pose_list=pose_data[random.randint(0,len(pose_data))]
-    print(pose_list)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
     robot_num = 5
-    controller = LocalExpertController()
-    # pose_list = initialize_pose(5)
+
+    #### expert controller
+    sensor_range=5
+    sensor_angle=math.pi/2
+    safe_margin=0.05
+    K_f=1
+    K_m=10
+    K_omega=1
+    controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega)
+
+
+
+    #### Vit controller
+    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_1600_epoch1.pth"
+    # controller=VitController(model_path)
 
     # pose_list = [[-2, -2, math.pi/4],
     #              [-2, 2, -math.pi/4],
     #              [2, 2, -3*math.pi/4],
     #              [2, -2, 3*math.pi/4],
     #              [0, 0, 0],
-    #              # [3, -3, 0],
-    #              # [0, 0, 0],
-    #              ]
+                 # [3, -3, 0],
+                 # [0, 0, 0],
+                 # ]
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
  # [-0.11962687 ,-2.94522615 ,-2.78613711],
@@ -198,7 +222,7 @@ if __name__ == "__main__":
  # [ 0.34727331  ,1.90429804 ,-1.54858546],
  # [-2.34736724  ,2.89713682 ,-1.14321162]]
 
-    listener = DataCollector(robot_num,controller)
+    listener = Simulation(robot_num,controller)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()
