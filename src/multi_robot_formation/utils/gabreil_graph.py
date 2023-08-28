@@ -12,7 +12,7 @@ def is_valid_point(point_local,sensor_range=5,sensor_view_angle=math.pi/2):
         return False
     if np.linalg.norm(point_local)>sensor_range:
         return False
-    if abs(math.atan2(point_local[1], point_local[0]))> sensor_view_angle / 2:
+    if abs(math.atan2(point_local[1], point_local[0]))>= sensor_view_angle / 2:
         return False
     # print("valid",point_local)
     return True

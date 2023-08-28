@@ -84,6 +84,12 @@ class DataGenerator:
         :param global_pose_array: Robot's global pose, shape:(number of robot,3) [x,y,theta]
         :return: A list of local observations
         """
+
+        # global_pose_array = [[-2, -2, math.pi/4],
+        #          [-2, 2, -math.pi/4],
+        #          [2, 2, -3*math.pi/4],
+        #          [2, -2, 3*math.pi/4],
+        #          [0, 0, 0]]
         global_pose_array = np.array(global_pose_array)
         # self_orientation_array = np.array(self_orientation_array)
         occupancy_map_simulator = self.map_simulator
@@ -94,6 +100,8 @@ class DataGenerator:
             while len(position_lists_local[i]) < len(position_lists_local) - 1:
                 position_lists_local[i].append([float("inf"), float("inf"), 0])
 
+
+
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []
@@ -102,13 +110,12 @@ class DataGenerator:
         for robot_index in range(number_of_robot):
             control_i = controller.get_control(robot_index,global_pose_array)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
-
             ref_control_list.append([velocity_x, velocity_y,omega])
-
+        # print(self.sensor_angle)
         # print(global_pose_array)
-        # print(ref_control_list[1])
-        # print(global_to_local(global_pose_array)[1])
-        # cv2.imshow("robot view ", np.array(occupancy_maps[1]))
+        # print(ref_control_list[4])
+        # print(global_to_local(global_pose_array)[4])
+        # cv2.imshow("robot view ", np.array(occupancy_maps[4]))
         # cv2.waitKey(0)
         # for i in range(len(position_lists_local)):
         #     position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))

@@ -113,6 +113,8 @@ class ViT(nn.Module):
 
         self.mlp_control = nn.Sequential(
             nn.LayerNorm(dim),
+            nn.Linear(dim, dim),
+            nn.LayerNorm(dim),
             nn.Linear(dim, num_classes)
         )
         self.mlp_position = nn.Sequential(

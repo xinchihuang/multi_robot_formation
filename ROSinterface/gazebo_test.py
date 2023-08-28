@@ -51,7 +51,7 @@ class Simulation:
 
         self.sensor_range=5
         self.sensor_angle=math.pi/2
-        self.max_velocity=0.1
+        self.max_velocity=1
         self.max_omega=1
 
         self.desired_distance=2
@@ -151,7 +151,7 @@ class Simulation:
             occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= self.sensor_angle, local=True)
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
-                print(position_lists_local[index])
+                # print(position_lists_local[index])
                 occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[index])
                 # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
                 # cv2.waitKey(1)
@@ -185,36 +185,33 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses_5")
+    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/utils/poses")
     pose_list=pose_data[random.randint(0,len(pose_data))]
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
     robot_num = 5
 
-    #### expert controller
-    # sensor_range=5
-    # sensor_angle=math.pi/2
-    # safe_margin=0.05
-    # K_f=1
-    # K_m=10
-    # K_omega=1
-    # controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega)
+    ### expert controller
+    sensor_range=5
+    sensor_angle=math.pi/2
+    safe_margin=0.05
+    K_f=1
+    K_m=1
+    K_omega=1
+    controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega)
 
 
 
     #### Vit controller
-    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_1600_epoch1.pth"
-    controller=VitController(model_path)
+    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_3300_epoch1.pth"
+    # controller=VitController(model_path)
 
     # pose_list = [[-2, -2, math.pi/4],
     #              [-2, 2, -math.pi/4],
     #              [2, 2, -3*math.pi/4],
     #              [2, -2, 3*math.pi/4],
-    #              [0, 0, 0],
-                 # [3, -3, 0],
-                 # [0, 0, 0],
-                 # ]
+    #              [0, 0, 0]]
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
  # [-0.11962687 ,-2.94522615 ,-2.78613711],

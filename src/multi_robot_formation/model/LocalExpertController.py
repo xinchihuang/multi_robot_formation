@@ -65,7 +65,7 @@ class LocalExpertController:
 
     def get_control(self,robot_id,pose_list):
         """
-        :param position_list: local position list for training
+        :param position_list: global position list for training
         """
         out_put = ControlData()
         desired_distance = self.desired_distance
@@ -99,6 +99,7 @@ class LocalExpertController:
             if distance_left > self.safe_margin:
                 rate_l=0
             else:
+                # print(robot_id,neighbor_id,distance_left)
                 rate_l = (self.safe_margin - distance_left) / distance_left
             velocity_x_l = rate_l * position_local[0]*(-math.sin(self.sensor_angle/2))
             velocity_y_l = rate_l * position_local[1] * (-math.cos(self.sensor_angle / 2))
@@ -108,6 +109,7 @@ class LocalExpertController:
             if distance_right > self.safe_margin:
                 rate_r=0
             else:
+                # print(robot_id, neighbor_id, distance_right)
                 rate_r = (self.safe_margin - distance_right) / distance_right
             velocity_x_r = rate_r * position_local[0] * (-math.sin(self.sensor_angle / 2))
             velocity_y_r = rate_r * position_local[1] * (math.cos(self.sensor_angle / 2))
@@ -116,6 +118,7 @@ class LocalExpertController:
             if distance_sensor > self.safe_margin:
                 rate_s=0
             else:
+                # print(robot_id, neighbor_id, distance_sensor)
                 rate_s = (self.safe_margin - distance_sensor) / distance_sensor
             velocity_x_s = rate_s * position_local[0] * (math.cos(gamma))
             velocity_y_s = rate_s * position_local[1] * (math.sin(gamma))
@@ -123,17 +126,18 @@ class LocalExpertController:
             velocity_sum_x += self.K_f*velocity_x_f+self.K_m*(velocity_x_l+velocity_x_r+velocity_x_s)
             velocity_sum_y += self.K_f*velocity_y_f+self.K_m*(velocity_y_l+velocity_y_r+velocity_y_s)
             velocity_sum_omega += self.K_omega*velocity_omega
+        # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
         out_put.velocity_x=velocity_sum_x
         out_put.velocity_y=velocity_sum_y
         out_put.omega=velocity_sum_omega
         return out_put
 
-# pose_lists=[[-1.12931571  ,1.32345932  ,0.        ],
-#  [-2.51703116  ,2.77701291  ,0.        ],
-#  [-0.54381906  ,3.21032015  ,0.        ],
-#  [-3.5840113   ,4.28758138  ,0.        ],
-#  [-1.6970137   ,4.79284693  ,0.        ]]
+# pose_lists=[[-2, -2, math.pi/4],
+#                  [-2, 2, -math.pi/4],
+#                  [2, 2, -3*math.pi/4],
+#                  [2, -2, 3*math.pi/4],
+#                  [0, 0, 0]]
 # controller=LocalExpertController()
-# control_i = controller.get_control(1,pose_lists)
+# control_i = controller.get_control(4,pose_lists)
 # velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
 # print([velocity_x, velocity_y,omega])
