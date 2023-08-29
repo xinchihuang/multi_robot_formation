@@ -90,7 +90,7 @@ class MapSimulator:
             return [x_map, y_map]
         return None
 
-    def generate_map_one(
+    def generate_map_all(
         self,
         position_list_local,
     ):
@@ -134,7 +134,58 @@ class MapSimulator:
             occupancy_map=occupancy_map*self.position_encoding_matrix
         occupancy_map = preprocess(occupancy_map)
         return occupancy_map
+    def generate_map_partial(
+        self,
+        position_list_local,
+    ):
 
+        """
+        Generate occupancy map
+        :param position_list_local: All robots' map coordinate relative to the observer robot [x,y,z]
+        :param self_orientation: Observer robots' orientation (float)
+        :param robot_size: Size of robot in occupancy map
+        :param max_height: points' horizontal range
+        :param map_size: The size of occupancy map
+        :param max_x: Max world x coordinate
+        :param max_y: Max world y coordinate
+        :return: occupancy map
+        """
+
+        scale = min(self.max_x, self.max_y)
+        robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale / 2)))
+
+        occupancy_map = (
+            np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
+        )
+        try:
+            for world_points in position_list_local:
+                if is_valid_point(world_points,sensor_range=self.max_x,sensor_view_angle=self.sensor_view_angle)==False:
+                    continue
+                transformed_x = world_points[0] * math.sqrt(2) - world_points[1] * math.sqrt(2) - self.max_x
+                transformed_y = world_points[0] * math.sqrt(2) + world_points[1] * math.sqrt(2) - self.max_y
+                transformed_world_points = [transformed_x, transformed_y, 0]
+                map_points = self.world_to_map( transformed_world_points, self.map_size, self.max_x, self.max_y)
+                if map_points == None:
+                    continue
+                x = map_points[0]
+                y = map_points[1]
+                for m in range(-robot_range, robot_range, 1):
+                    for n in range(-robot_range, robot_range, 1):
+                        occupancy_map[x + m][y + n] = 0
+        except:
+            pass
+        occupancy_map = occupancy_map[
+            robot_range:-robot_range, robot_range:-robot_range
+        ]
+        if self.position_encoding:
+            occupancy_map=occupancy_map*self.position_encoding_matrix
+        occupancy_map = preprocess(occupancy_map)
+        return occupancy_map
+    def generate_map_one(self,position_lists_local):
+        if self.partial:
+            return self.generate_map_partial(position_lists_local)
+        else:
+            return self.generate_map_all(position_lists_local)
 
     def generate_maps(
         self,

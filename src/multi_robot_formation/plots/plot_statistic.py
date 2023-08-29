@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import math
+import distutils.dir_util
 
 def gabriel(pose_array):
     node_mum = np.shape(pose_array)[0]
@@ -196,21 +197,29 @@ def process_data_gazebo(root_path,robot_num=5):
         if convergence_time >= 50:
             unsuccess += 1
             print(path,average_formation_error)
+            to_root = "/home/xinchi/unsuccess"
+            distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
             continue
         if crash==True:
             unsuccess += 1
             print(path,average_formation_error)
+            to_root = "/home/xinchi/unsuccess"
+            distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
         if average_formation_error>5:
             unsuccess += 1
             print(path, average_formation_error)
+            to_root = "/home/xinchi/unsuccess"
+            distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
 
         converge_time_all.append(convergence_time)
         average_formation_error_all.append(average_formation_error)
         average_formation_all.append(average_formation)
         # break
+
     print(root_path,unsuccess)
+
     return converge_time_all,average_formation_all,average_formation_error_all
 
 def box_1(data_m,title,ylabel,save_dir):
@@ -283,7 +292,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/gazebo_data/evaluating"
+root_dir="/home/xinchi/gazebo_data/training"
 
 # dir4= os.path.join(root_dir,"model_4")
 # converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)

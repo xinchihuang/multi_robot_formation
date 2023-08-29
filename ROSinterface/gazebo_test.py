@@ -195,11 +195,14 @@ if __name__ == "__main__":
     ### expert controller
     sensor_range=5
     sensor_angle=math.pi/2
-    safe_margin=0.05
+    safe_margin=0.1
     K_f=1
     K_m=1
     K_omega=1
-    controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega)
+
+    max_speed = 1
+    max_omega = 1
+    controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
 
 
 

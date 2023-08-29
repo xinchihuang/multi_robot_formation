@@ -27,7 +27,7 @@ def sort_pose(position_list):
 
 
 class DataGenerator:
-    def __init__(self, desired_distance=2,max_x=5,max_y=5,local=True, partial=True,safe_margin=0.05,sensor_angle=math.pi/2,K_f=1,K_m=10,K_omega=1):
+    def __init__(self, desired_distance=2,max_x=5,max_y=5,local=True, partial=True,safe_margin=0.1,sensor_angle=math.pi/2,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
         self.desired_distance=desired_distance
         self.local = local
         self.partial = partial
@@ -37,6 +37,8 @@ class DataGenerator:
         self.K_f = K_f
         self.K_m = K_m
         self.K_omega = K_omega
+        self.max_speed = max_speed
+        self.max_omega = max_omega
 
         self.sensor_angle = sensor_angle
         self.map_simulator=MapSimulator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial,sensor_view_angle=self.sensor_angle)
@@ -106,7 +108,7 @@ class DataGenerator:
         ref_control_list = []
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
-        controller = LocalExpertController(desired_distance=self.desired_distance,sensor_range=self.max_x,sensor_angle=self.sensor_angle,safe_margin=self.safe_margin,K_f=self.K_f,K_m=self.K_m,K_omega=self.K_omega)
+        controller = LocalExpertController(desired_distance=self.desired_distance,sensor_range=self.max_x,sensor_angle=self.sensor_angle,safe_margin=self.safe_margin,K_f=self.K_f,K_m=self.K_m,K_omega=self.K_omega,max_speed=self.max_speed,max_omega=self.max_omega)
         for robot_index in range(number_of_robot):
             control_i = controller.get_control(robot_index,global_pose_array)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
