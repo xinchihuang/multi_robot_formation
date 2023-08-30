@@ -3,8 +3,6 @@ import sys
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
 print(sys.path)
-
-from comm_data import ControlData
 import numpy as np
 import math
 
