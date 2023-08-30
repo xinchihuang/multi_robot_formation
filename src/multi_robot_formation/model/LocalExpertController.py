@@ -7,7 +7,10 @@ print(sys.path)
 from comm_data import ControlData
 import numpy as np
 import math
+
+# from ..comm_data import ControlData
 # from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+from comm_data import ControlData
 from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
 
 class LocalExpertControllerOld:

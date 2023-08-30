@@ -160,11 +160,11 @@ class Executor:
         velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
         if velocity_x==0 and velocity_y==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=20
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=omega
             )
         else:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=0
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=omega
             )
             self.idle_frame=0
         self.connector.send_to_robot(msg)
