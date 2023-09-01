@@ -3,12 +3,13 @@ import sys
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
 sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
 print(sys.path)
-
-from comm_data import ControlData
 import numpy as np
 import math
-# from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
-from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+
+from ..comm_data import ControlData
+from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+# from comm_data import ControlData
+# from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
 
 class LocalExpertControllerOld:
     def __init__(self,desired_distance=2,safe_margin=0.5):

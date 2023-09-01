@@ -9,7 +9,7 @@ from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from multi_robot_formation.controller_new import VitController
 from multi_robot_formation.robot_template import Robot
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
-
+from multi_robot_formation.model.LocalExpertController import LocalExpertController
 # # from robot_test import *
 from collections import defaultdict
 import time
@@ -28,7 +28,9 @@ class ModelControl:
         self.model_path =os.path.abspath('..')+"/jetson/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         self.desired_distance=1.0
 
-        self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+        # self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+
+        self.controller=LocalExpertController()
         self.robot = Robot(
             sensor=None,
             executor=Executor(),
@@ -86,15 +88,17 @@ class ModelControl:
                 position_list_local.append([x_c, y_c, z_c])
         if len(position_list_local) == 0:
             print("no data")
-            model_data=ControlData()
+            control_data=ControlData()
         else:
             print("position", position_list_local)
-            occupancy_map_simulator = MapSimulator()
-            occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
+            # occupancy_map_simulator = MapSimulator()
+            # occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
             # model_data=self.simple_control(position_list_local,0,1)
             # self.robot.controller.num_robot=epoch5
-            model_data=self.robot.controller.get_control(0,occupancy_map)
-        self.robot.executor.execute_control(model_data)
+            # model_data=self.robot.controller.get_control(0,occupancy_map)
+            position_list_local.append([0,0,0])
+            control_data=self.robot.controller.get_control(len(position_list_local),position_list_local)
+        self.robot.executor.execute_control(control_data=control_data)
 
     def keyboard_stop(self):
         if data.data == 'q':
