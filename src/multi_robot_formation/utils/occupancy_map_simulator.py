@@ -152,8 +152,7 @@ class MapSimulator:
         """
 
         scale = min(self.max_x, self.max_y)/2
-        robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale / 2)))
-
+        robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale)))
         occupancy_map = (
             np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
         )
@@ -172,14 +171,13 @@ class MapSimulator:
                 for m in range(-robot_range, robot_range, 1):
                     for n in range(-robot_range, robot_range, 1):
                         occupancy_map[x + m][y + n] = 0
-                        print(x+m,y+n)
 
         except:
             pass
 
-        # occupancy_map = occupancy_map[
-        #     robot_range:-robot_range, robot_range:-robot_range
-        # ]
+        occupancy_map = occupancy_map[
+            robot_range:-robot_range, robot_range:-robot_range
+        ]
         if self.position_encoding:
             occupancy_map=occupancy_map*self.position_encoding_matrix
         # occupancy_map = preprocess(occupancy_map)
