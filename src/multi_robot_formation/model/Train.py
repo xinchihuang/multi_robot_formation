@@ -219,6 +219,7 @@ class Trainer:
                 if self.use_cuda:
                     occupancy_maps = occupancy_maps.to("cuda")
                     reference = reference.to("cuda")
+
                 self.optimizer.zero_grad()
                 outs = self.model(torch.unsqueeze(occupancy_maps[:,0,:,:],1),self.task_type)
                 loss = self.criterion(outs, reference[:, 0])
