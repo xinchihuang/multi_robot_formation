@@ -151,7 +151,7 @@ class MapSimulator:
         :return: occupancy map
         """
 
-        scale = min(self.max_x, self.max_y)
+        scale = min(self.max_x, self.max_y)/2
         robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale / 2)))
 
         occupancy_map = (
@@ -167,19 +167,22 @@ class MapSimulator:
                 map_points = self.world_to_map( transformed_world_points, self.map_size, self.max_x, self.max_y)
                 if map_points == None:
                     continue
-                x = map_points[0]
-                y = map_points[1]
+                x = map_points[0]+robot_range
+                y = map_points[1]+robot_range
                 for m in range(-robot_range, robot_range, 1):
                     for n in range(-robot_range, robot_range, 1):
                         occupancy_map[x + m][y + n] = 0
+                        print(x+m,y+n)
+
         except:
             pass
-        occupancy_map = occupancy_map[
-            robot_range:-robot_range, robot_range:-robot_range
-        ]
+
+        # occupancy_map = occupancy_map[
+        #     robot_range:-robot_range, robot_range:-robot_range
+        # ]
         if self.position_encoding:
             occupancy_map=occupancy_map*self.position_encoding_matrix
-        occupancy_map = preprocess(occupancy_map)
+        # occupancy_map = preprocess(occupancy_map)
         return occupancy_map
     def generate_map_one(self,position_lists_local):
         if self.partial:
@@ -207,17 +210,18 @@ class MapSimulator:
 
 
 
-# if __name__ == "__main__":
-#     map_simulator=MapSimulator()
-#     position_list_local=[[-1.99621605  ,4.07709261  ,0.        ],
-#  [-0.83022503  ,4.42916132  ,0.        ],
-#  [ 0.          ,0.          ,0.        ],
-#  [ 2.08811675  ,1.40447998  ,0.        ],
-#  [-2.51021058  ,2.20360313  ,0.        ]]
-#
-#
-#     print(position_list_local)
-#     occupancy_map = map_simulator.generate_map_one(position_list_local)
-#     cv2.imshow("robot view " + str(1), np.array(occupancy_map))
-#     cv2.waitKey(0)
+if __name__ == "__main__":
+    map_simulator=MapSimulator()
+    position_list_local=[[-1.99621605  ,4.07709261  ,0.        ],
+ [-0.83022503  ,4.42916132  ,0.        ],
+ [ 0.          ,0.          ,0.        ],
+ [ 2.08811675  ,1.40447998  ,0.        ],
+ [-2.51021058  ,2.20360313  ,0.        ]]
+
+
+    print(position_list_local)
+    occupancy_map = map_simulator.generate_map_one(position_list_local)
+    cv2.imshow("robot view " + str(1), np.array(occupancy_map))
+    cv2.waitKey(0)
+
 # print(math.sin(arctan(-1.732,-1)))
