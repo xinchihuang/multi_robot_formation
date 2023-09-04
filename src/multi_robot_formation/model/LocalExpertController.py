@@ -5,11 +5,11 @@ sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robo
 print(sys.path)
 import numpy as np
 import math
-
-from ..comm_data import ControlData
-from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
-# from comm_data import ControlData
-# from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+#
+# from ..comm_data import ControlData
+# from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+from comm_data import ControlData
+from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
 
 class LocalExpertControllerOld:
     def __init__(self,desired_distance=2,safe_margin=0.5):
@@ -54,7 +54,7 @@ class LocalExpertControllerOld:
 
 
 class LocalExpertController:
-    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.1,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
+    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
         self.name = "LocalExpertController"
         self.desired_distance = desired_distance
         self.sensor_range = sensor_range
@@ -65,7 +65,7 @@ class LocalExpertController:
         self.K_omega = K_omega
         self.max_speed=max_speed
         self.max_omega=max_omega
-
+        # print(self.safe_margin)
     def get_control(self,robot_id,pose_list):
         """
         :param position_list: global position list for training

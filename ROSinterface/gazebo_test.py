@@ -42,7 +42,7 @@ class Simulation:
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
         ts.registerCallback(self.SimulateCallback)
 
-        self.save_data_root="/home/xinchi/gazebo_data"
+        self.save_data_root="/home/xinchi/gazebo_data/testing"
         self.upper_bound=0.12
         self.lower_bound=-0.12
         self.map_size = 100
@@ -51,7 +51,7 @@ class Simulation:
 
         self.sensor_range=5
         self.sensor_angle=math.pi/2
-        self.max_velocity=1
+        self.max_velocity=0.5
         self.max_omega=1
 
         self.desired_distance=2
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     ### expert controller
     sensor_range=5
     sensor_angle=math.pi/2
-    safe_margin=0.1
+    safe_margin=0.4
     K_f=1
     K_m=1
     K_omega=1
@@ -205,16 +205,12 @@ if __name__ == "__main__":
     controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
 
 
-
-    #### Vit controller
-    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/model_3300_epoch1.pth"
+    #
+    # ### Vit controller
+    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
     # controller=VitController(model_path)
 
-    # pose_list = [[-2, -2, math.pi/4],
-    #              [-2, 2, -math.pi/4],
-    #              [2, 2, -3*math.pi/4],
-    #              [2, -2, 3*math.pi/4],
-    #              [0, 0, 0]]
+
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
  # [-0.11962687 ,-2.94522615 ,-2.78613711],
