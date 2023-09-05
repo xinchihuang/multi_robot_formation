@@ -46,7 +46,7 @@ class ModelControl:
         self.height = 2
         self.color_index = {"green": 0}
         self.EP_DICT = {}
-        self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
+        # self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
         # self.robot.controller.initialize_GNN_model(1, self.model_path)
         # self.IP_DICT={1:'172.20.4.7'}
 
@@ -98,6 +98,7 @@ class ModelControl:
             # model_data=self.robot.controller.get_control(0,occupancy_map)
             position_list_local.append([0,0,0])
             control_data=self.robot.controller.get_control(len(position_list_local)-1,position_list_local)
+            print(control_data.velocity_x)
         self.robot.executor.execute_control(control_data=control_data)
 
     def keyboard_stop(self):
