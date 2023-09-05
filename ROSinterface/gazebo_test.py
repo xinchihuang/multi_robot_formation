@@ -193,22 +193,22 @@ if __name__ == "__main__":
     robot_num = 5
 
     ### expert controller
-    sensor_range=5
-    sensor_angle=math.pi/2
-    safe_margin=0.4
-    K_f=1
-    K_m=1
-    K_omega=1
-
-    max_speed = 1
-    max_omega = 1
-    controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
+    # sensor_range=5
+    # sensor_angle=math.pi/2
+    # safe_margin=0.4
+    # K_f=1
+    # K_m=1
+    # K_omega=1
+    #
+    # max_speed = 1
+    # max_omega = 1
+    # controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
 
 
     #
-    # ### Vit controller
-    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
-    # controller=VitController(model_path)
+    ### Vit controller
+    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
+    controller=VitController(model_path)
 
 
  #
