@@ -155,17 +155,17 @@ class Executor:
         print("index", control_data.robot_index)
         print("x", velocity_x)
         print("y", velocity_y)
-        print("z", omega)
+        print("omega", omega)
         velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x) > 0.1 else velocity_x
         velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
         omega = 0.1 * abs(omega) / omega if abs(omega) > 0.1 else omega
         if velocity_x==0 and velocity_y==0 and omega==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=omega
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=math.degrees(omega)
             )
         else:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=omega
+                speed_x=velocity_x, speed_y=velocity_y, speed_z=math.degrees(omega)
             )
             self.idle_frame=0
         self.connector.send_to_robot(msg)
