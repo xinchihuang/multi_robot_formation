@@ -90,7 +90,7 @@ class ModelControl:
             print("no data")
             control_data=ControlData()
         else:
-            print("position", position_list_local)
+            # print("position", position_list_local)
             print(self.robot.controller.name)
             # occupancy_map_simulator = MapSimulator()
             # occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
@@ -98,6 +98,7 @@ class ModelControl:
             # self.robot.controller.num_robot=epoch5
             # model_data=self.robot.controller.get_control(0,occupancy_map)
             position_list_local.append([0,0,0])
+            print("position", position_list_local)
             control_data=self.robot.controller.get_control(len(position_list_local)-1,position_list_local)
             print(control_data.velocity_x)
         self.robot.executor.execute_control(control_data=control_data)
