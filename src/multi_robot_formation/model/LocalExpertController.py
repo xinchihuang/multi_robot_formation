@@ -80,6 +80,7 @@ class LocalExpertController:
         velocity_sum_x = 0
         velocity_sum_y = 0
         velocity_sum_omega = 0
+        print(robot_id,neighbor_list)
         for neighbor_id in range(len(neighbor_list)):
             if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
                 continue
