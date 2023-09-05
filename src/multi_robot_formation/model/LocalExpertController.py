@@ -6,10 +6,10 @@ print(sys.path)
 import numpy as np
 import math
 #
-from ..comm_data import ControlData
-from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
-# from comm_data import ControlData
-# from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+# from ..comm_data import ControlData
+# from ..utils.gabreil_graph import get_gabreil_graph_local,global_to_local
+from comm_data import ControlData
+from utils.gabreil_graph import get_gabreil_graph_local,global_to_local
 
 class LocalExpertControllerOld:
     def __init__(self,desired_distance=2,safe_margin=0.5):
@@ -80,8 +80,8 @@ class LocalExpertController:
         velocity_sum_x = 0
         velocity_sum_y = 0
         velocity_sum_omega = 0
-        print(pose_list,pose_array_local)
-        print(robot_id,neighbor_list,gabreil_graph_local)
+        # print(pose_list,pose_array_local)
+        # print(robot_id,neighbor_list,gabreil_graph_local)
         for neighbor_id in range(len(neighbor_list)):
             if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
                 continue
@@ -139,12 +139,12 @@ class LocalExpertController:
         out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
         return out_put
 
-# pose_lists=[[-2, -2, math.pi/4],
-#                  [-2, 2, -math.pi/4],
-#                  [2, 2, -3*math.pi/4],
-#                  [2, -2, 3*math.pi/4],
+# pose_lists=[[3, 0, math.pi/4],
+#                  # [-2, 2, -math.pi/4],
+#                  # [2, 2, -3*math.pi/4],
+#                  # [2, -2, 3*math.pi/4],
 #                  [0, 0, 0]]
 # controller=LocalExpertController()
-# control_i = controller.get_control(4,pose_lists)
+# control_i = controller.get_control(1,pose_lists)
 # velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
 # print([velocity_x, velocity_y,omega])
