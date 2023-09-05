@@ -85,7 +85,7 @@ class ModelControl:
             x_c, z_c, y_c = blob.center.x, -blob.center.y, blob.center.z
             if -0.2<z_c<0.2:
             # print(blob.name,x_w,y_w,z_w)
-                position_list_local.append([y_c, x_c, z_c])
+                position_list_local.append([y_c, -x_c, z_c])
         if len(position_list_local) == 0:
             print("no data")
             control_data=ControlData()
