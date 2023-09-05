@@ -20,7 +20,7 @@ class LocalExpertControllerOld:
         """
         :param position_list_local: local position list for training
         """
-        print(self.name)
+
         position_array=np.array(position_list_local)
         out_put = ControlData()
         neighbor=np.ones(len(position_list_local))
@@ -71,6 +71,7 @@ class LocalExpertController:
         """
         :param position_list: global position list for training
         """
+        print(self.name)
         out_put = ControlData()
         desired_distance = self.desired_distance
         gabreil_graph_local = get_gabreil_graph_local(pose_list, self.sensor_range, self.sensor_angle)
