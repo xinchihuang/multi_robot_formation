@@ -97,7 +97,7 @@ class ModelControl:
             # self.robot.controller.num_robot=epoch5
             # model_data=self.robot.controller.get_control(0,occupancy_map)
             position_list_local.append([0,0,0])
-            control_data=self.robot.controller.get_control(len(position_list_local),position_list_local)
+            control_data=self.robot.controller.get_control(len(position_list_local)-1,position_list_local)
         self.robot.executor.execute_control(control_data=control_data)
 
     def keyboard_stop(self):
