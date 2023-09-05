@@ -91,6 +91,7 @@ class ModelControl:
             control_data=ControlData()
         else:
             print("position", position_list_local)
+            print(self.robot.controller.name)
             # occupancy_map_simulator = MapSimulator()
             # occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
             # model_data=self.simple_control(position_list_local,0,1)
@@ -119,6 +120,6 @@ if __name__ == "__main__":
     topic = "/blobs_3d"
     listener = ModelControl(topic)
     rospy.Subscriber('keyboard_input', String, listener.keyboard_stop)
-    timer = rospy.Timer(rospy.Duration(150), listener.timed_stop)
+    timer = rospy.Timer(rospy.Duration(100), listener.timed_stop)
     rospy.spin()
 
