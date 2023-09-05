@@ -20,6 +20,7 @@ class LocalExpertControllerOld:
         """
         :param position_list_local: local position list for training
         """
+        print(self.name)
         position_array=np.array(position_list_local)
         out_put = ControlData()
         neighbor=np.ones(len(position_list_local))
