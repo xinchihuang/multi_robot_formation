@@ -91,7 +91,7 @@ class ModelControl:
             control_data=ControlData()
         else:
             # print("position", position_list_local)
-            print(self.robot.controller.name)
+
             # occupancy_map_simulator = MapSimulator()
             # occupancy_map = occupancy_map_simulator.generate_map_one(position_list_local)
             # model_data=self.simple_control(position_list_local,0,1)
@@ -100,7 +100,9 @@ class ModelControl:
             position_list_local.append([0,0,0])
             print("position", position_list_local)
             control_data=self.robot.controller.get_control(len(position_list_local)-1,position_list_local)
-            print(control_data.velocity_x)
+            control_data.velocity_x = control_data.velocity_x / (len(position_list_local)-1)
+            control_data.velocity_y = control_data.velocity_y / (len(position_list_local) - 1)
+            control_data.omega = control_data.omega / (len(position_list_local) - 1)
         self.robot.executor.execute_control(control_data=control_data)
 
     def keyboard_stop(self):
