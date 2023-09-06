@@ -55,7 +55,7 @@ class LocalExpertControllerOld:
 
 
 class LocalExpertController:
-    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
+    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.radians(69),safe_margin=0.05,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
         self.name = "LocalExpertController"
         self.desired_distance = desired_distance
         self.sensor_range = sensor_range
