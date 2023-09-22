@@ -88,6 +88,8 @@ class LocalExpertController:
             #         pose_list[robot_id][2]) * (pose_list[neighbor_id][1]-pose_list[robot_id][1])]
             position_local=pose_array_local[robot_id][neighbor_id]
 
+
+
             distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
             rate_f = (distance_formation - desired_distance) / distance_formation
             velocity_x_f = rate_f * position_local[0]
@@ -134,98 +136,7 @@ class LocalExpertController:
         out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
         out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
         return out_put
-class LocalExpertControllerHeuristic:
-    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
-        self.name = "LocalExpertControllerHeuristic"
-        self.desired_distance = desired_distance
-        self.sensor_range = sensor_range
-        self.sensor_angle = sensor_angle
-        self.safe_margin =safe_margin
-        self.K_f = K_f
-        self.K_m = K_m
-        self.K_omega = K_omega
-        self.max_speed=max_speed
-        self.max_omega=max_omega
-        self.state="form"
-        self.swing_direction=1
-        self.rotate_track=0
-        # print(self.safe_margin)
-    def get_control(self,robot_id,pose_list):
-        """
-        :param position_list: global position list for training
-        """
-        out_put = ControlData()
-        desired_distance = self.desired_distance
-        gabreil_graph_local = get_gabreil_graph_local(pose_list, self.sensor_range, self.sensor_angle)
-        pose_array_local=global_to_local(pose_list)
-        neighbor_list = gabreil_graph_local[robot_id]
-        velocity_sum_x = 0
-        velocity_sum_y = 0
-        velocity_sum_omega = 0
-        print(self.state)
-        #no robot in the view
-        if sum(neighbor_list)<=1:
 
-            self.state="rotate"
-            velocity_sum_omega=self.max_omega
-        # only one robot in the view
-        elif sum(neighbor_list)==2:
-            if self.state=="rotate":
-                self.state="form"
-            elif self.state=="form":
-                for neighbor_id in range(len(neighbor_list)):
-                    if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
-                        continue
-                    position_local = pose_array_local[robot_id][neighbor_id]
-                    gamma = math.atan2(position_local[1], (position_local[0]))
-                    distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
-                    if abs(gamma)<0.01 and (distance_formation - desired_distance)<0.05:
-                        self.state="swing"
-                        break
-                    rate_f = (distance_formation - desired_distance) / distance_formation
-                    velocity_x_f = rate_f * position_local[0]
-                    velocity_y_f = rate_f * position_local[1]
-                    velocity_omega = math.atan2(position_local[1], (position_local[0]))
-
-                    velocity_sum_x += self.K_f * velocity_x_f
-                    velocity_sum_y += self.K_f * velocity_y_f
-                    velocity_sum_omega += self.K_omega * velocity_omega
-            elif self.state == "swing":
-                for neighbor_id in range(len(neighbor_list)):
-                    if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
-                        continue
-                    position_local = pose_array_local[robot_id][neighbor_id]
-                    gamma = math.atan2(position_local[1], (position_local[0]))
-                    if self.swing_direction==1:
-                        if self.sensor_angle/2+gamma<0.1:
-                            print("change direction",self.sensor_angle/2,gamma)
-                            self.swing_direction=-1
-                    else:
-                        if self.sensor_angle/2-gamma<0.1:
-                            print("change direction",self.sensor_angle/2,gamma)
-                            self.swing_direction=1
-                    velocity_sum_omega = self.swing_direction*self.max_omega
-                    print(velocity_sum_omega, self.sensor_angle / 2, gamma)
-        # two or more robots in view
-        elif sum(neighbor_list)>2:
-            self.state="form"
-            for neighbor_id in range(len(neighbor_list)):
-                if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
-                    continue
-                position_local = pose_array_local[robot_id][neighbor_id]
-                gamma = math.atan2(position_local[1], (position_local[0]))
-                distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
-                rate_f = (distance_formation - desired_distance) / distance_formation
-                velocity_x_f = rate_f * position_local[0]
-                velocity_y_f = rate_f * position_local[1]
-                velocity_omega = gamma
-                velocity_sum_x += self.K_f * velocity_x_f
-                velocity_sum_y += self.K_f * velocity_y_f
-                velocity_sum_omega += self.K_omega * velocity_omega
-        out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
-        out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
-        out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
-        return out_put
 # pose_lists=[[-2, -2, math.pi/4],
 #                  [-2, 2, -math.pi/4],
 #                  [2, 2, -3*math.pi/4],

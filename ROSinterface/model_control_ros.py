@@ -46,7 +46,7 @@ class ModelControl:
         self.height = 2
         self.color_index = {"green": 0}
         self.EP_DICT = {}
-        self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
+        # self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
         # self.robot.controller.initialize_GNN_model(1, self.model_path)
         # self.IP_DICT={1:'172.20.4.7'}
 
