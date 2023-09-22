@@ -20,7 +20,7 @@ from squaternion import Quaternion
 from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global_to_local
 from multi_robot_formation.utils.initial_pose import initialize_pose,PoseDataLoader
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
-from multi_robot_formation.model.LocalExpertController import LocalExpertController
+from multi_robot_formation.model.LocalExpertController import LocalExpertController,LocalExpertControllerHeuristic
 from multi_robot_formation.controller_new import VitController
 
 class Simulation:
@@ -42,7 +42,7 @@ class Simulation:
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
         ts.registerCallback(self.SimulateCallback)
 
-        self.save_data_root="/home/xinchi/gazebo_data/testing"
+        self.save_data_root="/home/xinchi/gazebo_data/editing"
         self.upper_bound=0.12
         self.lower_bound=-0.12
         self.map_size = 100
@@ -132,7 +132,7 @@ class Simulation:
             pose_list.append(pose_index)
         self.trace.append(pose_list)
         print("___________")
-        print(pose_list)
+        # print(pose_list)
         gabreil_graph_global=get_gabreil_graph(pose_list)
         for i in range(len(gabreil_graph_global)):
             for j in range(i+1,len(gabreil_graph_global)):
@@ -144,6 +144,10 @@ class Simulation:
 
             # control_list.append(self.expert_control_local(pose_list,index))
         if self.controller.name=="LocalExpertController":
+            for index in range(0, self.robot_num):
+                control_data=self.controller.get_control(index, pose_list)
+                control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
+        elif self.controller.name=="LocalExpertControllerHeuristic":
             for index in range(0, self.robot_num):
                 control_data=self.controller.get_control(index, pose_list)
                 control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
@@ -193,22 +197,22 @@ if __name__ == "__main__":
     robot_num = 5
 
     ### expert controller
-    # sensor_range=5
-    # sensor_angle=math.pi/2
-    # safe_margin=0.4
-    # K_f=1
-    # K_m=1
-    # K_omega=1
-    #
-    # max_speed = 1
-    # max_omega = 1
-    # controller = LocalExpertController(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
+    sensor_range=5
+    sensor_angle=math.pi/2
+    safe_margin=0.2
+    K_f=1
+    K_m=1
+    K_omega=1
+
+    max_speed = 1
+    max_omega = 1
+    controller = LocalExpertControllerHeuristic(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
 
 
     #
-    ### Vit controller
-    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
-    controller=VitController(model_path)
+    # ### Vit controller
+    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
+    # controller=VitController(model_path)
 
 
  #
