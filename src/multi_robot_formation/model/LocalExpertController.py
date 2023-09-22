@@ -88,6 +88,8 @@ class LocalExpertController:
             #         pose_list[robot_id][2]) * (pose_list[neighbor_id][1]-pose_list[robot_id][1])]
             position_local=pose_array_local[robot_id][neighbor_id]
 
+
+
             distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
             rate_f = (distance_formation - desired_distance) / distance_formation
             velocity_x_f = rate_f * position_local[0]
