@@ -47,12 +47,12 @@ class Simulation:
         self.lower_bound=-0.12
         self.map_size = 100
         self.height = 2
-        self.max_time_step=1000
+        self.max_time_step=2000
 
         self.sensor_range=5
         self.sensor_angle=math.pi/2
         self.max_velocity=0.5
-        self.max_omega=1
+        self.max_omega=2
 
         self.desired_distance=2
         self.trace=[]
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     K_omega=1
 
     max_speed = 1
-    max_omega = 1
+    max_omega = 2
     controller = LocalExpertControllerHeuristic(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
 
 

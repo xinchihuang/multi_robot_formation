@@ -401,14 +401,14 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
     plot_formation_gabreil(position_array,orientation_array, root_dir)
-    plot_speed(dt, position_array, root_dir)
+    # plot_speed(dt, position_array, root_dir)
 
 
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/")
-    root_path="/home/xinchi/unsuccess"
+    root_path="/home/xinchi/unsuccess_heu"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path))
-    trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
-    print(trace_array.shape)
+    # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
+    # print(trace_array.shape)

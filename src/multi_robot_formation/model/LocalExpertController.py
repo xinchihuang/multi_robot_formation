@@ -168,7 +168,6 @@ class LocalExpertControllerHeuristic:
         print(self.state)
         #no robot in the view
         if sum(neighbor_list)<=1:
-
             self.state="rotate"
             velocity_sum_omega=self.max_omega
         # only one robot in the view
@@ -199,16 +198,20 @@ class LocalExpertControllerHeuristic:
                         continue
                     position_local = pose_array_local[robot_id][neighbor_id]
                     gamma = math.atan2(position_local[1], (position_local[0]))
+                    distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
+                    if (distance_formation - desired_distance)>0.05:
+                        self.state="form"
+                        break
                     if self.swing_direction==1:
-                        if self.sensor_angle/2+gamma<0.1:
+                        if self.sensor_angle/2+gamma<0.05:
                             print("change direction",self.sensor_angle/2,gamma)
                             self.swing_direction=-1
                     else:
-                        if self.sensor_angle/2-gamma<0.1:
+                        if self.sensor_angle/2-gamma<0.05:
                             print("change direction",self.sensor_angle/2,gamma)
                             self.swing_direction=1
                     velocity_sum_omega = self.swing_direction*self.max_omega
-                    print(velocity_sum_omega, self.sensor_angle / 2, gamma)
+
         # two or more robots in view
         elif sum(neighbor_list)>2:
             self.state="form"

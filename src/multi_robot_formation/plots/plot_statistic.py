@@ -197,19 +197,19 @@ def process_data_gazebo(root_path,robot_num=5):
         if convergence_time >= 50:
             unsuccess += 1
             print(path,average_formation_error)
-            to_root = "/home/xinchi/unsuccess"
+            to_root = "/home/xinchi/unsuccess_heu"
             distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
             continue
         if crash==True:
             unsuccess += 1
             print(path,average_formation_error)
-            to_root = "/home/xinchi/unsuccess"
+            to_root = "/home/xinchi/unsuccess_heu"
             distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
         if average_formation_error>10:
             unsuccess += 1
             print(path, average_formation_error)
-            to_root = "/home/xinchi/unsuccess"
+            to_root = "/home/xinchi/unsuccess_heu"
             distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
 
@@ -292,7 +292,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/gazebo_data/testing"
+root_dir="/home/xinchi/gazebo_data/heuristic"
 
 # dir4= os.path.join(root_dir,"model_4")
 # converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)
