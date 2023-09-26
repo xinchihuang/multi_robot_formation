@@ -42,7 +42,7 @@ class Simulation:
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
         ts.registerCallback(self.SimulateCallback)
 
-        self.save_data_root="/home/xinchi/gazebo_data/editing"
+        self.save_data_root="/home/xinchi/gazebo_data/heuristic"
         self.upper_bound=0.12
         self.lower_bound=-0.12
         self.map_size = 100
