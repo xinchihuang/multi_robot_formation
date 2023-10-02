@@ -1,0 +1,6 @@
+<launch>
+
+  <node name="gazebo_test" pkg="multi_robot_formation" type="gazebo_test.py" cwd="node">
+
+  </node>
+ </launch>
