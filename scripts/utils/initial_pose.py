@@ -56,7 +56,7 @@ def check_valid_initial_graph(graph_global,graph_local):
     if is_gabriel(graph_global,graph_local)==False:
         valid=False
     return valid
-def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
+def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1,check_partial=False):
 
     while True:
         pose_list = []
@@ -84,7 +84,7 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
         gabriel_graph_global = get_gabreil_graph(pose_list)
         gabriel_graph_local=get_gabreil_graph_local(pose_list)
 
-        if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
+        if check_partial==True and check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
             for line in gabriel_graph_global:
                 print(line)
             print("----------")

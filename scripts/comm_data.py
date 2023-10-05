@@ -12,6 +12,19 @@ class ControlData:
         self.velocity_y = 0
         self.omega=0
 
+class ControlDataXYOmega:
+    """
+    A data structure for passing control signals to executor
+    """
+
+    def __init__(self):
+        self.robot_index = None
+        # self.omega_left = 0
+        # self.omega_right = 0
+
+        self.velocity_x = 0
+        self.velocity_y = 0
+        self.omega=0
 
 class SensorData:
     """

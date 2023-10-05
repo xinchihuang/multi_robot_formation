@@ -6,8 +6,8 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-from .preprocess import preprocess
-from .gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
+from preprocess import preprocess
+from gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
 # from preprocess import preprocess
 # from gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
 class MapSimulator:
@@ -31,6 +31,8 @@ class MapSimulator:
         :param max_x: Max world x coordinate
         :param max_y: Max world y coordinate
         :param local: Control whether to rotate the occupancy map or not(True: local map, False: global map)
+        :param block: Control whether to consider the blocking conditions
+        :param partial: partially observed or fully observed
         """
 
         self.robot_size = robot_size
@@ -96,14 +98,8 @@ class MapSimulator:
     ):
 
         """
-        Generate occupancy map
+        Generate occupancy map with fully observed
         :param position_list_local: All robots' map coordinate relative to the observer robot [x,y,z]
-        :param self_orientation: Observer robots' orientation (float)
-        :param robot_size: Size of robot in occupancy map
-        :param max_height: points' horizontal range
-        :param map_size: The size of occupancy map
-        :param max_x: Max world x coordinate
-        :param max_y: Max world y coordinate
         :return: occupancy map
         """
 
@@ -140,14 +136,8 @@ class MapSimulator:
     ):
 
         """
-        Generate occupancy map
+        Generate occupancy map with partially observation
         :param position_list_local: All robots' map coordinate relative to the observer robot [x,y,z]
-        :param self_orientation: Observer robots' orientation (float)
-        :param robot_size: Size of robot in occupancy map
-        :param max_height: points' horizontal range
-        :param map_size: The size of occupancy map
-        :param max_x: Max world x coordinate
-        :param max_y: Max world y coordinate
         :return: occupancy map
         """
 
@@ -183,6 +173,9 @@ class MapSimulator:
         # occupancy_map = preprocess(occupancy_map)
         return occupancy_map
     def generate_map_one(self,position_lists_local):
+        """
+                Generate one occupancy map
+        """
         if self.partial:
             return self.generate_map_partial(position_lists_local)
         else:
@@ -196,7 +189,6 @@ class MapSimulator:
         """
         Generate occupancy map
         :param position_lists_local: All robots' map coordinate
-        :param self_orientation_list: All robots' orientation (map coordinate)
         :return: A list of occupancy maps
         """
         maps = []
@@ -209,7 +201,7 @@ class MapSimulator:
 
 
 if __name__ == "__main__":
-    map_simulator=MapSimulator()
+    map_simulator=MapSimulator(sensor_view_angle= 2*math.pi, local=True,partial=False)
     position_list_local=[[-1.99621605  ,4.07709261  ,0.        ],
  [-0.83022503  ,4.42916132  ,0.        ],
  [ 0.          ,0.          ,0.        ],

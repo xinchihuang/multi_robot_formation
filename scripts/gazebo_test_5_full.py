@@ -25,7 +25,7 @@ from model.LocalExpertController import LocalExpertController,LocalExpertControl
 from controller_new import VitController
 
 class Simulation:
-    def __init__(self, robot_num,controller=None):
+    def __init__(self, robot_num,controller=None,save_data_root=None):
         self.robot_num=robot_num
         self.sub_topic_list = []
         self.pub_topic_dict = collections.defaultdict()
@@ -43,17 +43,15 @@ class Simulation:
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
         ts.registerCallback(self.SimulateCallback)
 
-        self.save_data_root="/home/xinchi/gazebo_data/heuristic"
-        self.upper_bound=0.12
-        self.lower_bound=-0.12
+        self.save_data_root=save_data_root
+        self.robot_upper_bound=0.12
+        self.robot_lower_bound=-0.12
         self.map_size = 100
-        self.height = 2
-        self.max_time_step=2000
+        self.max_simulation_time_step=2000
 
         self.sensor_range=5
-        self.sensor_angle=math.pi/2
+        self.sensor_angle=2*math.pi
         self.max_velocity=0.5
-        self.max_omega=2
 
         self.desired_distance=2
         self.trace=[]
@@ -61,14 +59,6 @@ class Simulation:
         self.reference_control=[]
         self.time_step=0
 
-    # def point_to_map(self, points):
-    #     occupancy_map = np.ones((self.map_size, self.map_size))
-    #     for point in points:
-    #         x_map = int((-point[2] / self.range) * self.map_size/2 + self.map_size / 2)
-    #         y_map = int((point[0] / self.range) * self.map_size/2 + self.map_size / 2)
-    #         if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
-    #             occupancy_map[x_map][y_map] = 0
-    #     return occupancy_map
     def save_to_file(self):
         root=self.save_data_root
         if not os.path.exists(root):
@@ -76,7 +66,7 @@ class Simulation:
         num_dirs = len(os.listdir(root))
         data_path = os.path.join(root, str(num_dirs))
         os.mkdir(data_path)
-        observation_array=np.array(self.observation_list)
+        # observation_array=np.array(self.observation_list)
         trace_array=np.array(self.trace)
         reference_control_array=np.array(self.reference_control)
         # np.save(os.path.join(data_path,"observation.npy"),observation_array)
@@ -104,18 +94,7 @@ class Simulation:
                 distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
                             pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
                 print(i, j, distance)
-
-            # control_list.append(self.expert_control_local(pose_list,index))
-        if self.controller.name=="LocalExpertController":
-            for index in range(0, self.robot_num):
-                control_data=self.controller.get_control(index, pose_list)
-                control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
-        elif self.controller.name=="LocalExpertControllerHeuristic":
-            for index in range(0, self.robot_num):
-                control_data=self.controller.get_control(index, pose_list)
-                control_list.append([control_data.velocity_x,control_data.velocity_y,control_data.omega])
-        elif self.controller.name=="VitController":
-            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= self.sensor_angle, local=True)
+            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= self.sensor_angle, local=True,partial=False)
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
                 # print(position_lists_local[index])
@@ -129,20 +108,10 @@ class Simulation:
             msg=Twist()
             msg.linear.x = control_list[index][0] if abs(control_list[index][0])<self.max_velocity else self.max_velocity*abs(control_list[index][0])/control_list[index][0]
             msg.linear.y = control_list[index][1] if abs(control_list[index][1])<self.max_velocity else self.max_velocity*abs(control_list[index][1])/control_list[index][1]
-            # msg.linear.x = 0
-            # msg.linear.y = 1
-            # msg.linear.z = 0
-            msg.angular.z = control_list[index][2] if abs(control_list[index][2])<self.max_omega else self.max_omega*abs(control_list[index][2])/control_list[index][2]
-
-
-            # print(msg.linear.x,msg.linear.y,msg.angular.z)
-            # print(control_list[index])
-            # msg.angular.z = 1
-
             self.pub_topic_dict[index].publish(msg)
         self.time_step+=1
 
-        if self.time_step>self.max_time_step:
+        if self.time_step>self.max_simulation_time_step:
             print("save")
             self.save_to_file()
             rospy.signal_shutdown(f"Stop after {self.time_step} steps")
@@ -152,30 +121,15 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses")
-    pose_list=pose_data[random.randint(0,len(pose_data))]
+    pose_list=initialize_pose(5)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
     robot_num = 5
-
-    ### expert controller
-    sensor_range=5
-    sensor_angle=math.pi/2
-    safe_margin=0.2
-    K_f=1
-    K_m=1
-    K_omega=1
-
-    max_speed = 1
-    max_omega = 2
-    controller = LocalExpertControllerHeuristic(sensor_range=sensor_range,sensor_angle=sensor_angle,safe_margin=safe_margin,K_f=K_f,K_m=K_m,K_omega=K_omega,max_speed=max_speed,max_omega=max_omega)
-
-
-    #
-    # ### Vit controller
-    # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth"
-    # controller=VitController(model_path)
+    ### Vit controller
+    model_path="/home/xinchi/vit_full/vit.pth"
+    save_data_root="/home/xinchi/gazebo_data/ViT_5_full"
+    controller=VitController(model_path)
 
 
  #

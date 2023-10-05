@@ -4,17 +4,13 @@ from collections import defaultdict
 import cv2
 import os
 import sys
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
-print(sys.path)
-print(os.getcwd())
-from multi_robot_formation.utils.gabreil_graph import get_gabreil_graph, get_gabreil_graph_local,global_to_local
-from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
-from multi_robot_formation.comm_data import ControlData, SensorData, SceneData
+
+from .gabreil_graph import get_gabreil_graph, get_gabreil_graph_local,global_to_local
+from .occupancy_map_simulator import MapSimulator
+from comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
-from multi_robot_formation.controller_new import *
-from multi_robot_formation.model.LocalExpertController import LocalExpertController
+from controller_new import *
+from model.LocalExpertController import LocalExpertController,LocalExpertControllerOld
 import copy
 import math
 def sort_pose(position_list):
@@ -27,7 +23,7 @@ def sort_pose(position_list):
 
 
 class DataGenerator:
-    def __init__(self, desired_distance=2,max_x=5,max_y=5,local=True, partial=True,safe_margin=0.1,sensor_angle=math.pi/2,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
+    def __init__(self, desired_distance=2,max_x=5,max_y=5,local=True, partial=True,safe_margin=0.1,sensor_angle=math.pi/2,K_f=1,K_m=0,K_omega=0,max_speed=1,max_omega=0):
         self.desired_distance=desired_distance
         self.local = local
         self.partial = partial
@@ -108,7 +104,7 @@ class DataGenerator:
         ref_control_list = []
         adjacency_lists = []
         number_of_robot = global_pose_array.shape[0]
-        controller = LocalExpertController(desired_distance=self.desired_distance,sensor_range=self.max_x,sensor_angle=self.sensor_angle,safe_margin=self.safe_margin,K_f=self.K_f,K_m=self.K_m,K_omega=self.K_omega,max_speed=self.max_speed,max_omega=self.max_omega)
+        controller = LocalExpertController(desired_distance=self.desired_distance,safe_margin=self.safe_margin,sensor_range=self.max_x,sensor_angle=self.sensor_angle,K_f=self.K_f,K_omega=self.K_omega,max_speed=self.max_speed,max_omega=self.max_omega)
         for robot_index in range(number_of_robot):
             control_i = controller.get_control(robot_index,global_pose_array)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega

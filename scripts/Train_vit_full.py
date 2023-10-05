@@ -1,10 +1,6 @@
 import os
-import sys
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
-print(sys.path)
 
+print(os.getcwd())
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -15,7 +11,7 @@ from tqdm import tqdm
 import copy
 import math
 import random
-from vit_model import ViT
+from model.vit_model import ViT
 from utils.data_generator import DataGenerator
 from utils.preprocess import preprocess
 
@@ -70,7 +66,7 @@ class RobotDatasetTrace(Dataset):
         self.pose_array=np.transpose(self.pose_array,(1,0,2))
 
 
-        self.sensor_view_angle=sensor_view_angle
+        self.sensor_view_angle = sensor_view_angle
         self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial,sensor_angle=self.sensor_view_angle)
         self.get_settings()
 
@@ -86,25 +82,7 @@ class RobotDatasetTrace(Dataset):
         self_orientation_array = global_pose_array[:, 2]
         self_orientation_array = copy.deepcopy(self_orientation_array)
         global_pose_array[:, 2] = 0
-        # use_random = random.uniform(0, 1)
-        # if use_random < self.random_rate:
-        #     global_pose_array = np.random.uniform(self.random_range[0], self.random_range[1], size=(self.number_of_agents,3))
-        #     if random.uniform(0, 1)<0.5:
-        #         global_pose_array=global_pose_array*-1
-        #     global_pose_array[:, 2] = 0
-        #     self_orientation_array = (
-        #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
-        #     )
-        # if use_random < 0.2:
-        #     global_pose_array = 2 * np.random.random((self.number_of_agents, 3)) - 1
-        #     global_pose_array[:, 2] = 0
-        #     self_orientation_array = (
-        #             2 * math.pi * np.random.random(self.number_of_agents) - math.pi
-        #     )
 
-        # data_generator = DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial)
-        # if self.task_type=="all":
-            # print(self.task_type)
         occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
             global_pose_array
         )
@@ -244,34 +222,8 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
-                    # total_loss_eval = 0
-                    # total_eval = 0
-                    # for iter_eval, batch_eval in enumerate(evaluateloader):
-                    #     occupancy_maps = batch_eval["occupancy_maps"]
-                    #     reference = batch_eval["reference_control"]
-                    #     if use_cuda:
-                    #         occupancy_maps = occupancy_maps.to("cuda")
-                    #         reference = reference.to("cuda")
-                    #     self.optimizer.zero_grad()
-                    #     # print(occupancy_maps.shape)
-                    #
-                    #     outs = model(torch.unsqueeze(occupancy_maps[:, 0, :, :], 1),self.task_type)
-                    #     loss = self.criterion(outs, reference[:, 0])
-                    #
-                    #     for i in range(1, self.number_of_agent):
-                    #         outs = model(torch.unsqueeze(occupancy_maps[:, i, :, :], 1),self.task_type)
-                    #         loss += self.criterion(outs, reference[:, i])
-                    #     self.optimizer.step()
-                    #     total_loss_eval += loss.item()
-                    #     total_eval += occupancy_maps.size(0) * self.number_of_agent
-                    # print(
-                    #     "Average evaluating_data loss at iteration " + str(iteration) + ":",
-                    #     total_loss_eval / total_eval,
-                    # )
-                    # print("loss_eval ", total_loss_eval)
-                    # print("total_eval ", total_eval)
-            self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit.pth")
+                    self.save("/home/xinchi/vit_full/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
+            self.save("/home/xinchi/vit_full/vit.pth")
         # return total_loss / total
 
     def save(self, save_path):
@@ -283,13 +235,13 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
-    save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
+    save_model_path = "/home/xinchi/vit_full/vit.pth"
     desired_distance = 2.0
     number_of_robot = 5
     map_size=100
     max_x = 5
     max_y =5
-    sensor_view_angle=math.pi/2
+    sensor_view_angle= 2*math.pi
     # dataset parameters
     local = True
     partial = True

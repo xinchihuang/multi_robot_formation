@@ -134,8 +134,8 @@ class LocalExpertController:
         # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
         out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
         out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
-        out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
-        return
+        # out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
+        return out_put
 
 class LocalExpertControllerHeuristic:
     def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
