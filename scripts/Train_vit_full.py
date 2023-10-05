@@ -167,7 +167,18 @@ class Trainer:
         self.use_cuda = use_cuda
         if self.use_cuda:
             self.model = self.model.to("cuda")
-
+        self.get_setting()
+    def get_setting(self):
+        print("-----------------------------------")
+        print("Trainner settings")
+        print("Transform: ", self.transform)
+        print("Number_of_agents: ", self.number_of_agent)
+        print("Task_type: ", self.task_type)
+        print("Random_rate: ", self.random_rate)
+        # print("random_range: ", self.random_range)
+        print("batch_size: ", self.batch_size)
+        print("learning_rate: ", self.learning_rate)
+        print("use_cuda: ", self.use_cuda)
     def train(self):
         """ """
         self.epoch += 1
@@ -244,7 +255,7 @@ if __name__ == "__main__":
     sensor_view_angle= 2*math.pi
     # dataset parameters
     local = True
-    partial = True
+    partial = False
 
     #trainer parameters
     criterion = "mse"

@@ -6,8 +6,8 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-from preprocess import preprocess
-from gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
+from .preprocess import preprocess
+from .gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
 # from preprocess import preprocess
 # from gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
 class MapSimulator:
