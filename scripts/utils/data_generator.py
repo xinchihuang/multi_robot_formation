@@ -97,9 +97,6 @@ class DataGenerator:
         for i in range(len(position_lists_local)):
             while len(position_lists_local[i]) < len(position_lists_local) - 1:
                 position_lists_local[i].append([float("inf"), float("inf"), 0])
-
-
-
         occupancy_maps = occupancy_map_simulator.generate_maps(position_lists_local)
         ref_control_list = []
         adjacency_lists = []

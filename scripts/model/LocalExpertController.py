@@ -52,8 +52,7 @@ class LocalExpertControllerOld:
 
         return out_put
 
-
-class LocalExpertController:
+class LocalExpertControllerPartial:
     def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
         self.name = "LocalExpertController"
         self.desired_distance = desired_distance
@@ -131,6 +130,46 @@ class LocalExpertController:
             velocity_sum_x += self.K_f*velocity_x_f+self.K_m*(velocity_x_l+velocity_x_r+velocity_x_s)
             velocity_sum_y += self.K_f*velocity_y_f+self.K_m*(velocity_y_l+velocity_y_r+velocity_y_s)
             velocity_sum_omega += self.K_omega*velocity_omega
+        # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
+        out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
+        out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
+        # out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
+        return out_put
+class LocalExpertController:
+    def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
+        self.name = "LocalExpertController"
+        self.desired_distance = desired_distance
+        self.sensor_range = sensor_range
+        self.sensor_angle = sensor_angle
+        self.safe_margin =safe_margin
+        self.K_f = K_f
+        self.K_m = K_m
+        self.K_omega = K_omega
+        self.max_speed=max_speed
+        self.max_omega=max_omega
+        # print(self.safe_margin)
+    def get_control(self,robot_id,pose_list):
+        """
+        :param position_list: global position list for training
+        """
+        out_put = ControlData()
+        desired_distance = self.desired_distance
+        gabreil_graph_local = get_gabreil_graph_local(pose_list, self.sensor_range, self.sensor_angle)
+        pose_array_local=global_to_local(pose_list)
+        neighbor_list = gabreil_graph_local[robot_id]
+        velocity_sum_x = 0
+        velocity_sum_y = 0
+        for neighbor_id in range(len(neighbor_list)):
+            if neighbor_id == robot_id or neighbor_list[neighbor_id] == 0:
+                continue
+            position_local=pose_array_local[robot_id][neighbor_id]
+            distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
+            rate_f = (distance_formation - desired_distance) / distance_formation
+            velocity_x_f = rate_f * position_local[0]
+            velocity_y_f = rate_f * position_local[1]
+            velocity_sum_x += self.K_f*velocity_x_f
+            velocity_sum_y += self.K_f*velocity_y_f
+        print(velocity_sum_x,velocity_sum_y)
         # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
         out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
         out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y

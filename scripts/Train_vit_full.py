@@ -13,7 +13,10 @@ import math
 import random
 from model.vit_model import ViT
 from utils.data_generator import DataGenerator
+from utils.occupancy_map_simulator import MapSimulator
+from utils.gabreil_graph import global_to_local
 from utils.preprocess import preprocess
+from controllers import LocalExpertControllerFull
 
 import cv2
 
@@ -33,6 +36,7 @@ class RobotDatasetTrace(Dataset):
 
     ):
 
+
         #### map simulator settings
         self.max_x = max_x
         self.max_y = max_y
@@ -44,7 +48,6 @@ class RobotDatasetTrace(Dataset):
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
         self.task_type = task_type
-        self.random_rate = 0
         self.num_sample = len(os.listdir(data_path_root))
         self.occupancy_maps_list = []
         self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
@@ -64,10 +67,9 @@ class RobotDatasetTrace(Dataset):
             # print(pose_array_i.shape)
             self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=0)
         self.pose_array=np.transpose(self.pose_array,(1,0,2))
-
-
         self.sensor_view_angle = sensor_view_angle
-        self.data_generator=DataGenerator(max_x=self.max_x,max_y=self.max_y,local=self.local, partial=self.partial,sensor_angle=self.sensor_view_angle)
+        self.map_simulator=MapSimulator(sensor_view_angle=2*math.pi,partial=False)
+        self.controller=LocalExpertControllerFull(desired_distance=self.desired_distance,sensor_range=self.max_x)
         self.get_settings()
 
     def __len__(self):
@@ -78,27 +80,29 @@ class RobotDatasetTrace(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         # print("pose array",idx,self.pose_array.shape)
-        global_pose_array = self.pose_array[:, idx, :]
-        self_orientation_array = global_pose_array[:, 2]
-        self_orientation_array = copy.deepcopy(self_orientation_array)
-        global_pose_array[:, 2] = 0
-
-        occupancy_maps, reference_control, adjacency_lists,reference_position,reference_neighbor = self.data_generator.generate_map_all(
-            global_pose_array
-        )
-
-
+        pose_array = self.pose_array[:, idx, :]
+        pose_array[:, 2] = 0
+        number_of_robot = pose_array.shape[0]
+        occupancy_maps=[]
+        ref_control_list = []
+        for robot_id in range(number_of_robot):
+            position_lists_local = global_to_local(pose_array)
+            occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
+            # cv2.imshow("robot view ", np.array(occupancy_maps[0]))
+            # cv2.waitKey(1)
+            data = {"robot_id": robot_id, "pose_list": pose_array}
+            control_i = self.controller.get_control(data)
+            velocity_x, velocity_y, omega = control_i.velocity_x, control_i.velocity_y, control_i.omega
+            ref_control_list.append([velocity_x, velocity_y, omega])
+        occupancy_maps=np.array(occupancy_maps)
+        reference_control=np.array(ref_control_list)
         if self.transform:
             occupancy_maps = torch.from_numpy(occupancy_maps).double()
             reference_control = torch.from_numpy(reference_control).double()
-            reference_position = torch.from_numpy(reference_position).double()
-            reference_neighbor= torch.from_numpy(reference_neighbor).double()
 
         return {
             "occupancy_maps": occupancy_maps,
             "reference_control": reference_control,
-            "reference_position": reference_position,
-            "reference_neighbor": reference_neighbor,
         }
     def get_settings(self):
         print("-----------------------------------")
@@ -107,7 +111,6 @@ class RobotDatasetTrace(Dataset):
         print("desired_distance: ", self.desired_distance)
         print("number_of_agents: ", self.number_of_agents)
         print("task_type: ", self.task_type)
-        print("random_rate: ", self.random_rate)
         # print("random_range: ", self.random_range)
         print("num_sample: ", self.num_sample)
         print("data_shape:" , self.pose_array.shape)
@@ -126,16 +129,12 @@ class Trainer:
         optimizer,
         batch_size,
         learning_rate,
-        max_epoch=10,
-
+        max_epoch=1,
         task_type="all",
         if_continue=False,
         load_model_path='',
         use_cuda=True,
-        random_rate=1.,
-        random_increase=True
     ):
-
 
         self.model = model.double()
         if if_continue:
@@ -144,13 +143,10 @@ class Trainer:
             )
         self.trainset=trainset
         self.evaluateset=evaluateset
-
         self.number_of_agent = number_of_agent
-
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.task_type=task_type
-
         if criterion == "mse":
             self.criterion = nn.MSELoss()
         if optimizer == "rms":
@@ -161,9 +157,6 @@ class Trainer:
         self.epoch = -1
         self.lr_schedule = {0: 0.0001, 10: 0.0001, 20: 0.0001}
         self.max_epoch=max_epoch
-
-        self.random_rate = random_rate
-        self.random_increase=random_increase
         self.use_cuda = use_cuda
         if self.use_cuda:
             self.model = self.model.to("cuda")
@@ -174,7 +167,6 @@ class Trainer:
         print("Transform: ", self.transform)
         print("Number_of_agents: ", self.number_of_agent)
         print("Task_type: ", self.task_type)
-        print("Random_rate: ", self.random_rate)
         # print("random_range: ", self.random_range)
         print("batch_size: ", self.batch_size)
         print("learning_rate: ", self.learning_rate)

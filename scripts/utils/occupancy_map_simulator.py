@@ -18,10 +18,10 @@ class MapSimulator:
         map_size=100,
         max_x=5,
         max_y=5,
-        sensor_view_angle=math.pi/2,
+        sensor_view_angle=2*math.pi,
         local=True,
         block=True,
-        partial=True,
+        partial=False,
         position_encoding=False
     ):
         """

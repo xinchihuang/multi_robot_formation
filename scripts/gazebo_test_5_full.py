@@ -21,43 +21,44 @@ from squaternion import Quaternion
 from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global_to_local
 from utils.initial_pose import initialize_pose,PoseDataLoader
 from utils.occupancy_map_simulator import MapSimulator
-from model.LocalExpertController import LocalExpertController,LocalExpertControllerHeuristic
-from controller_new import VitController
+
+from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,controller=None,save_data_root=None):
-        self.robot_num=robot_num
+    def __init__(self, robot_num,desired_distance,controller,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,
+                 map_size = 100,sensor_range=5,max_velocity=0.5,max_simulation_time_step = 2000):
+
+        # basic settings
+        self.robot_num = robot_num
+        self.desired_distance = desired_distance
+        # communication related
         self.sub_topic_list = []
         self.pub_topic_dict = collections.defaultdict()
-        # for index in range(self.robot_num):
-        #     point_topic=f"D435_camera_{index}/depth/color/points"
-        #     self.sub_topic_list.append(message_filters.Subscriber(point_topic, PointCloud2))
         for index in range(self.robot_num):
             pose_topic=f'rm_{index}/odom'
             self.sub_topic_list.append(message_filters.Subscriber(pose_topic, Odometry))
         for index in range(self.robot_num):
             pub_topic=f'rm_{index}/cmd_vel'
             self.pub_topic_dict[index]=rospy.Publisher(pub_topic, Twist, queue_size=10)
-        # print(self.sub_topic_list)
-        self.controller=controller
         ts = message_filters.ApproximateTimeSynchronizer(self.sub_topic_list, queue_size=10, slop=0.1,allow_headerless=True)
         ts.registerCallback(self.SimulateCallback)
 
-        self.save_data_root=save_data_root
-        self.robot_upper_bound=0.12
-        self.robot_lower_bound=-0.12
-        self.map_size = 100
-        self.max_simulation_time_step=2000
+        # robot related
+        self.controller = controller
+        self.robot_upper_bound=robot_upper_bound
+        self.robot_lower_bound=robot_lower_bound
+        self.map_size = map_size
+        self.sensor_range=sensor_range
+        self.max_velocity=max_velocity
 
-        self.sensor_range=5
-        self.sensor_angle=2*math.pi
-        self.max_velocity=0.5
-
-        self.desired_distance=2
-        self.trace=[]
-        self.observation_list=[]
-        self.reference_control=[]
+        # simulation related
         self.time_step=0
+        self.max_simulation_time_step = max_simulation_time_step
+        # save related
+        self.save_data_root = save_data_root
+        self.trace = []
+        self.observation_list = []
+        self.reference_control = []
 
     def save_to_file(self):
         root=self.save_data_root
@@ -79,6 +80,7 @@ class Simulation:
         # print(argv)
         pose_list = []
         control_list=[]
+
         for index in range(self.robot_num):
             q=Quaternion(argv[index].pose.pose.orientation.x,argv[index].pose.pose.orientation.y,argv[index].pose.pose.orientation.z,argv[index].pose.pose.orientation.w)
             pose_index=[argv[index].pose.pose.position.x,argv[index].pose.pose.position.y,q.to_euler(degrees=False)[0]]
@@ -94,14 +96,15 @@ class Simulation:
                 distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
                             pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
                 print(i, j, distance)
-            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= self.sensor_angle, local=True,partial=False)
+            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= math.pi*2, local=True,partial=False)
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
                 # print(position_lists_local[index])
                 occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[index])
                 # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
                 # cv2.waitKey(1)
-                control_data = self.controller.get_control(index, occupancy_map)
+                data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
+                control_data = self.controller.get_control(data)
                 control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
             # print(control_list)
         for index in range(0,self.robot_num):
@@ -121,7 +124,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_list=initialize_pose(5)
+    # pose_list=initialize_pose(5)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
@@ -130,16 +133,21 @@ if __name__ == "__main__":
     model_path="/home/xinchi/vit_full/vit.pth"
     save_data_root="/home/xinchi/gazebo_data/ViT_5_full"
     controller=VitController(model_path)
-
+    #
+    desired_distance = 2
+    # sensor_range=5
+    # K_f=1
+    # max_speed = 1
+    # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
 
  #
- #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
- # [-0.11962687 ,-2.94522615 ,-2.78613711],
- # [-4.51360495  ,1.04370626  ,0.72373201],
- # [ 0.34727331  ,1.90429804 ,-1.54858546],
- # [-2.34736724  ,2.89713682 ,-1.14321162]]
+    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
+ [-0.11962687 ,-2.94522615 ,-2.78613711],
+ [-4.51360495  ,1.04370626  ,0.72373201],
+ [ 0.34727331  ,1.90429804 ,-1.54858546],
+ [-2.34736724  ,2.89713682 ,-1.14321162]]
 
-    listener = Simulation(robot_num,controller)
+    listener = Simulation(robot_num,desired_distance,controller)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()
