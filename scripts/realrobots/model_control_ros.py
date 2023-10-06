@@ -7,7 +7,6 @@ import signal
 from multi_robot_formation.realrobot.robot_executor_robomaster import Executor
 from multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from multi_robot_formation.controller_new import VitController
-from multi_robot_formation.robot_template import Robot
 from multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
 from multi_robot_formation.model.LocalExpertController import LocalExpertController
 # # from robot_test import *

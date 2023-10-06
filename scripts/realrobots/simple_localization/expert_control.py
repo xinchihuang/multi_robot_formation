@@ -280,7 +280,7 @@ class ImageListener:
         self.range = 5
         self.height = 2
         self.color_index = {"red":0,"yellow":1,"green":2}
-        self.params = np.loadtxt("/home/xinchi/catkin_ws/src/localization/scripts/params.csv", delimiter=",")
+        self.params = np.loadtxt("/home/xinchi/catkin_ws/src/localization/simple_localization/params.csv", delimiter=",")
         self.executor=Executor()
         # self.executor.initialize()
         self.EP_DICT={}

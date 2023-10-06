@@ -1,16 +1,12 @@
 """
 author: Xinchi Huang
 """
-import math
 
-from scene_vrep import Scene
-from scene_vrep_holonomic import SceneHolonomic
-from vrep.robot_executor_vrep import Executor
-from vrep.robot_executor_vrep_holonomic import ExecutorHolonomic
-from vrep.robot_sensor_vrep import Sensor
-from vrep.robot_sensor_vrep_holonomic import SensorHolonomic
-from robot_template import Robot
-from controller_new import *
+from deprecated.scene_vrep_holonomic import SceneHolonomic
+from deprecated.vrep import ExecutorHolonomic
+from deprecated.vrep import SensorHolonomic
+from deprecated.robot_template import Robot
+from deprecated.controller_new import *
 from model.LocalExpertController import LocalExpertControllerPartial
 
 ### ViT experiments

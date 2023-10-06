@@ -62,7 +62,7 @@ class ImageListener:
         self.range=5
         self.height=2
         self.calibration_color="red"
-        self.params=np.loadtxt("/home/xinchi/catkin_ws/src/localization/scripts/params.csv",delimiter=",")
+        self.params=np.loadtxt("/home/xinchi/catkin_ws/src/localization/simple_localization/params.csv",delimiter=",")
     def imageDepthCallback(self, data):
 
         try:

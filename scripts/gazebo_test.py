@@ -4,25 +4,21 @@ import random
 
 import numpy as np
 import rospy
-import time
 import math
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import PointCloud2
-from sensor_msgs import point_cloud2
 from gazebo_msgs.msg import ModelState
 from gazebo_msgs.srv import SetModelState
-import cv2
 import os
 import message_filters
 import collections
 from squaternion import Quaternion
 
-from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global_to_local
-from utils.initial_pose import initialize_pose,PoseDataLoader
+from utils.gabreil_graph import get_gabreil_graph, global_to_local
+from utils.initial_pose import PoseDataLoader
 from utils.occupancy_map_simulator import MapSimulator
-from model.LocalExpertController import LocalExpertController,LocalExpertControllerHeuristic
-from controller_new import VitController
+from model.LocalExpertController import LocalExpertControllerHeuristic
+
 
 class Simulation:
     def __init__(self, robot_num,controller=None):
@@ -152,7 +148,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses")
+    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/simple_localization/utils/poses")
     pose_list=pose_data[random.randint(0,len(pose_data))]
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
