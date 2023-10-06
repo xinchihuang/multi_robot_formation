@@ -92,8 +92,8 @@ class RobotDatasetTrace(Dataset):
             # cv2.waitKey(1)
             data = {"robot_id": robot_id, "pose_list": pose_array}
             control_i = self.controller.get_control(data)
-            velocity_x, velocity_y, omega = control_i.velocity_x, control_i.velocity_y, control_i.omega
-            ref_control_list.append([velocity_x, velocity_y, omega])
+            velocity_x, velocity_y = control_i.velocity_x, control_i.velocity_y
+            ref_control_list.append([velocity_x, velocity_y])
         occupancy_maps=np.array(occupancy_maps)
         reference_control=np.array(ref_control_list)
         if self.transform:
@@ -263,7 +263,7 @@ if __name__ == "__main__":
     model=ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 3,
+        num_classes = 2,
         dim = 256,
         depth = 3,
         heads = 8,

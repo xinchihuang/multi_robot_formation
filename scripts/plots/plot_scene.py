@@ -17,7 +17,7 @@ import itertools
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
-from LocalExpertController import LocalExpertController
+# from LocalExpertController import LocalExpertController
 
 def gabriel(pose_array):
     """
@@ -82,52 +82,52 @@ def plot_wheel_speed(dt, velocity_array, save_path):
     plt.close()
     # plt.show()
 
-def plot_speed(dt, pose_array, save_path):
-    """
-    Plot line chart for robots wheel speeds
-    :param dt: Time interval
-    :param velocity_array: Robots velocity data 3D numpy array [robot:[time step:[left,right]]]
-    :param save_path: Path to save figures
-    :return:
-    """
-    print(pose_array.shape)
-    controller = LocalExpertController()
-    rob_num = np.shape(pose_array)[0]
-    gabriel_graph = gabriel(pose_array)
-    distance_dict = {}
-    speed_dict={}
-    xlist = []
-    for i in range(np.shape(pose_array)[1]):
-        xlist.append(i * dt)
-    for i in range(np.shape(pose_array)[1]):
-        position_array=pose_array[:,i,:]
-        for j in range(rob_num):
-            control=controller.get_control(j,position_array)
-            name_x="x_"+str(j)
-            name_y="y_"+str(j)
-            if not name_x in speed_dict:
-                speed_dict[name_x]=[]
-            if not name_y in speed_dict:
-                speed_dict[name_y]=[]
-            speed_dict[name_x].append(control.velocity_x)
-            speed_dict[name_y].append(control.velocity_y)
-    plt.figure(figsize=(5, 3))
-    for key, _ in speed_dict.items():
-        plt.plot(xlist, speed_dict[key], label=key)
-    # plt.legend()
-    plt.subplots_adjust(left=0.13,
-                        bottom=0.23,
-                        right=0.98,
-                        top=0.98,
-                        wspace=0.0,
-                        hspace=0.0)
-    plt.xlabel("time(s)", fontsize=20)
-    plt.ylabel("distance(m)", fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.grid()
-    plt.savefig(os.path.join(save_path, "speed_" + str(rob_num) + ".png"), pad_inches=0.0)
-    plt.close()
+# def plot_speed(dt, pose_array, save_path):
+#     """
+#     Plot line chart for robots wheel speeds
+#     :param dt: Time interval
+#     :param velocity_array: Robots velocity data 3D numpy array [robot:[time step:[left,right]]]
+#     :param save_path: Path to save figures
+#     :return:
+#     """
+#     print(pose_array.shape)
+#     controller = LocalExpertController()
+#     rob_num = np.shape(pose_array)[0]
+#     gabriel_graph = gabriel(pose_array)
+#     distance_dict = {}
+#     speed_dict={}
+#     xlist = []
+#     for i in range(np.shape(pose_array)[1]):
+#         xlist.append(i * dt)
+#     for i in range(np.shape(pose_array)[1]):
+#         position_array=pose_array[:,i,:]
+#         for j in range(rob_num):
+#             control=controller.get_control(j,position_array)
+#             name_x="x_"+str(j)
+#             name_y="y_"+str(j)
+#             if not name_x in speed_dict:
+#                 speed_dict[name_x]=[]
+#             if not name_y in speed_dict:
+#                 speed_dict[name_y]=[]
+#             speed_dict[name_x].append(control.velocity_x)
+#             speed_dict[name_y].append(control.velocity_y)
+#     plt.figure(figsize=(5, 3))
+#     for key, _ in speed_dict.items():
+#         plt.plot(xlist, speed_dict[key], label=key)
+#     # plt.legend()
+#     plt.subplots_adjust(left=0.13,
+#                         bottom=0.23,
+#                         right=0.98,
+#                         top=0.98,
+#                         wspace=0.0,
+#                         hspace=0.0)
+#     plt.xlabel("time(s)", fontsize=20)
+#     plt.ylabel("distance(m)", fontsize=20)
+#     plt.xticks(fontsize=20)
+#     plt.yticks(fontsize=20)
+#     plt.grid()
+#     plt.savefig(os.path.join(save_path, "speed_" + str(rob_num) + ".png"), pad_inches=0.0)
+#     plt.close()
 def plot_relative_distance(dt, pose_array, save_path):
     """
     Plot line chart for robots relative distance
@@ -220,11 +220,11 @@ def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_dista
     print(position_array)
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
-    for i in range(len(position_array)):
-        plt.plot([position_array[i][0], position_array[i][0] + math.cos(position_array[i][2] + math.pi / 4)],
-                 [position_array[i][1], position_array[i][1] + math.sin(position_array[i][2] + math.pi / 4)],color="gray")
-        plt.plot([position_array[i][0], position_array[i][0] + math.cos(position_array[i][2] - math.pi / 4)],
-                 [position_array[i][1], position_array[i][1] + math.sin(position_array[i][2] - math.pi / 4)],color="gray")
+    # for i in range(len(position_array)):
+    #     plt.plot([position_array[i][0], position_array[i][0] + math.cos(position_array[i][2] + math.pi / 4)],
+    #              [position_array[i][1], position_array[i][1] + math.sin(position_array[i][2] + math.pi / 4)],color="gray")
+    #     plt.plot([position_array[i][0], position_array[i][0] + math.cos(position_array[i][2] - math.pi / 4)],
+    #              [position_array[i][1], position_array[i][1] + math.sin(position_array[i][2] - math.pi / 4)],color="gray")
 
     xlist=[]
     ylist=[]
@@ -407,7 +407,7 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/")
-    root_path="/home/xinchi/unsuccess_heu"
+    root_path="/home/xinchi/gazebo_data/ViT_5_full"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path))
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")

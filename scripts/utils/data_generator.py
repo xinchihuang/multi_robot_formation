@@ -9,8 +9,6 @@ from .gabreil_graph import get_gabreil_graph, get_gabreil_graph_local,global_to_
 from .occupancy_map_simulator import MapSimulator
 from comm_data import ControlData, SensorData, SceneData
 # from controller import Controller
-from controller_new import *
-from model.LocalExpertController import LocalExpertController,LocalExpertControllerOld
 import copy
 import math
 def sort_pose(position_list):

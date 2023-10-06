@@ -26,7 +26,7 @@ from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
     def __init__(self, robot_num,desired_distance,controller,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,
-                 map_size = 100,sensor_range=5,max_velocity=0.5,max_simulation_time_step = 2000):
+                 map_size = 100,sensor_range=5,max_velocity=0.5,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -124,7 +124,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    # pose_list=initialize_pose(5)
+    pose_list=initialize_pose(5)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
@@ -141,13 +141,13 @@ if __name__ == "__main__":
     # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
 
  #
-    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
- [-0.11962687 ,-2.94522615 ,-2.78613711],
- [-4.51360495  ,1.04370626  ,0.72373201],
- [ 0.34727331  ,1.90429804 ,-1.54858546],
- [-2.34736724  ,2.89713682 ,-1.14321162]]
+ #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
+ # [-0.11962687 ,-2.94522615 ,-2.78613711],
+ # [-4.51360495  ,1.04370626  ,0.72373201],
+ # [ 0.34727331  ,1.90429804 ,-1.54858546],
+ # [-2.34736724  ,2.89713682 ,-1.14321162]]
 
-    listener = Simulation(robot_num,desired_distance,controller)
+    listener = Simulation(robot_num,desired_distance,controller,save_data_root=save_data_root)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()

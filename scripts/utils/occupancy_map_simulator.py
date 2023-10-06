@@ -13,7 +13,7 @@ from .gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_g
 class MapSimulator:
     def __init__(
         self,
-        robot_size=0.2,
+        robot_size=0.3,
         max_height=0.3,
         map_size=100,
         max_x=5,
