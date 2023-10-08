@@ -407,7 +407,7 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/")
-    root_path="/home/xinchi/gazebo_data/ViT_5_full"
+    root_path="/home/xinchi/gazebo_data/ViT_9_full"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path))
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")

@@ -10,12 +10,8 @@ import torch.nn as nn
 from tqdm import tqdm
 import copy
 import math
-import random
 from model.vit_model import ViT
 from utils.data_generator import DataGenerator
-from utils.preprocess import preprocess
-
-import cv2
 
 
 class RobotDatasetTrace(Dataset):

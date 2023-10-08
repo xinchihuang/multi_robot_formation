@@ -292,7 +292,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/gazebo_data/heuristic"
+root_dir="/home/xinchi/gazebo_data/ViT_5_full"
 
 # dir4= os.path.join(root_dir,"model_4")
 # converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)

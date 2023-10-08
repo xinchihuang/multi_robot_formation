@@ -223,7 +223,7 @@ class LocalExpertControllerHeuristic:
             velocity_sum_omega) / velocity_sum_omega
         return out_put
 class VitController:
-    def __init__(self, model_path, desired_distance=2.0, num_robot=5, input_height=100, input_width=100, use_cuda=True,max_speed=0.2):
+    def __init__(self, model_path, desired_distance=2.0, num_robot=5, input_height=100, input_width=100, use_cuda=True,max_speed=0.1):
         """
         :param desired_distance: Desired formation distance (type: float)
         :param num_robot: The number of robots (type: int)
@@ -248,7 +248,7 @@ class VitController:
         self.model = ViT(
         image_size = 100,
         patch_size = 10,
-        num_classes = 3,
+        num_classes = 2,
         dim = 256,
         depth = 3,
         heads = 8,
@@ -292,11 +292,11 @@ class VitController:
         print(self.robot_id,control)
         velocity_x = control[0][0]
         velocity_y = control[0][1]
-        omega=control[0][2]
+        # omega=control[0][2]
         out_put.robot_index = self.robot_id
         out_put.velocity_x = velocity_x
         out_put.velocity_y = velocity_y
-        out_put.omega=0
+        # out_put.omega=0
         out_put.velocity_x = velocity_x if abs(velocity_x) < self.max_speed else self.max_speed * abs(
             velocity_x) / velocity_x
         out_put.velocity_y = velocity_y if abs(velocity_y) < self.max_speed else self.max_speed * abs(

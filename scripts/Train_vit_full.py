@@ -8,17 +8,11 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 import torch.nn as nn
 from tqdm import tqdm
-import copy
 import math
-import random
 from model.vit_model import ViT
-from utils.data_generator import DataGenerator
 from utils.occupancy_map_simulator import MapSimulator
 from utils.gabreil_graph import global_to_local
-from utils.preprocess import preprocess
 from controllers import LocalExpertControllerFull
-
-import cv2
 
 
 class RobotDatasetTrace(Dataset):

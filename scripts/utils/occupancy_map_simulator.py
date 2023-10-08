@@ -6,14 +6,12 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-from .preprocess import preprocess
 from .gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
-# from preprocess import preprocess
-# from gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_graph,is_valid_point
+# from gabreil_graph import is_valid_point
 class MapSimulator:
     def __init__(
         self,
-        robot_size=0.3,
+        robot_size=0.2,
         max_height=0.3,
         map_size=100,
         max_x=5,
@@ -87,7 +85,6 @@ class MapSimulator:
 
         y_map = min(int(map_size/2)+int(x_world*map_size/max_x/2), map_size-1)
         x_map = min(int(map_size/2)-int(y_world*map_size/max_y/2), map_size-1)
-
         if 0 <= x_map < map_size and 0 <= y_map < map_size:
             return [x_map, y_map]
         return None
@@ -128,7 +125,7 @@ class MapSimulator:
         ]
         if self.position_encoding:
             occupancy_map=occupancy_map*self.position_encoding_matrix
-        occupancy_map = preprocess(occupancy_map)
+        # occupancy_map = preprocess(occupancy_map)
         return occupancy_map
     def generate_map_partial(
         self,
@@ -158,6 +155,7 @@ class MapSimulator:
                     continue
                 x = map_points[0]+robot_range
                 y = map_points[1]+robot_range
+
                 for m in range(-robot_range, robot_range, 1):
                     for n in range(-robot_range, robot_range, 1):
                         occupancy_map[x + m][y + n] = 0
@@ -202,11 +200,11 @@ class MapSimulator:
 
 if __name__ == "__main__":
     map_simulator=MapSimulator(sensor_view_angle= 2*math.pi, local=True,partial=False)
-    position_list_local=[[-1.99621605  ,4.07709261  ,0.        ],
- [-0.83022503  ,4.42916132  ,0.        ],
- [ 0.          ,0.          ,0.        ],
- [ 2.08811675  ,1.40447998  ,0.        ],
- [-2.51021058  ,2.20360313  ,0.        ]]
+    position_list_local = [[-0.2, 0.2, 0.],
+                           [0.2, 0.2, 0.],
+                           [0., 0., 0.],
+                           [-0.2, -0.2, 0.],
+                           [0.2, -0.2, 0.], ]
 
 
     print(position_list_local)
