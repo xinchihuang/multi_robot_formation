@@ -4,8 +4,8 @@ import os
 
 import numpy as np
 
-from .gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
-# from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+# from .gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 def dfs(node, visited, adjacency_matrix, component):
     visited[node] = True
     component.add(node)
@@ -85,11 +85,11 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
         gabriel_graph_local=get_gabreil_graph_local(pose_list)
 
         if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
-            for line in gabriel_graph_global:
-                print(line)
-            print("----------")
-            for line in gabriel_graph_local:
-                print(line)
+            # for line in gabriel_graph_global:
+            #     print(line)
+            # # print("----------")
+            # for line in gabriel_graph_local:
+            #     print(line)
             break
     return pose_list
 def initial_from_data(root):
@@ -99,16 +99,16 @@ def initial_from_data(root):
         else:
             pose_array_data=np.concatenate((pose_array_data,np.load(os.path.join(root,os.listdir(root)[i]))))
     print(pose_array_data.shape)
-def generate_valid_pose(root,num_robot=5):
+def generate_valid_pose(root,num_robot=5,initial_max_range=5.,initial_min_range=1.):
     if not os.path.exists(root):
         os.mkdir(root)
     count = len(os.listdir(root))*100
     pose_list_to_save=[]
     while True:
-        pose_list=initialize_pose(num_robot)
+        pose_list=initialize_pose(num_robot,initial_max_range=initial_max_range,initial_min_range=initial_min_range)
         pose_list_to_save.append(pose_list)
         count+=1
-        print(count)
+        # print(count)
         if count%100==0:
             pose_file = os.path.join(root, str(count + 100))
             pose_array=np.array(pose_list_to_save)
@@ -132,5 +132,5 @@ class PoseDataLoader:
 
 if __name__ == "__main__":
     # initialize_pose(5)
-    generate_valid_pose("poses")
+    generate_valid_pose("poses_small_7",num_robot=7,initial_max_range=2,initial_min_range=0.5)
     # initial_from_data("poses")

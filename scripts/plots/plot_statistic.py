@@ -292,86 +292,32 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
                         hspace=0.0)
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
-root_dir="/home/xinchi/gazebo_data/ViT_5_full"
-
-# dir4= os.path.join(root_dir,"model_4")
-# converge_time_all_4,average_formation_all_4,average_formation_error_all_4=process_data(dir4)
-# dir5= os.path.join(root_dir,"model_5")
-# converge_time_all_5,average_formation_all_5,average_formation_error_all_5=process_data(dir5,5)
-# dir6= os.path.join(root_dir,"model_6")
-# converge_time_all_6,average_formation_all_6,average_formation_error_all_6=process_data(dir6,6)
-# dir7= os.path.join(root_dir,"model_7")
-# converge_time_all_7,average_formation_all_7,average_formation_error_all_7=process_data(dir7,7)
-# dir8= os.path.join(root_dir,"model_8")
-# converge_time_all_8,average_formation_all_8,average_formation_error_all_8=process_data(dir8,8)
-# dir9= os.path.join(root_dir,"model_9")
-# converge_time_all_9,average_formation_all_9,average_formation_error_all_9=process_data(dir9,9)
-# converge_time_all_model=[converge_time_all_4,converge_time_all_5,converge_time_all_6,converge_time_all_7,converge_time_all_8,converge_time_all_9]
-# average_formation_all_model=[average_formation_all_4,average_formation_all_5,average_formation_all_6,average_formation_all_7,average_formation_all_8,average_formation_all_9]
-# average_formation_error_all_model=[average_formation_error_all_4,average_formation_error_all_5,average_formation_error_all_6,average_formation_error_all_7,average_formation_error_all_8,average_formation_error_all_9]
-# converge_time_all_ViT=[]
-# average_formation_all_ViT=[]
-# average_formation_error_all_ViT=[]
-# for num_robot in range(5,10):
-#     path=os.path.join(root_dir,"ViT_"+str(num_robot))
-#     converge_time_all, average_formation_all, average_formation_error_all = process_data(path, num_robot)
-#     converge_time_all_ViT.append(converge_time_all)
-#     average_formation_all_ViT.append(average_formation_all)
-#     average_formation_error_all_ViT.append(average_formation_error_all)
-
-converge_time_all_expert=[]
-average_formation_all_expert=[]
-average_formation_error_all_expert=[]
-
-path=os.path.join(root_dir)
-converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path)
-converge_time_all_expert.append(converge_time_all)
-average_formation_all_expert.append(average_formation_all)
-average_formation_error_all_expert.append(average_formation_error_all)
 
 
-# dir= '/home/xinchi/6_robots/model_6'
-# dir4_e= os.path.join(root_dir,"expert_adjusted_4")
-# converge_time_all_4_e,average_formation_all_4_e,average_formation_error_all_4_e=process_data(dir4_e)
-# dir5_e= os.path.join(root_dir,"expert_adjusted_5")
-# converge_time_all_5_e,average_formation_all_5_e,average_formation_error_all_5_e=process_data(dir5_e)
-# dir6_e= os.path.join(root_dir,"expert_adjusted_6")
-# converge_time_all_6_e,average_formation_all_6_e,average_formation_error_all_6_e=process_data(dir6_e)
-# dir7_e= os.path.join(root_dir,"expert_adjusted_7")
-# converge_time_all_7_e,average_formation_all_7_e,average_formation_error_all_7_e=process_data(dir7_e)
-# dir8_e= os.path.join(root_dir,"expert_adjusted_8")
-# converge_time_all_8_e,average_formation_all_8_e,average_formation_error_all_8_e=process_data(dir8_e)
-# dir9_e= os.path.join(root_dir,"expert_adjusted_9")
-# converge_time_all_9_e,average_formation_all_9_e,average_formation_error_all_9_e=process_data(dir9_e)
-# converge_time_all_expert=[converge_time_all_4_e,converge_time_all_5_e,converge_time_all_6_e,converge_time_all_7_e,converge_time_all_8_e,converge_time_all_9_e]
-# average_formation_all_expert=[average_formation_all_4_e,average_formation_all_5_e,average_formation_all_6_e,average_formation_all_7_e,average_formation_all_8_e,average_formation_all_9_e]
-# average_formation_error_all_expert=[average_formation_error_all_4_e,average_formation_error_all_5_e,average_formation_error_all_6_e,average_formation_error_all_7_e,average_formation_error_all_8_e,average_formation_error_all_9_e]
+
+converge_time_all_ViT=[]
+average_formation_all_ViT=[]
+average_formation_error_all_ViT=[]
+
+for i in (5,7,9):
+
+    root_dir="/home/xinchi/gazebo_data/ViT/ViT_"+str(i)+"_full"
+    path = os.path.join(root_dir)
+    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path)
+    converge_time_all_ViT.append(converge_time_all)
+    average_formation_all_ViT.append(average_formation_all)
+    average_formation_error_all_ViT.append(average_formation_error_all)
 
 
-# dir_test= os.path.join(root_dir,"ViT_9_6.5")
-#
-# converge_time_all,average_formation_all,average_formation_error_all=process_data(dir_test,9)
-# converge_time_all_model=[converge_time_all]
-# average_formation_all_model=[average_formation_all]
-# average_formation_error_all_model=[average_formation_error_all]
-
-
-# dir= '/home/xinchi/6_robots/model_6'
-
-# dir5_e= os.path.join(root_dir,"expert_adjusted_5")
-# converge_time_all_5_e,average_formation_all_5_e,average_formation_error_all_5_e=process_data(dir5_e)
-# converge_time_all_expert=[converge_time_all_5_e]
-# average_formation_all_expert=[average_formation_all_5_e]
-# average_formation_error_all_expert=[average_formation_error_all_5_e]
 
 
 #
-# box_1(converge_time_all_ViT,"Converge time","Convergence Time(s)",root_dir)
-# box_1(average_formation_all_ViT,"Average distance","Distance(m)",root_dir)
-# box_1(average_formation_error_all_ViT,"Average group formation error","Formation Error(%)",root_dir)
-box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
-box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)
-box_1(average_formation_error_all_expert,"Average group formation error","Formation Error(%)",root_dir)
+box_1(converge_time_all_ViT,"Converge time","Convergence Time(s)",root_dir)
+box_1(average_formation_all_ViT,"Average distance","Distance(m)",root_dir)
+box_1(average_formation_error_all_ViT,"Average group formation error","Formation Error(%)",root_dir)
+# box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
+# box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)
+# box_1(average_formation_error_all_expert,"Average group formation error","Formation Error(%)",root_dir)
 # box_2(converge_time_all_model,converge_time_all_expert,"Converge time 5","Convergence Time(s)",root_dir)
 # box_2(average_formation_all_model,average_formation_all_expert,"Average distance 5","Distance(m)",root_dir)
 # box_2(average_formation_error_all_model,average_formation_error_all_expert,"Average group formation error 5","Formation Error(%)",root_dir)

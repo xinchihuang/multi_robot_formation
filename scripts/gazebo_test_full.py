@@ -124,14 +124,14 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_list=initialize_pose(9)
+    pose_list=initialize_pose(7)
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
-    robot_num = 9
+    robot_num = 7
     ### Vit controller
     model_path="/home/xinchi/vit_full/vit.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_9_full"
+    save_data_root="/home/xinchi/gazebo_data/ViT_7_full"
     controller=VitController(model_path)
     #
     desired_distance = 2

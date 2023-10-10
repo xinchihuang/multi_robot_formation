@@ -150,7 +150,7 @@ def plot_relative_distance(dt, pose_array, save_path):
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    print(distance_dict)
+    # print(distance_dict)
     plt.figure(figsize=(10, 10))
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key)
@@ -207,7 +207,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array,orientation_array, save_path,desired_distance=2):
+def plot_formation_gabreil(pose_array,save_path,desired_distance=2):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -300,7 +300,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,orientation_array,save_path,stop_time=50):
+def plot_trace_triangle(pose_array,save_path,stop_time=50):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
@@ -308,10 +308,9 @@ def plot_trace_triangle(pose_array,orientation_array,save_path,stop_time=50):
         color = next(colors)
         xtrace = []
         ytrace = []
-
         for p in range(0,stop_time*20-1,100):
-            pos=pose_array[i][p]
-            theta=orientation_array[i][p]
+            pos=[pose_array[i][p][0],pose_array[i][p][1]]
+            theta=pose_array[i][p][2]
             plot_triangle(ax, pos,theta, 0.3, color)
             xtrace.append(pose_array[i][p][0])
             ytrace.append(pose_array[i][p][1])
@@ -368,7 +367,6 @@ def plot_load_data(root_dir,dt=0.05):
     position_array = trace_array[:, :, :2]
     orientation_array=trace_array[:, :, 2]
     # pose_array=np.concatenate(position_array,orientation_array,axis=3)
-    print(position_array)
 
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
@@ -400,15 +398,16 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
     position_array=np.transpose(position_array,(1,0,2))
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array,orientation_array, root_dir)
+    plot_formation_gabreil(position_array, root_dir)
+    plot_trace_triangle(position_array,root_dir)
     # plot_speed(dt, position_array, root_dir)
 
 
 if __name__ == "__main__":
 
-    # plot_load_data_gazebo("/home/xinchi/gazebo_data/")
-    root_path="/home/xinchi/gazebo_data/ViT_9_full"
-    for path in os.listdir(root_path):
-        plot_load_data_gazebo(os.path.join(root_path,path))
+    plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
+    # root_path="/home/xinchi/gazebo_data/ViT_7_full"
+    # for path in os.listdir(root_path):
+    #     plot_load_data_gazebo(os.path.join(root_path,path))
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

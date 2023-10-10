@@ -9,10 +9,13 @@ from torchvision import transforms
 import torch.nn as nn
 from tqdm import tqdm
 import math
+import random
 from model.vit_model import ViT
 from utils.occupancy_map_simulator import MapSimulator
 from utils.gabreil_graph import global_to_local
+from utils.initial_pose import initialize_pose,PoseDataLoader
 from controllers import LocalExpertControllerFull
+
 
 
 class RobotDatasetTrace(Dataset):
@@ -27,6 +30,8 @@ class RobotDatasetTrace(Dataset):
         max_y,
         sensor_view_angle,
         task_type="all",
+        random_rate=0.5,
+        pose_root=None
 
     ):
 
@@ -38,6 +43,9 @@ class RobotDatasetTrace(Dataset):
         self.partial = partial
 
         #### dataset settings
+        self.random_rate = random_rate
+        self.pose_root=pose_root
+        self.pose_loader=PoseDataLoader(self.pose_root)
         self.transform = True
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
@@ -79,6 +87,8 @@ class RobotDatasetTrace(Dataset):
         number_of_robot = pose_array.shape[0]
         occupancy_maps=[]
         ref_control_list = []
+        if random.randrange(0,1)<self.random_rate:
+            pose_array=self.pose_loader[random.randint(0,len(self.pose_loader)-1)]
         for robot_id in range(number_of_robot):
             position_lists_local = global_to_local(pose_array)
             occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
@@ -242,6 +252,8 @@ if __name__ == "__main__":
     # dataset parameters
     local = True
     partial = False
+    random_rate=0.5
+    pose_root="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_small"
 
     #trainer parameters
     criterion = "mse"
@@ -278,7 +290,9 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
-        sensor_view_angle=sensor_view_angle
+        sensor_view_angle=sensor_view_angle,
+        random_rate=random_rate,
+        pose_root=pose_root
     )
     evaluateset = RobotDatasetTrace(
         data_path_root=os.path.join(data_path_root, "evaluating"),
@@ -289,7 +303,9 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
-        sensor_view_angle=sensor_view_angle
+        sensor_view_angle=sensor_view_angle,
+        random_rate=random_rate,
+        pose_root=pose_root
     )
 
 

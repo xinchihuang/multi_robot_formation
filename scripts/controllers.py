@@ -289,7 +289,7 @@ class VitController:
         control = (
             self.model(self_input_tensor,task="control").detach().cpu().numpy()
         )
-        print(self.robot_id,control)
+        # print(self.robot_id,control)
         velocity_x = control[0][0]
         velocity_y = control[0][1]
         # omega=control[0][2]
