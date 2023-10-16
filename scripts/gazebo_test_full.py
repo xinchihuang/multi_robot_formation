@@ -19,14 +19,14 @@ import collections
 from squaternion import Quaternion
 
 from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global_to_local
-from utils.initial_pose import initialize_pose,PoseDataLoader
+from utils.initial_pose import initialize_pose,PoseDataLoader,initial_from_data
 from utils.occupancy_map_simulator import MapSimulator
 
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
     def __init__(self, robot_num,desired_distance,controller,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,
-                 map_size = 100,sensor_range=5,max_velocity=0.5,max_simulation_time_step = 1000):
+                 map_size = 100,sensor_range=5,max_velocity=0.05,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -124,14 +124,21 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_list=initialize_pose(7)
+    robot_num = 9
+    initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
+    pose_lists=initial_from_data(initial_pose)
+    pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
+    # pose_list=initialize_pose(robot_num)
+
+
+
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
-    robot_num = 7
+
     ### Vit controller
     model_path="/home/xinchi/vit_full/vit.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_7_full"
+    save_data_root="/home/xinchi/gazebo_data/ViT_9_full"
     controller=VitController(model_path)
     #
     desired_distance = 2

@@ -11,7 +11,7 @@ from .gabreil_graph import global_to_local,get_gabreil_graph_local,get_gabreil_g
 class MapSimulator:
     def __init__(
         self,
-        robot_size=0.2,
+        robot_size=0.1,
         max_height=0.3,
         map_size=100,
         max_x=5,
@@ -200,11 +200,11 @@ class MapSimulator:
 
 if __name__ == "__main__":
     map_simulator=MapSimulator(sensor_view_angle= 2*math.pi, local=True,partial=False)
-    position_list_local = [[-0.2, 0.2, 0.],
-                           [0.2, 0.2, 0.],
+    position_list_local = [[-0.35, 0.3, 0.],
+                           [0.3, 0.3, 0.],
                            [0., 0., 0.],
-                           [-0.2, -0.2, 0.],
-                           [0.2, -0.2, 0.], ]
+                           [-0.3, -0.3, 0.],
+                           [0.3, -0.3, 0.], ]
 
 
     print(position_list_local)
