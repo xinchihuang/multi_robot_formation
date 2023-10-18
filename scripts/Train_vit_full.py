@@ -77,8 +77,8 @@ class RobotDatasetTrace(Dataset):
         self.get_settings()
 
     def __len__(self):
-        return self.pose_array.shape[1]
-
+        # return self.pose_array.shape[1]
+        return len(self.pose_loader)
     def __getitem__(self, idx):
 
         if torch.is_tensor(idx):
@@ -241,6 +241,7 @@ class Trainer:
 
 
 if __name__ == "__main__":
+    torch.cuda.memory_summary(device=None, abbreviated=False)
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
@@ -260,7 +261,8 @@ if __name__ == "__main__":
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    batch_size = 128
+    patch_size=100
+    batch_size = 64
     learning_rate= 0.01
     max_epoch=1
     use_cuda = True
@@ -270,7 +272,7 @@ if __name__ == "__main__":
     # model
     model=ViT(
         image_size = map_size,
-        patch_size = 10,
+        patch_size = patch_size,
         num_classes = 2,
         dim = 256,
         depth = 3,
