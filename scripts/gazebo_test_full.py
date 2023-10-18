@@ -125,11 +125,22 @@ class Simulation:
 
 if __name__ == "__main__":
     robot_num = 9
-    initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
-    pose_lists=initial_from_data(initial_pose)
-    pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
+    # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
+    # pose_lists=initial_from_data(initial_pose)
+    # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
+
+
     # pose_list=initialize_pose(robot_num)
 
+    pose_list=[[0,0,0],
+               [3,3,0],
+               [-3,3,0],
+               [-3,-3,0],
+               [3,-3,0],
+               [-3,0,0],
+               [3,0,0],
+               [0,3,0],
+               [0,-3,0]]
 
 
     rospy.wait_for_service('/gazebo/set_model_state')

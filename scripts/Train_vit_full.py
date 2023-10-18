@@ -29,6 +29,7 @@ class RobotDatasetTrace(Dataset):
         max_x,
         max_y,
         sensor_view_angle,
+        map_size=100,
         task_type="all",
         random_rate=0.5,
         pose_root=None
@@ -39,6 +40,7 @@ class RobotDatasetTrace(Dataset):
         #### map simulator settings
         self.max_x = max_x
         self.max_y = max_y
+        self.map_size=map_size
         self.local = local
         self.partial = partial
 
@@ -245,7 +247,7 @@ if __name__ == "__main__":
     save_model_path = "/home/xinchi/vit_random7/vit.pth"
     desired_distance = 2.0
     number_of_robot = 7
-    map_size=100
+    map_size=1000
     max_x = 5
     max_y =5
     sensor_view_angle= 2*math.pi
@@ -267,7 +269,7 @@ if __name__ == "__main__":
     task_type="all"
     # model
     model=ViT(
-        image_size = 100,
+        image_size = map_size,
         patch_size = 10,
         num_classes = 2,
         dim = 256,
@@ -290,6 +292,7 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
+        map_size=map_size,
         sensor_view_angle=sensor_view_angle,
         random_rate=random_rate,
         pose_root=pose_root
@@ -303,6 +306,7 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
+        map_size=map_size,
         sensor_view_angle=sensor_view_angle,
         random_rate=random_rate,
         pose_root=pose_root
