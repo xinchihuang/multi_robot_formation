@@ -245,7 +245,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
-    save_model_path = "/home/xinchi/vit_random7/vit.pth"
+    save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
     desired_distance = 2.0
     number_of_robot = 7
     map_size=100
