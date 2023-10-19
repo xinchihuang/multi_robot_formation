@@ -13,7 +13,7 @@ class MapSimulator:
         self,
         robot_size=0.1,
         max_height=0.3,
-        map_size=1000,
+        map_size=100,
         max_x=5,
         max_y=5,
         sensor_view_angle=2*math.pi,

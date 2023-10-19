@@ -248,7 +248,7 @@ if __name__ == "__main__":
     save_model_path = "/home/xinchi/vit_random7/vit.pth"
     desired_distance = 2.0
     number_of_robot = 7
-    map_size=1000
+    map_size=100
     max_x = 5
     max_y =5
     sensor_view_angle= 2*math.pi
@@ -256,12 +256,12 @@ if __name__ == "__main__":
     local = True
     partial = False
     random_rate=0.5
-    pose_root="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_7"
+    pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_7","/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_pentagon_7"]
 
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    patch_size=100
+    patch_size=10
     batch_size = 64
     learning_rate= 0.01
     max_epoch=1

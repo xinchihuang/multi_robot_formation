@@ -131,6 +131,23 @@ def initialize_pose_multi(queue,num_robot, initial_max_range=5,initial_min_range
                 break
         # print(multiprocessing.current_process().name)
         queue.put(pose_list)
+def initialize_pose_pentagon(queue,radius=2):
+    ignore_sigint()
+    while True:
+
+        pose_list=[[0,0,2 * math.pi * random.uniform(0, 1) - math.pi],
+                   [2*radius * np.cos(2 * math.pi * random.uniform(0, 1)),2*radius * np.sin(2 * math.pi * random.uniform(0, 1)),2 * math.pi * random.uniform(0, 1) - math.pi]]
+        num_vertices = 5
+        phase=random.random()*2 * np.pi
+        for i in range(num_vertices):
+            theta = 2 * math.pi * random.uniform(0, 1) - math.pi
+            angle = (2 * np.pi * i / num_vertices)+phase
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            pose_list.append([x,y,theta])
+        # print(multiprocessing.current_process().name)
+        queue.put(pose_list)
+        # print(pose_list)
 def initial_from_data(root):
     for i in range(len(os.listdir(root))):
         if i==0:
@@ -171,12 +188,15 @@ def ignore_sigint():
 
 
 class PoseDataLoader:
-    def __init__(self,root):
-        for i in range(len(os.listdir(root))):
-            if i == 0:
-                pose_array_data = np.load(os.path.join(root, os.listdir(root)[i]))
-            else:
-                pose_array_data = np.concatenate((pose_array_data, np.load(os.path.join(root, os.listdir(root)[i]))))
+    def __init__(self,root_list):
+        first=True
+        for root in root_list:
+            for i in range(len(os.listdir(root))):
+                if first:
+                    pose_array_data = np.load(os.path.join(root, os.listdir(root)[i]))
+                    first=False
+                else:
+                    pose_array_data = np.concatenate((pose_array_data, np.load(os.path.join(root, os.listdir(root)[i]))))
         self.data=pose_array_data
     def __getitem__(self, item):
         return self.data[item]
@@ -187,15 +207,15 @@ class PoseDataLoader:
 #     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 if __name__ == "__main__":
-    root="poses_large_9"
+    root="poses_pentagon_7"
     if not os.path.exists(root):
         os.mkdir(root)
     num_robot = 9
     initial_max_range = 5
     initial_min_range = 0.5
-
+    #
     queue = multiprocessing.Queue()
-    num_process = 16  # Number of random number generating processes
+    num_process = 4  # Number of random number generating processes
 
     # Start the writer process
     writer_process = multiprocessing.Process(target=valid_pose_saver, args=(queue, root))
@@ -203,7 +223,7 @@ if __name__ == "__main__":
 
     processes = []
     for _ in range(num_process):  # Four generator processes
-        p = multiprocessing.Process(target=initialize_pose_multi, args=(queue,num_robot, initial_max_range,initial_min_range))
+        p = multiprocessing.Process(target=initialize_pose_pentagon, args=(queue,2))
         processes.append(p)
         p.start()
 
@@ -221,8 +241,8 @@ if __name__ == "__main__":
         queue.put("DONE")
         writer_process.join()
 
-    print("All processes completed.")
-
+    # print("All processes completed.")
+    # initialize_pose_pentagon(queue, radius=2)
     # initialize_pose(5)
     # generate_valid_pose("poses_large_7",num_robot=7,initial_max_range=5,initial_min_range=0.5)
     # initial_from_data("poses")
