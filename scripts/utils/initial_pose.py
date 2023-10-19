@@ -182,6 +182,7 @@ def valid_pose_saver(queue,root):
             pose_array = np.array(pose_list_to_save)
             np.save(pose_file, pose_array)
             pose_list_to_save = []
+
 def ignore_sigint():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
