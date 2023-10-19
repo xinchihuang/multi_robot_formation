@@ -186,8 +186,6 @@ def valid_pose_saver(queue,root):
 def ignore_sigint():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-
-
 class PoseDataLoader:
     def __init__(self,root_list):
         first=True
