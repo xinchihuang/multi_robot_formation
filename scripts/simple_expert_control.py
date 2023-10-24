@@ -5,6 +5,7 @@ from comm_data import ControlData
 from collections import defaultdict
 from realrobots.robot_executor_robomaster import Executor
 import socket
+import argparse
 
 
 class LocalExpertControllerRemote:
@@ -116,6 +117,13 @@ class LocalExpertControllerRemote:
         out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
         out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
         return out_put
-controller=LocalExpertControllerRemote(0)
-while True:
-    controller.remote_control()
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(
+        prog='ProgramName',
+        description='What the program does',
+        epilog='Text at the bottom of help')
+    parser.add_argument('-id', '--robot_id')
+    args = parser.parse_args()
+    controller=LocalExpertControllerRemote(int(args.robot_id))
+    while True:
+        controller.remote_control()
