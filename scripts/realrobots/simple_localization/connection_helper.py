@@ -26,7 +26,7 @@ QRCODE_NAME = "qrcode.png"
 if __name__ == '__main__':
 
     helper = conn.ConnectionHelper()
-    info = helper.build_qrcode_string(ssid="iPhone 1.1", password="zgyd1234")
+    info = helper.build_qrcode_string(ssid="TP_link_3732_5G", password="72547274")
     myqr.run(words=info)
     time.sleep(1)
     img = Image.open(QRCODE_NAME)

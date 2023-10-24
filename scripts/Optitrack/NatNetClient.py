@@ -1227,7 +1227,8 @@ class NatNetClient:
             except  socket.timeout:
                 #if self.use_multicast:
                 print("ERROR: data socket access timeout occurred. Server not responding")
-                #return 4
+                #return 4'
+            # print(data)
             if len( data ) > 0 :
                 #peek ahead at message_id
                 message_id = get_message_id(data)
@@ -1244,7 +1245,7 @@ class NatNetClient:
                         else:
                             print_level = 0
                 message_id = self.__process_message( data , print_level)
-
+                print(message_id)
                 data=bytearray(0)
         return 0
 
