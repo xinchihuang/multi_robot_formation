@@ -49,6 +49,9 @@ class LocalExpertControllerRemote:
                 for j in range(len(pose_string_list)):
                     pose.append(float(pose_string_list[j]))
                 pose_list.append(pose)
+                temp=pose_list[1]
+                pose_list[1]=pose_list[2]
+                pose_list[2]=temp
             data={}
             data["robot_id"] = self.robot_id
             data["pose_list"] = pose_list
