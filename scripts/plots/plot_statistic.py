@@ -299,9 +299,9 @@ converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
 
-for i in (5,7,9):
+for i in (5,6,7,8,9):
 
-    root_dir="/home/xinchi/gazebo_data/ViT/ViT_"+str(i)+"_full"
+    root_dir="/home/xinchi/gazebo_data/ViT_full_0.5/ViT_"+str(i)+"_full"
     path = os.path.join(root_dir)
     converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path)
     converge_time_all_ViT.append(converge_time_all)

@@ -29,6 +29,7 @@ class RobotDatasetTrace(Dataset):
         max_x,
         max_y,
         sensor_view_angle,
+        map_size=100,
         task_type="all",
         random_rate=0.5,
         pose_root=None
@@ -39,6 +40,7 @@ class RobotDatasetTrace(Dataset):
         #### map simulator settings
         self.max_x = max_x
         self.max_y = max_y
+        self.map_size=map_size
         self.local = local
         self.partial = partial
 
@@ -75,20 +77,20 @@ class RobotDatasetTrace(Dataset):
         self.get_settings()
 
     def __len__(self):
-        return self.pose_array.shape[1]
-
+        # return self.pose_array.shape[1]
+        return len(self.pose_loader)
     def __getitem__(self, idx):
 
         if torch.is_tensor(idx):
             idx = idx.tolist()
         # print("pose array",idx,self.pose_array.shape)
-        pose_array = self.pose_array[:, idx, :]
-        pose_array[:, 2] = 0
-        number_of_robot = pose_array.shape[0]
+        # pose_array = self.pose_array[:, idx, :]
+        # pose_array[:, 2] = 0
+        # number_of_robot = pose_array.shape[0]
         occupancy_maps=[]
         ref_control_list = []
-        if random.randrange(0,1)<self.random_rate:
-            pose_array=self.pose_loader[random.randint(0,len(self.pose_loader)-1)]
+        # if random.randrange(0,1)<self.random_rate:
+        pose_array=self.pose_loader[random.randint(0,len(self.pose_loader)-1)]
         for robot_id in range(number_of_robot):
             position_lists_local = global_to_local(pose_array)
             occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
@@ -229,8 +231,8 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("/home/xinchi/vit_full/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
-            self.save("/home/xinchi/vit_full/vit.pth")
+                    self.save("/home/xinchi/vit_random7/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
+            self.save("/home/xinchi/vit_random7/vit.pth")
         # return total_loss / total
 
     def save(self, save_path):
@@ -239,12 +241,13 @@ class Trainer:
 
 
 if __name__ == "__main__":
+    torch.cuda.memory_summary(device=None, abbreviated=False)
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
-    save_model_path = "/home/xinchi/vit_full/vit.pth"
+    save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
     desired_distance = 2.0
-    number_of_robot = 5
+    number_of_robot = 7
     map_size=100
     max_x = 5
     max_y =5
@@ -253,12 +256,13 @@ if __name__ == "__main__":
     local = True
     partial = False
     random_rate=0.5
-    pose_root="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_small"
+    pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_7","/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_pentagon_7"]
 
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    batch_size = 128
+    patch_size=10
+    batch_size = 64
     learning_rate= 0.01
     max_epoch=1
     use_cuda = True
@@ -267,8 +271,8 @@ if __name__ == "__main__":
     task_type="all"
     # model
     model=ViT(
-        image_size = 100,
-        patch_size = 10,
+        image_size = map_size,
+        patch_size = patch_size,
         num_classes = 2,
         dim = 256,
         depth = 3,
@@ -290,6 +294,7 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
+        map_size=map_size,
         sensor_view_angle=sensor_view_angle,
         random_rate=random_rate,
         pose_root=pose_root
@@ -303,6 +308,7 @@ if __name__ == "__main__":
         task_type=task_type,
         max_x=max_x,
         max_y=max_y,
+        map_size=map_size,
         sensor_view_angle=sensor_view_angle,
         random_rate=random_rate,
         pose_root=pose_root
