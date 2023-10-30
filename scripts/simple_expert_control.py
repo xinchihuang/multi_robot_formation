@@ -10,7 +10,7 @@ import argparse
 
 class LocalExpertControllerRemote:
     def __init__(self,robot_id,desired_distance=2,sensor_range=5,K_f=1,max_speed=0.1,message_port=12345,command_port=40923):
-        self.name = "LocalExpertControllerFull"
+        self.name = "LocalExpertControllerRemote"
         self.robot_id=robot_id
         self.desired_distance = desired_distance
         self.sensor_range = sensor_range
@@ -39,7 +39,7 @@ class LocalExpertControllerRemote:
     def remote_control(self):
         message, addr = self.message_socket.recvfrom(1024)  # Buffer size is 1024 bytes
         message=message.decode()
-        print(message)
+        # print(message)
         try:
             marker_list= message.strip(";").split(";")
             pose_list=[]
