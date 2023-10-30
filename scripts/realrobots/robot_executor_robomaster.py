@@ -141,7 +141,7 @@ class Executor:
     """
 
     def __init__(self):
-        # self.connector = UartConnector()
+        self.connector = UartConnector()
         self.idle_frame=0
 
     def execute_control(self, control_data):
