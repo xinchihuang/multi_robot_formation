@@ -50,7 +50,7 @@ class LocalExpertControllerRemote:
                 for j in range(len(pose_string_list)):
                     pose.append(float(pose_string_list[j]))
                 temp = pose[1]
-                pose[1] = pose[2]
+                pose[1] = -pose[2]
                 pose[2] = 0
                 print(i, pose)
                 pose_list.append(pose)

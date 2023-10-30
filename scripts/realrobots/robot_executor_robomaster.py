@@ -150,7 +150,7 @@ class Executor:
         :param control_data: Controls to be executed
         """
         velocity_x = control_data.velocity_x
-        velocity_y = -control_data.velocity_y
+        velocity_y = control_data.velocity_y
         omega=control_data.omega
         print("index", control_data.robot_index)
         print("x", velocity_x)
@@ -164,11 +164,11 @@ class Executor:
         # omega=1
         if velocity_x==0 and velocity_y==0 and omega==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=math.degrees(omega)
+                speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
         else:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-                speed_x=velocity_x, speed_y=velocity_y, speed_z=math.degrees(omega)
+                speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
             self.idle_frame=0
         self.connector.send_to_robot(msg)
