@@ -141,7 +141,7 @@ class Executor:
     """
 
     def __init__(self):
-        self.connector = UartConnector()
+        # self.connector = UartConnector()
         self.idle_frame=0
 
     def execute_control(self, control_data):
@@ -150,7 +150,7 @@ class Executor:
         :param control_data: Controls to be executed
         """
         velocity_x = control_data.velocity_x
-        velocity_y = control_data.velocity_y
+        velocity_y = -control_data.velocity_y
         omega=control_data.omega
         print("index", control_data.robot_index)
         print("x", velocity_x)
