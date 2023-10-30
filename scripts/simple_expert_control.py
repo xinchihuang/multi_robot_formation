@@ -49,7 +49,7 @@ class LocalExpertControllerRemote:
                 pose_string_list=marker_list[i].strip("(").strip(")").split(",")
                 for j in range(len(pose_string_list)):
                     pose.append(float(pose_string_list[j]))
-                print(pose)
+                print(i,pose)
                 temp = pose[1]
                 pose[1] = pose[2]
                 pose[2] = 0
