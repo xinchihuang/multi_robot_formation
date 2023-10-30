@@ -52,7 +52,7 @@ class LocalExpertControllerRemote:
                 print(pose)
                 temp = pose[1]
                 pose[1] = pose[2]
-                pose[2] = temp
+                pose[2] = 0
                 pose_list.append(pose)
 
             data={}
