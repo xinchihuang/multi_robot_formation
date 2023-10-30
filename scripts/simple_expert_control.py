@@ -19,7 +19,7 @@ class LocalExpertControllerRemote:
         self.message_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.message_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.message_socket.bind(('', message_port))
-        self.executor=Executor()
+        # self.executor=Executor()
 
         # self.robot_ip_dict = defaultdict(str)
         # self.robot_ip_dict[0]="192.168.0.100"
@@ -43,15 +43,18 @@ class LocalExpertControllerRemote:
         try:
             marker_list= message.strip(";").split(";")
             pose_list=[]
+
             for i in range(len(marker_list)):
                 pose=[]
                 pose_string_list=marker_list[i].strip("(").strip(")").split(",")
                 for j in range(len(pose_string_list)):
                     pose.append(float(pose_string_list[j]))
+                print(pose)
+                temp = pose[1]
+                pose[1] = pose[2]
+                pose[2] = temp
                 pose_list.append(pose)
-                temp=pose_list[1]
-                pose_list[1]=pose_list[2]
-                pose_list[2]=temp
+
             data={}
             data["robot_id"] = self.robot_id
             data["pose_list"] = pose_list
