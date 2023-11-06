@@ -20,26 +20,25 @@ def apply_transform(point, matrix):
     homogeneous_point = np.append(point, 1)
     transformed_point = matrix @ homogeneous_point  # Using '@' for matrix multiplication
     return transformed_point[:2]
-def generate_trapezoid(number_of_point,sep1=0.01,sep2=0.25):
+def generate_object(number_of_point,sep1=0.02,sep2=0.25):
     point_list=[]
+    point_list.append([0, sep2 / 2])
     for i in range(number_of_point):
-        point_list.append([-sep1*(number_of_point-1)/2+i*sep1,sep2/2])
         point_list.append([-sep1 * (number_of_point - 1) + 2*i * sep1, -sep2 / 2])
     return np.array(point_list)
 
-def detect_objects(points,sep1=0.01):
+def detect_objects(points,sep1=0.04):
     X = np.array(points)
     kmeans = KMeans(n_clusters=4)
     kmeans.fit(X)
     predicted_labels = kmeans.predict(X)
-    centroids = kmeans.cluster_centers_
-    print(centroids,predicted_labels)
+    # centroids = kmeans.cluster_centers_
+    # print(centroids,predicted_labels)
     groups = defaultdict(list)
     centroids_dict=defaultdict(list)
 
-    for i in range(centroids.shape[0]):
-        centroids_dict[i]=centroids[i]
-    print(centroids_dict)
+    # for i in range(centroids.shape[0]):
+    #     centroids_dict[i]=centroids[i]
     for i in range(len(X)):
         groups[predicted_labels[i]].append(X[i])
     direction_vectors_dict=defaultdict(list)
@@ -47,22 +46,34 @@ def detect_objects(points,sep1=0.01):
         points = np.array(groups[group_id])
         tree = KDTree(points)
         direction_vector = np.zeros((2))
+        front=[]
+        back=[]
         for point_index in range(points.shape[0]):
             point_to_search = points[point_index]
             distance, index = tree.query(point_to_search, k=2)
+            if distance[1] > 2*sep1:
 
-            if distance[1] < 1.5*sep1:
-                print(group_id, distance, point_to_search - centroids[group_id])
-                direction_vector = direction_vector+(point_to_search - centroids_dict[group_id])
+                front.append(point_to_search)
+                # print(group_id, distance, point_to_search - centroids[group_id])
+                # direction_vector = direction_vector+(point_to_search - centroids_dict[group_id])
             else:
-                direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
+                back.append(point_to_search)
+                # direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
+        centroid=np.zeros((2))
+        if len(front)==0:
+            front.append(sum(back))
+        for point_back in back:
+            direction_vector = direction_vector + (front[0] - point_back)
+            centroid=centroid+point_back+front[0]
+        centroids_dict[group_id]=centroid/len(back)/2
         direction_vectors_dict[group_id]=(direction_vector/np.linalg.norm(direction_vector))
+
     return  direction_vectors_dict,X,predicted_labels,centroids_dict
 
 if __name__=="__main__":
     X=[]
     for i in range(2,6):
-        trapezoid=generate_trapezoid(i)
+        trapezoid=generate_object(i)
         tr_x=random.uniform(-1,1)
         tr_y=random.uniform(-1,1)
         tr_theta=random.uniform(-360,360)
