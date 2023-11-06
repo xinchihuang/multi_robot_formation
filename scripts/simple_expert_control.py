@@ -19,7 +19,7 @@ class LocalExpertControllerRemote:
         self.message_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.message_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.message_socket.bind(('', message_port))
-        self.executor=Executor()
+        # self.executor=Executor()
 
         # self.robot_ip_dict = defaultdict(str)
         # self.robot_ip_dict[0]="192.168.0.100"
@@ -39,26 +39,36 @@ class LocalExpertControllerRemote:
     def remote_control(self):
         message, addr = self.message_socket.recvfrom(1024)  # Buffer size is 1024 bytes
         message=message.decode()
-        # print(message)
+        print(message)
         try:
             marker_list= message.strip(";").split(";")
             pose_list=[]
 
-            for i in range(len(marker_list)):
-                pose=[]
-                pose_string_list=marker_list[i].strip("(").strip(")").split(",")
-                for j in range(len(pose_string_list)):
-                    pose.append(float(pose_string_list[j]))
-                temp = pose[1]
-                pose[1] = -pose[2]
-                pose[2] = 0
-                print(i, pose)
-                pose_list.append(pose)
+            # for i in range(len(marker_list)):
+            #     pose=[]
+            #     pose_string_list=marker_list[i].strip("(").strip(")").split(",")
+            #     for j in range(len(pose_string_list)):
+            #         pose.append(float(pose_string_list[j]))
+            #     temp = pose[1]
+            #     pose[1] = -pose[2]
+            #     pose[2] = 0
+            #     print(i, pose)
+            #     pose_list.append(pose)
+            control_data = ControlData()
 
-            data={}
-            data["robot_id"] = self.robot_id
-            data["pose_list"] = pose_list
-            control_data = self.get_control(data)
+            for i in marker_list:
+                id=marker_list[i].split(":")[0]
+                control_x=marker_list[i].split(":")[1].strip('[').strip(']').split(" ")[0]
+                control_y = marker_list[i].split(":")[1].strip('[').strip(']').split(" ")[1]
+            if id==self.robot_id:
+                control_data.velocity_x = control_x
+                control_data.velocity_y = control_y
+            # data={}
+            # data["robot_id"] = self.robot_id
+            # data["pose_list"] = pose_list
+            # control_data = self.get_control(data)
+
+
             self.executor.execute_control(control_data=control_data)
         except:
             pass
