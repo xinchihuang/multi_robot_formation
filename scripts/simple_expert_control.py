@@ -19,7 +19,7 @@ class LocalExpertControllerRemote:
         self.message_socket=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.message_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.message_socket.bind(('', message_port))
-        # self.executor=Executor()
+        self.executor=Executor()
 
         # self.robot_ip_dict = defaultdict(str)
         # self.robot_ip_dict[0]="192.168.0.100"
