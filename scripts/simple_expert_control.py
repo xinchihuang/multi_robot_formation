@@ -58,8 +58,8 @@ class LocalExpertControllerRemote:
             # print(marker_list)
             for i in range(len(marker_list)):
                 id=marker_list[i].split(":")[0]
-                control_x = marker_list[i].split(":")[1].strip('[').strip(']').split(",")[0]
-                control_y = marker_list[i].split(":")[1].strip('[').strip(']').split(",")[1]
+                control_x = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[0])
+                control_y = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[1])
                 if int(id)==self.robot_id:
 
                     control_data.velocity_x = control_x
