@@ -55,15 +55,15 @@ class LocalExpertControllerRemote:
             #     print(i, pose)
             #     pose_list.append(pose)
             control_data = ControlData()
-
+            # print(marker_list)
             for i in range(len(marker_list)):
                 id=marker_list[i].split(":")[0]
-                control_x=marker_list[i].split(":")[1].strip('[').strip(']').split(" ")[0]
-                control_y = marker_list[i].split(":")[1].strip('[').strip(']').split(" ")[1]
-            if id==self.robot_id:
-                control_data.velocity_x = control_x
-                control_data.velocity_y = control_y
-            # print(control_x,control_y)
+                control_x = marker_list[i].split(":")[1].strip('[').strip(']').split(",")[0]
+                control_y = marker_list[i].split(":")[1].strip('[').strip(']').split(",")[1]
+                if id==self.robot_id:
+                    control_data.velocity_x = control_x
+                    control_data.velocity_y = control_y
+                # print("X",control_x,"Y",control_y)
             # data={}
             # data["robot_id"] = self.robot_id
             # data["pose_list"] = pose_list
