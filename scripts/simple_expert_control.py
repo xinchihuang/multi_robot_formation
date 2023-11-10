@@ -40,13 +40,13 @@ class LocalExpertControllerRemote:
         control_data = ControlData()
         if self.count==0:
             self.count=1
-            control_data.velocity_x = 1
+            control_data.velocity_x = 0.1
             control_data.velocity_y = 0
             control_data.robot_index = self.robot_id
             self.executor.execute_control(control_data=control_data)
         else :
             self.count=0
-            control_data.velocity_x = 1
+            control_data.velocity_x = -0.1
             control_data.velocity_y = 0
             control_data.robot_index = self.robot_id
             self.executor.execute_control(control_data=control_data)
