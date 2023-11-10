@@ -7,7 +7,7 @@ from realrobots.robot_executor_robomaster import Executor
 import socket
 import argparse
 
-
+import time
 class LocalExpertControllerRemote:
     def __init__(self,robot_id,desired_distance=1,sensor_range=5,K_f=1,max_speed=0.1,message_port=12345,command_port=40923):
         self.name = "LocalExpertControllerRemote"
@@ -50,6 +50,7 @@ class LocalExpertControllerRemote:
             control_data.velocity_y = 0
             control_data.robot_index = self.robot_id
             self.executor.execute_control(control_data=control_data)
+        time.sleep(0.1)
 
     def remote_control_r(self):
         message, addr = self.message_socket.recvfrom(1024)  # Buffer size is 1024 bytes
