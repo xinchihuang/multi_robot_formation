@@ -20,6 +20,7 @@ class LocalExpertControllerRemote:
         self.message_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self.message_socket.bind(('', message_port))
         self.executor=Executor()
+        self.count=0
 
         # self.robot_ip_dict = defaultdict(str)
         # self.robot_ip_dict[0]="192.168.0.100"
@@ -35,11 +36,25 @@ class LocalExpertControllerRemote:
         # print(self.robot_ip_dict)
 
 
-
     def remote_control(self):
+        if self.count==0:
+            self.count=1
+            control_data.velocity_x = 1
+            control_data.velocity_y = 0
+            control_data.robot_index = self.robot_id
+            self.executor.execute_control(control_data=control_data)
+        else :
+            self.count=0
+            control_data.velocity_x = 1
+            control_data.velocity_y = 0
+            control_data.robot_index = self.robot_id
+            self.executor.execute_control(control_data=control_data)
+
+    def remote_control_r(self):
         message, addr = self.message_socket.recvfrom(1024)  # Buffer size is 1024 bytes
         message=message.decode()
         # print(message)
+
         try:
             marker_list= message.strip(";").split(";")
             pose_list=[]
@@ -65,6 +80,7 @@ class LocalExpertControllerRemote:
                     control_data.velocity_x = control_x
                     control_data.velocity_y = control_y
                     control_data.robot_index=self.robot_id
+
                 print("X",control_x,"Y",control_y)
             # data={}
             # data["robot_id"] = self.robot_id
