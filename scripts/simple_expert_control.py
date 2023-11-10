@@ -37,6 +37,7 @@ class LocalExpertControllerRemote:
 
 
     def remote_control(self):
+        control_data = ControlData()
         if self.count==0:
             self.count=1
             control_data.velocity_x = 1
