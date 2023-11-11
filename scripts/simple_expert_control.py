@@ -37,6 +37,29 @@ class LocalExpertControllerRemote:
 
 
     def remote_control(self):
+        message, addr = self.message_socket.recvfrom(1024)  # Buffer size is 1024 bytes
+        message = message.decode()
+        # print(message)
+
+        try:
+            marker_list = message.strip(";").split(";")
+            pose_list = []
+
+            control_data = ControlData()
+            # print(marker_list)
+            for i in range(len(marker_list)):
+                id = marker_list[i].split(":")[0]
+                control_x = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[0])
+                control_y = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[1])
+                if int(id) == self.robot_id:
+                    control_data.velocity_x = control_x
+                    control_data.velocity_y = control_y
+                    control_data.robot_index = self.robot_id
+
+                print("X", control_x, "Y", control_y)
+            self.executor.execute_control(control_data=control_data)
+        except:
+            pass
         control_data = ControlData()
         if self.count==0:
             self.count=1
