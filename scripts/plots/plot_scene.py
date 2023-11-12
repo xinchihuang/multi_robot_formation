@@ -82,52 +82,6 @@ def plot_wheel_speed(dt, velocity_array, save_path):
     plt.close()
     # plt.show()
 
-# def plot_speed(dt, pose_array, save_path):
-#     """
-#     Plot line chart for robots wheel speeds
-#     :param dt: Time interval
-#     :param velocity_array: Robots velocity data 3D numpy array [robot:[time step:[left,right]]]
-#     :param save_path: Path to save figures
-#     :return:
-#     """
-#     print(pose_array.shape)
-#     controller = LocalExpertController()
-#     rob_num = np.shape(pose_array)[0]
-#     gabriel_graph = gabriel(pose_array)
-#     distance_dict = {}
-#     speed_dict={}
-#     xlist = []
-#     for i in range(np.shape(pose_array)[1]):
-#         xlist.append(i * dt)
-#     for i in range(np.shape(pose_array)[1]):
-#         position_array=pose_array[:,i,:]
-#         for j in range(rob_num):
-#             control=controller.get_control(j,position_array)
-#             name_x="x_"+str(j)
-#             name_y="y_"+str(j)
-#             if not name_x in speed_dict:
-#                 speed_dict[name_x]=[]
-#             if not name_y in speed_dict:
-#                 speed_dict[name_y]=[]
-#             speed_dict[name_x].append(control.velocity_x)
-#             speed_dict[name_y].append(control.velocity_y)
-#     plt.figure(figsize=(5, 3))
-#     for key, _ in speed_dict.items():
-#         plt.plot(xlist, speed_dict[key], label=key)
-#     # plt.legend()
-#     plt.subplots_adjust(left=0.13,
-#                         bottom=0.23,
-#                         right=0.98,
-#                         top=0.98,
-#                         wspace=0.0,
-#                         hspace=0.0)
-#     plt.xlabel("time(s)", fontsize=20)
-#     plt.ylabel("distance(m)", fontsize=20)
-#     plt.xticks(fontsize=20)
-#     plt.yticks(fontsize=20)
-#     plt.grid()
-#     plt.savefig(os.path.join(save_path, "speed_" + str(rob_num) + ".png"), pad_inches=0.0)
-#     plt.close()
 def plot_relative_distance(dt, pose_array, save_path):
     """
     Plot line chart for robots relative distance
