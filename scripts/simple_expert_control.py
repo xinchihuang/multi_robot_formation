@@ -41,12 +41,15 @@ class ControlTransmitter:
             pass
     def get_control(self):
         control_data = ControlData()
-        self.get_input_data()
-        control_x = self.input_data[self.robot_id][0]
-        control_y = self.input_data[self.robot_id][1]
-        control_data.velocity_x = control_x
-        control_data.velocity_y = control_y
-        control_data.robot_index = self.robot_id
+        try:
+            self.get_input_data()
+            control_x = self.input_data[self.robot_id][0]
+            control_y = self.input_data[self.robot_id][1]
+            control_data.velocity_x = control_x
+            control_data.velocity_y = control_y
+            control_data.robot_index = self.robot_id
+        except:
+            pass
         return control_data
     def excute_control(self):
         control_data=self.get_control()
