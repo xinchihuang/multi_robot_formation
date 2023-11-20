@@ -5,10 +5,7 @@ author: Xinchi Huang
 
 import os
 import sys
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation")
-sys.path.append("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/model")
-print(sys.path)
+
 
 
 import os
@@ -161,7 +158,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array,save_path,desired_distance=2):
+def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,ylim=8):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -199,20 +196,20 @@ def plot_formation_gabreil(pose_array,save_path,desired_distance=2):
             count+=1
             formation_error+=abs(distance-desired_distance)
 
-    plt.subplots_adjust(left=0.16,
-                        bottom=0.16,
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.1,
                         right=0.95,
-                        top=0.98,
+                        top=0.95,
                         wspace=0.0,
                         hspace=0.0)
-    plt.title("Average formation error: "+str(formation_error/count))
+    plt.title("Average formation error: "+str(formation_error/count),fontsize=20)
     plt.xlabel("x(m)", fontsize=20)
     plt.ylabel("y(m)", fontsize=20)
     plt.legend()
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.xlim(-10, 10)
-    plt.ylim(-10, 10)
+    plt.xlim(-xlim, xlim)
+    plt.ylim(-ylim, ylim)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
@@ -254,7 +251,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path,stop_time=50):
+def plot_trace_triangle(pose_array,save_path='',stop_time=50,xlim=8,ylim=8):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
@@ -291,8 +288,8 @@ def plot_trace_triangle(pose_array,save_path,stop_time=50):
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
 
-    plt.xlim(-8, 8)
-    plt.ylim(-8, 8)
+    plt.xlim(-xlim, xlim)
+    plt.ylim(-ylim, ylim)
     plt.grid()
     plt.savefig(os.path.join(save_path, "robot_trace_" + str(rob_num) + ".png"))
     plt.close()

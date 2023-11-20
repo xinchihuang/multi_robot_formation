@@ -35,13 +35,22 @@ class ControlPublisher():
         if self.count == 0:
             self.count = 1
             message="6:[1,0];"
-        else:
-            self.count=0
+        elif self.count == 1:
+            self.count=2
+            message = "6:[0,1];"
+        elif self.count == 2:
+            self.count=3
             message = "6:[-1,0];"
+        elif self.count == 3:
+            self.count=4
+            message = "6:[0,-1];"
+        elif self.count == 4:
+            self.count = 4
+            message = "6:[0,0];"
         print(message)
         broadcast_address = ('<broadcast>', 12345)
         self.udp_socket.sendto(message.encode(), broadcast_address)
-        time.sleep(0.04)
+        time.sleep(5)
         # self.udp_socket.close()
 class ControlRec():
     def __init__(self):
@@ -65,7 +74,7 @@ if __name__ == "__main__":
     controller=ControlPublisher()
     # receiver=ControlRec()
     while True:
-        sender_thread = threading.Thread(target=controller.send_keyboard_message)
+        sender_thread = threading.Thread(target=controller.send_broadcast_message)
         sender_thread.start()
 
         # 启动接收广播回应的线程
