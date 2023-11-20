@@ -59,7 +59,7 @@ class SceneHolonomic:
         self.initial_max_range=initial_max_range
         self.initial_min_range=initial_min_range
         self.max_sep_range=max_sep_range
-        # self.platform = "vrep"
+        # self.robot_platform = "vrep"
         # self.model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
         # # self.model_path="/home/xinchi/saved_model_5.28/vit1.0.pth"
         # if controller_type=="ViT":
