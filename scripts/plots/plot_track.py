@@ -9,21 +9,18 @@ from plot_scene import plot_formation_gabreil,plot_relative_distance_gabreil,plo
 from collections import defaultdict
 import matplotlib
 # Replace 'your_file.csv' with the path to your CSV file
-file_path = 'Take 2023-11-15 03.26.28 PM.csv'
-
+file_path = 'Square.csv'
+robot_index_list=[6]
 # Open the CSV file and read its content
 with (open(file_path, 'r') as file):
     # Create a CSV reader object
     csv_reader = csv.reader(file)
-    num_robot=4
+    num_robot=6
     # Iterate over each row in the CSV file
     count=0
     object_dict=defaultdict(list)
-    for i in range(num_robot):
-        object_dict[i+3] = []
-
-
-
+    for i in robot_index_list:
+        object_dict[i] = []
     for row in csv_reader:
         count+=1
         if count<=7:
@@ -46,7 +43,7 @@ with (open(file_path, 'r') as file):
         # print(direction_vectors_dict)
         # print(centroids_dict)
 
-        for item in range(3,num_robot+3):
+        for item in object_dict:
             if item in centroids_dict:
                 if len(object_dict[item]) == 0:
                     object_dict[item].append([centroids_dict[item][0], centroids_dict[item][1],
@@ -60,7 +57,7 @@ with (open(file_path, 'r') as file):
                 else:
                     object_dict[item].append(object_dict[item][-1])
             else:
-                # print(item)
+                print(item)
                 object_dict[item].append(object_dict[item][-1])
     pose_lists=[]
     for item in object_dict:

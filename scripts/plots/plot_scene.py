@@ -251,7 +251,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',stop_time=50,xlim=8,ylim=8):
+def plot_trace_triangle(pose_array,save_path='',time_step=5000,xlim=8,ylim=8):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
@@ -259,15 +259,15 @@ def plot_trace_triangle(pose_array,save_path='',stop_time=50,xlim=8,ylim=8):
         color = next(colors)
         xtrace = []
         ytrace = []
-        for p in range(0,stop_time*20-1,100):
+        for p in range(0,time_step-1,100):
             pos=[pose_array[i][p][0],pose_array[i][p][1]]
             theta=pose_array[i][p][2]
-            plot_triangle(ax, pos,theta, 0.3, color)
+            plot_triangle(ax, pos,theta, 0.1, color)
             xtrace.append(pose_array[i][p][0])
             ytrace.append(pose_array[i][p][1])
             ax.plot(xtrace,ytrace,color=color,linestyle='--')
     gabriel_graph = gabriel(pose_array)
-    position_array = pose_array[:, stop_time*20-1, :2]
+    position_array = pose_array[:, time_step-1, :2]
     for i in range(rob_num):
         for j in range(i + 1, rob_num):
             if gabriel_graph[i][j] == 0:
