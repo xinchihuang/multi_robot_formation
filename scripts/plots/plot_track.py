@@ -9,8 +9,8 @@ from plot_scene import plot_formation_gabreil,plot_relative_distance_gabreil,plo
 from collections import defaultdict
 import matplotlib
 # Replace 'your_file.csv' with the path to your CSV file
-file_path = 'Square.csv'
-robot_index_list=[6]
+file_path = 'formation4-1.csv'
+robot_index_list=[3,4,5,6]
 # Open the CSV file and read its content
 with (open(file_path, 'r') as file):
     # Create a CSV reader object
@@ -64,7 +64,7 @@ with (open(file_path, 'r') as file):
         print(len(object_dict[item]),item)
         pose_lists.append(object_dict[item])
     pose_array=numpy.array(pose_lists)
-    plot_trace_triangle(pose_array,xlim=2,ylim=2)
+    plot_trace_triangle(pose_array,xlim=3,ylim=3)
     plot_formation_gabreil(pose_array,desired_distance=1,xlim=2,ylim=2)
 
 

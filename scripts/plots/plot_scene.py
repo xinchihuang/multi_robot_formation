@@ -251,7 +251,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',time_step=5000,xlim=8,ylim=8):
+def plot_trace_triangle(pose_array,save_path='',time_step=2800,xlim=8,ylim=8):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
