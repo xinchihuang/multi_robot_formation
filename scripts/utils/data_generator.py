@@ -8,6 +8,7 @@ import sys
 from .gabreil_graph import get_gabreil_graph, get_gabreil_graph_local,global_to_local
 from .occupancy_map_simulator import MapSimulator
 from comm_data import ControlData, SensorData, SceneData
+from model.LocalExpertController import LocalExpertController
 # from controller import Controller
 import copy
 import math
@@ -104,27 +105,6 @@ class DataGenerator:
             control_i = controller.get_control(robot_index,global_pose_array)
             velocity_x, velocity_y,omega = control_i.velocity_x, control_i.velocity_y,control_i.omega
             ref_control_list.append([velocity_x, velocity_y,omega])
-        # print(self.sensor_angle)
-        # print(global_pose_array)
-        # print(ref_control_list[4])
-        # print(global_to_local(global_pose_array)[4])
-        # cv2.imshow("robot view ", np.array(occupancy_maps[4]))
-        # cv2.waitKey(0)
-        # for i in range(len(position_lists_local)):
-        #     position_lists_local[i] = sort_pose(np.array(position_lists_local[i]))
-        # position_lists_local = np.array(position_lists_local)
-        # #neighbor
-        # neighbor_lists = []
-        # number_of_robot = position_lists_local.shape[0]
-        # for robot_index in range(number_of_robot):
-        #     neighbor_list_i = self.update_neighbor(position_lists_local[robot_index])
-        #     neighbor_lists.append(neighbor_list_i)
-        #
-        # # position
-        # selected = position_lists_local[:, :, :2]
-        # position_lists_squeezed = np.reshape(selected, (selected.shape[0], selected.shape[1] * selected.shape[2]))
-        # position_lists_squeezed[position_lists_squeezed == float("inf")] = 0
-
         return (
             np.array(occupancy_maps),
             np.array(ref_control_list),
@@ -195,19 +175,6 @@ class DataGenerator:
 
 
 if __name__ == "__main__":
-    # self_pose_array=[[-3, -3, 0], [-3, 3, 0], [3, 3, 0], [3, -3, 0], [0, 0, 0]]
-    # self_orientation_array=[0,0,0,0,0]
-    # data_generator=DataGenerator(partial=False)
-    #
-    # occupancy_maps,ref_control_lists,adjacency_lists,position_lists_squeezed,neighbor_lists=data_generator.generate_map_all(self_pose_array,self_orientation_array)
-    # print(ref_control_lists)
-    # cv2.imshow("robot view (all)", occupancy_maps[0])
-    # cv2.waitKey(0)
-    # occupancy_maps, reference, adjacency_lists = data_generator.generate_map_control(
-    #     self_pose_array, self_orientation_array
-    # )
-    # print(reference)
-    # cv2.imshow("robot view (control)", occupancy_maps[0])
-    # cv2.waitKey(0)
+
     pass
 

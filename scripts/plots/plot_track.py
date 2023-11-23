@@ -12,7 +12,7 @@ import matplotlib
 file_path = 'Square.csv'
 robot_index_list=[6]
 # Open the CSV file and read its content
-with (open(file_path, 'r') as file):
+with open(file_path, 'r') as file:
     # Create a CSV reader object
     csv_reader = csv.reader(file)
     num_robot=6
