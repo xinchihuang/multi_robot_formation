@@ -236,7 +236,7 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
+                    self.save("/home/xinchi/VIT_1m/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
                     # total_loss_eval = 0
                     # total_eval = 0
                     # for iter_eval, batch_eval in enumerate(evaluateloader):
@@ -276,11 +276,11 @@ if __name__ == "__main__":
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
     save_model_path = "/src/multi_robot_formation/saved_model/vit.pth"
-    desired_distance = 2.0
+    desired_distance = 1.0
     number_of_robot = 5
     map_size=100
-    max_x = 5
-    max_y =5
+    max_x = 2
+    max_y = 2
     sensor_view_angle=math.pi/2
     # dataset parameters
     local = True
