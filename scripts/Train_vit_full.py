@@ -231,7 +231,7 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("/home/xinchi/vit_random7/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
+                    self.save("/home/xinchi/VIT_1m/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
             self.save("/home/xinchi/vit_random7/vit.pth")
         # return total_loss / total
 
@@ -245,7 +245,7 @@ if __name__ == "__main__":
     torch.cuda.empty_cache()
     # global parameters
     data_path_root = "/home/xinchi/gazebo_data"
-    save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
+    save_model_path = "/home/xinchi/VIT_1m/vit.pth"
     desired_distance = 2.0
     number_of_robot = 7
     map_size=100
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     patch_size=10
     batch_size = 64
     learning_rate= 0.01
-    max_epoch=1
+    max_epoch=10
     use_cuda = True
 
 
