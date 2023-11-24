@@ -77,7 +77,6 @@ class Simulation:
 
 
     def SimulateCallback(self, *argv):
-        # print(argv)
         pose_list = []
         control_list=[]
 
@@ -106,9 +105,10 @@ class Simulation:
                 data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
                 control_data = self.controller.get_control(data)
                 control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
-            # print(control_list)
+
         for index in range(0,self.robot_num):
             msg=Twist()
+            # print(control_list[index])
             msg.linear.x = control_list[index][0] if abs(control_list[index][0])<self.max_velocity else self.max_velocity*abs(control_list[index][0])/control_list[index][0]
             msg.linear.y = control_list[index][1] if abs(control_list[index][1])<self.max_velocity else self.max_velocity*abs(control_list[index][1])/control_list[index][1]
             self.pub_topic_dict[index].publish(msg)
@@ -124,23 +124,23 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 9
+    robot_num = 7
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
-    # pose_lists=initial_from_data(initial_pose)
+    # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
 
 
-    # pose_list=initialize_pose(robot_num)
+    pose_list=initialize_pose(robot_num,initial_max_range=2)
 
-    pose_list=[[0,0,0],
-               [3,3,0],
-               [-3,3,0],
-               [-3,-3,0],
-               [3,-3,0],
-               [-3,0,0],
-               [3,0,0],
-               [0,3,0],
-               [0,-3,0]]
+    # pose_list=[[0,0,0],
+    #            [1.5,1.5,0],
+    #            [-1.5,1.5,0],
+    #            # [-3,-3,0],
+    #            [1.5,-1.5,0],
+    #            # [-3,0,0],
+    #            [1.5,0,0],
+    #            [0,1.5,0],
+    #            [0,-1.5,0]]
 
 
     rospy.wait_for_service('/gazebo/set_model_state')
@@ -148,11 +148,11 @@ if __name__ == "__main__":
     rospy.init_node("collect_data")
 
     ### Vit controller
-    model_path="/home/xinchi/vit_full/vit.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_9_full"
+    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch2.pth"
+    save_data_root="/home/xinchi/gazebo_data/ViT_1m"
     controller=VitController(model_path)
     #
-    desired_distance = 2
+    desired_distance = 1
     # sensor_range=5
     # K_f=1
     # max_speed = 1
@@ -165,7 +165,7 @@ if __name__ == "__main__":
  # [ 0.34727331  ,1.90429804 ,-1.54858546],
  # [-2.34736724  ,2.89713682 ,-1.14321162]]
 
-    listener = Simulation(robot_num,desired_distance,controller,save_data_root=save_data_root)
+    listener = Simulation(robot_num,desired_distance,controller,sensor_range=2,save_data_root=save_data_root)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()
