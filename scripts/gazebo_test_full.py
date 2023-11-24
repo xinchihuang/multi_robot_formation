@@ -25,12 +25,11 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,desired_distance,controller,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,
-                 map_size = 100,sensor_range=5,max_velocity=0.05,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=0.05,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
-        self.desired_distance = desired_distance
+        self.occupancy_map_simulator = map_simulator
         # communication related
         self.sub_topic_list = []
         self.pub_topic_dict = collections.defaultdict()
@@ -47,7 +46,6 @@ class Simulation:
         self.controller = controller
         self.robot_upper_bound=robot_upper_bound
         self.robot_lower_bound=robot_lower_bound
-        self.map_size = map_size
         self.sensor_range=sensor_range
         self.max_velocity=max_velocity
 
@@ -95,11 +93,10 @@ class Simulation:
                 distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
                             pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
                 print(i, j, distance)
-            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= math.pi*2, local=True,partial=False)
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
                 # print(position_lists_local[index])
-                occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[index])
+                occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
                 # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
                 # cv2.waitKey(1)
                 data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
@@ -148,11 +145,11 @@ if __name__ == "__main__":
     rospy.init_node("collect_data")
 
     ### Vit controller
-    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch2.pth"
+    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
     save_data_root="/home/xinchi/gazebo_data/ViT_1m"
     controller=VitController(model_path)
     #
-    desired_distance = 1
+    desired_distance = 1.0
     # sensor_range=5
     # K_f=1
     # max_speed = 1
@@ -164,8 +161,11 @@ if __name__ == "__main__":
  # [-4.51360495  ,1.04370626  ,0.72373201],
  # [ 0.34727331  ,1.90429804 ,-1.54858546],
  # [-2.34736724  ,2.89713682 ,-1.14321162]]
-
-    listener = Simulation(robot_num,desired_distance,controller,sensor_range=2,save_data_root=save_data_root)
+    sensor_range=2
+    sensor_view_angle = math.pi * 2
+    occupancy_map_simulator = MapSimulator(max_x=sensor_range, max_y=sensor_range,
+                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
+    listener = Simulation(robot_num=robot_num,controller=controller,map_simulator=occupancy_map_simulator,sensor_range=sensor_range,save_data_root=save_data_root)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()
