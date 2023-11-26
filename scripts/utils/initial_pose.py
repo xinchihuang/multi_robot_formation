@@ -85,13 +85,13 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
         gabriel_graph_global = get_gabreil_graph(pose_list)
         gabriel_graph_local=get_gabreil_graph_local(pose_list)
 
-        if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
-            # for line in gabriel_graph_global:
-            #     print(line)
-            # # print("----------")
-            # for line in gabriel_graph_local:
-            #     print(line)
-            break
+        # if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
+        #     # for line in gabriel_graph_global:
+        #     #     print(line)
+        #     # # print("----------")
+        #     # for line in gabriel_graph_local:
+        #     #     print(line)
+        break
     return pose_list
 def initialize_pose_multi(queue,num_robot, initial_max_range=5,initial_min_range=1):
     ignore_sigint()

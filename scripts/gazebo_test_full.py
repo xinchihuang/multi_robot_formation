@@ -121,7 +121,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 7
+    robot_num = 13
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
     # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     ### Vit controller
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_1m"
+    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_13_1m"
     controller=VitController(model_path)
     #
     desired_distance = 1.0

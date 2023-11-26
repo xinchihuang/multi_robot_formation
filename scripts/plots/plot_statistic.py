@@ -143,7 +143,7 @@ def process_data(root_path,robot_num):
     # print(observe_data-reference)
 
 
-def process_data_gazebo(root_path,robot_num=5):
+def process_data_gazebo(root_path):
     path_list=[]
     for path in os.listdir(root_path):
         path_list.append(os.path.join(root_path, path))
@@ -176,7 +176,7 @@ def process_data_gazebo(root_path,robot_num=5):
             data=observe_data[:,time_step,:]
             gabriel_graph=gabriel(data)
             reference=np.ones(data.shape[1])
-            reference=reference*2
+            reference=reference
             distance_error_list=[]
             distance_list=[]
             for i in range(len(gabriel_graph)):
@@ -194,22 +194,22 @@ def process_data_gazebo(root_path,robot_num=5):
                             distance_error_list.append(distance_error)
         average_formation = np.average(np.array(distance_list))
         average_formation_error = 100*np.average(np.array(distance_error_list)) / 2
-        if convergence_time >= 50:
-            unsuccess += 1
-            print(path,average_formation_error)
-            to_root = "/home/xinchi/unsuccess_heu"
-            distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
-            continue
+        # if convergence_time >= 50:
+        #     unsuccess += 1
+        #     print(path,average_formation_error,"no converge")
+        #     to_root = "/home/xinchi/unsuccess"
+        #     distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
+        #     continue
         if crash==True:
             unsuccess += 1
-            print(path,average_formation_error)
-            to_root = "/home/xinchi/unsuccess_heu"
+            print(path,average_formation_error,"crash")
+            to_root = "/home/xinchi/unsuccess"
             distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
         if average_formation_error>10:
             unsuccess += 1
-            print(path, average_formation_error)
-            to_root = "/home/xinchi/unsuccess_heu"
+            print(path, average_formation_error,"too much error")
+            to_root = "/home/xinchi/unsuccess"
             distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
 
@@ -222,9 +222,9 @@ def process_data_gazebo(root_path,robot_num=5):
 
     return converge_time_all,average_formation_all,average_formation_error_all
 
-def box_1(data_m,title,ylabel,save_dir):
+def box_1(data_m,title,xlabel,ylabel,save_dir):
     fig = plt.figure(figsize=(5, 3))
-    labels=[i+5 for i in range(len(data_m))]
+
     color_model='#1f77b4'
     color_expert='#ff7f0e'
     model=plt.boxplot(data_m,
@@ -242,11 +242,12 @@ def box_1(data_m,title,ylabel,save_dir):
                         wspace=0.0,
                         hspace=0.0)
     # plt.legend([model["boxes"][0], exp["boxes"][0]], ['GNN', 'Expert'], loc='upper left',borderpad=0.5,labelspacing=0.5)
-    plt.xticks(np.array(range(len(data_m)))*1.0,labels=labels,fontsize=15)
+    plt.xticks(np.array(range(len(data_m)))*1.0,labels=xlabel,fontsize=15)
     plt.yticks(fontsize=15)
     # plt.title(title,fontsize=18)
     plt.xlabel("Number of robots",fontsize=15)
     plt.ylabel(ylabel,fontsize=15)
+    print(save_dir)
     plt.savefig(os.path.join(save_dir,title+'.png'))
 def box_2(data_m,data_e,title,ylabel,save_dir):
     fig = plt.figure(figsize=(2.5, 3))
@@ -298,11 +299,11 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-
-for i in (5,6,7,8,9):
-
-    root_dir="/home/xinchi/gazebo_data/ViT_full_0.5/ViT_"+str(i)+"_full"
-    path = os.path.join(root_dir)
+robot_num=(7,9,11)
+root_dir="/home/xinchi/gazebo_data/ViT_1m"
+for i in robot_num:
+    folder="ViT_"+str(i)+"_1m"
+    path = os.path.join(root_dir,folder)
     converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path)
     converge_time_all_ViT.append(converge_time_all)
     average_formation_all_ViT.append(average_formation_all)
@@ -312,9 +313,9 @@ for i in (5,6,7,8,9):
 
 
 #
-box_1(converge_time_all_ViT,"Converge time","Convergence Time(s)",root_dir)
-box_1(average_formation_all_ViT,"Average distance","Distance(m)",root_dir)
-box_1(average_formation_error_all_ViT,"Average group formation error","Formation Error(%)",root_dir)
+box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time(s)",root_dir)
+box_1(average_formation_all_ViT,"Average distance",robot_num,"Distance(m)",root_dir)
+box_1(average_formation_error_all_ViT,"Average group formation error",robot_num,"Formation Error(%)",root_dir)
 # box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
 # box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)
 # box_1(average_formation_error_all_expert,"Average group formation error","Formation Error(%)",root_dir)
