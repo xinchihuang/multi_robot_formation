@@ -20,7 +20,7 @@ class ModelControl:
     def __init__(self, topic):
 
         self.model_path = os.path.abspath(
-            '') + "/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
+            '') + "/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
         self.desired_distance=1.0
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller=LocalExpertController()
