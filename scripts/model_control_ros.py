@@ -3,7 +3,7 @@ import math
 import rospy
 import os
 import cv2
-from scripts.realrobots.robot_executor_robomaster import Executor
+from realrobots.robot_executor_robomaster import Executor
 from .multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from .multi_robot_formation.controller_new import VitController
 from .multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
@@ -23,7 +23,8 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 class ModelControl:
     def __init__(self, topic):
 
-        self.model_path =os.path.abspath('..')+"/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
+        self.model_path = os.path.abspath(
+            '') + "/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
         self.desired_distance=1.0
         self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller=LocalExpertController()
