@@ -4,13 +4,9 @@ import rospy
 import os
 import cv2
 from realrobots.robot_executor_robomaster import Executor
-from .multi_robot_formation.comm_data import SceneData, SensorData,ControlData
-from .multi_robot_formation.controller_new import VitController
-from .multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
-from .multi_robot_formation.model.LocalExpertController import LocalExpertController
-# # from robot_test import *
-from collections import defaultdict
-import time
+from comm_data import SceneData, SensorData,ControlData
+from controllers import VitController
+from utils.occupancy_map_simulator import MapSimulator
 
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
