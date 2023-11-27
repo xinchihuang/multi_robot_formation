@@ -24,7 +24,8 @@ from cmvision_3d.msg import Blobs3d, Blob3d
 class ModelControl:
     def __init__(self, topic):
 
-        self.model_path =os.path.abspath('..')+"/jetson/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit1.0.pth"
+        self.model_path =os.path.abspath('..')+"/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
+
         self.desired_distance=1.0
 
         # self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
@@ -41,8 +42,7 @@ class ModelControl:
         # self.bridge = CvBridge()
         self.sub = rospy.Subscriber(topic, Blobs3d, self.ModelControlCallback)
         self.map_size = 100
-        self.range = 5
-        self.height = 2
+        self.range = 2
         self.color_index = {"green": 0}
         self.EP_DICT = {}
         # self.IP_DICT = {0: "172.20.4.epoch1_3000", 1: "172.20.4.7", 2: "172.20.4.8"}
@@ -82,7 +82,7 @@ class ModelControl:
             #     continue
             look_up_table[robot_index] = 1
             x_c, z_c, y_c = blob.center.x, -blob.center.y, blob.center.z
-            if -0.3<z_c<0.3:
+            if -0.25<z_c<0.25:
             # print(blob.name,x_w,y_w,z_w)
                 position_list_local.append([y_c, -x_c, z_c])
         if len(position_list_local) == 0:
@@ -122,6 +122,6 @@ if __name__ == "__main__":
     topic = "/blobs_3d"
     listener = ModelControl(topic)
     rospy.Subscriber('keyboard_input', String, listener.keyboard_stop)
-    timer = rospy.Timer(rospy.Duration(100), listener.timed_stop)
+    # timer = rospy.Timer(rospy.Duration(100), listener.timed_stop)
     rospy.spin()
 
