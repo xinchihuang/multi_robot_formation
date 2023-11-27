@@ -3,6 +3,7 @@ import math
 import rospy
 import os
 import cv2
+import numpy as np
 from realrobots.robot_executor_robomaster import Executor
 from comm_data import SceneData, SensorData,ControlData
 from controllers import VitController
@@ -72,8 +73,8 @@ class ModelControl:
         else:
 
             occupancy_map = self.map_simulator.generate_map_one(position_list_local)
-            # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
-            # cv2.waitKey(1)
+            cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+            cv2.waitKey(1)
             data = {"robot_id": 0, "occupancy_map": occupancy_map}
             control_data = self.controller.get_control(data)
 
