@@ -6,6 +6,7 @@ author: Xinchi Huang
 import numpy as np
 import math
 def is_valid_point(point_local,sensor_range=5,sensor_view_angle=math.pi/2):
+
     # print(point_local)
     point_local=np.array(point_local[:2])
     if point_local[0]==0 and point_local[1]==0:

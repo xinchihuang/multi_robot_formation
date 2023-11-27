@@ -12,6 +12,7 @@ class LocalExpertControllerFull:
         self.sensor_range = sensor_range
         self.K_f = K_f
         self.max_speed=max_speed
+        print("LocalExpertControllerFull",self.__dict__)
     def get_control(self,data):
 
         out_put = ControlData()

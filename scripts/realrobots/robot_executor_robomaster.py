@@ -172,6 +172,7 @@ class Executor:
             )
             self.idle_frame=0
         self.connector.send_to_robot(msg)
+        time.sleep(0.02)
     def stop(self):
         # msg = "quit"
         msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(

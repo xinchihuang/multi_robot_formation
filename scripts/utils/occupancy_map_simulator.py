@@ -51,19 +51,8 @@ class MapSimulator:
                         self.position_encoding_matrix[i][j]=1
                         continue
                     self.position_encoding_matrix[i][j]=1/max(abs(i-self.map_size/2),abs(j-self.map_size/2))
-        # self.get_settings()
-    def get_settings(self):
-        print("-----------------------------------")
-        print("Map simulator settings")
-        print("robot_size: ", self.robot_size)
-        print("max_height: ", self.max_height)
-        print("map_size: ",  self.map_size)
-        print("max_x: ", self.max_x)
-        print("max_y: ", self.max_y)
-        print("local: ", self.local)
-        print("block: ", self.block)
-        print("partial: ", self.partial)
-        print("sensor_angel: ",self.sensor_view_angle)
+        print("MapSimulator",self.__dict__)
+
     def world_to_map(self, world_point, map_size, max_x, max_y):
         """
         Transform points from world coordinate to map coordinate

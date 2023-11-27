@@ -148,12 +148,23 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/simple_localization/utils/poses")
-    pose_list=pose_data[random.randint(0,len(pose_data))]
+    # pose_data=PoseDataLoader("/home/xinchi/catkin_ws/src/multi_robot_formation/simple_localization/utils/poses")
+    # pose_list=pose_data[random.randint(0,len(pose_data))]
+
+
+    pose_list=[[0,0,0],
+               [3,3,0],
+               [-3,3,0],
+               # [-3,-3,0],
+               [3,-3,0],
+               # [-3,0,0],
+               [3,0,0],
+               [0,3,0],
+               [0,-3,0]]
     rospy.wait_for_service('/gazebo/set_model_state')
     set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
     rospy.init_node("collect_data")
-    robot_num = 5
+    robot_num = 7
 
     ### expert controller
     sensor_range=5

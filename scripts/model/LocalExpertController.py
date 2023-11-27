@@ -169,7 +169,7 @@ class LocalExpertController:
             velocity_y_f = rate_f * position_local[1]
             velocity_sum_x += self.K_f*velocity_x_f
             velocity_sum_y += self.K_f*velocity_y_f
-        print(velocity_sum_x,velocity_sum_y)
+        # print(velocity_sum_x,velocity_sum_y)
         # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
         out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
         out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y

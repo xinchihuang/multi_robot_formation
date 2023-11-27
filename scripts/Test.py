@@ -52,7 +52,7 @@ for i in range(1):
 # initial_max_range=5
 # initial_min_range=1
 # sensor_range=10
-# platform="vrep"
+# robot_platform="vrep"
 # simulate_scene = Scene(num_robot=num_robot,desired_distance=desired_distance,initial_max_range=initial_max_range,initial_min_range=initial_min_range)
 # model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/src/multi_robot_formation/saved_model/vit0.8.pth"
 # controller = VitController(model_path=model_path,desired_distance=desired_distance)
@@ -63,7 +63,7 @@ for i in range(1):
 #             sensor=Sensor(),
 #             executor=Executor(),
 #             controller=empty_controller,
-#             platform=platform,
+#             robot_platform=robot_platform,
 #             sensor_range=sensor_range
 #         )
 #     else:
@@ -71,7 +71,7 @@ for i in range(1):
 #             sensor=Sensor(),
 #             executor=Executor(),
 #             controller=controller,
-#             platform=platform,
+#             robot_platform=robot_platform,
 #             sensor_range=sensor_range
 #         )
 #     simulate_scene.add_robot_vrep(i,new_robot)
