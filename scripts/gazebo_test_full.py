@@ -96,11 +96,15 @@ class Simulation:
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
                 # print(position_lists_local[index])
+                # start = time.time()
                 occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
                 # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
                 # cv2.waitKey(1)
                 data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
+
                 control_data = self.controller.get_control(data)
+                # end=time.time()
+                # print(end-start)
                 control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
 
         for index in range(0,self.robot_num):
@@ -121,23 +125,28 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 13
+    robot_num = 5
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
     # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
 
 
     pose_list=initialize_pose(robot_num,initial_max_range=2)
-
+    #
     # pose_list=[[0,0,0],
-    #            [1.5,1.5,0],
-    #            [-1.5,1.5,0],
-    #            # [-3,-3,0],
-    #            [1.5,-1.5,0],
-    #            # [-3,0,0],
+    #            # [1.5,1.5,0],
+    #            # [-1.5,1.5,0],
+    #            # [-1.5,-1.5,0],
+    #            # [1.5,-1.5,0],
+    #            [-1.5,0,0],
     #            [1.5,0,0],
     #            [0,1.5,0],
-    #            [0,-1.5,0]]
+    #            [0,-1.5,0],
+    #            # [3,0,0],
+    #            # [-3,0,0],
+    #            # [0,3,0],
+    #            # [0,-3,0],
+    #            ]
 
 
     rospy.wait_for_service('/gazebo/set_model_state')

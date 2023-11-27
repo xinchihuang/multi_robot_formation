@@ -19,9 +19,8 @@ def gabriel(pose_array):
                     gabriel_graph[v][u]=0
                     break
     return gabriel_graph
-def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_time=5,time_interval=0.05):
+def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_timesteps=100):
     time_steps=raw_data.shape[1]
-    check_timesteps=check_time/time_interval
     check_window=[]
     for time_step in range(time_steps):
         data=raw_data[:,time_step,:]
@@ -46,10 +45,10 @@ def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,chec
                 num_data_point+=len(check_window[i])
             average_formation_error= sum_distance_error/num_data_point
             if average_formation_error/desired_distance<=tolerrance:
-                return time_step/20
+                return time_step
             else:
                 check_window.pop(0)
-    return time_step*time_interval
+    return time_step
 def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=5):
     time_steps=raw_data.shape[1]
     realstop = 0
@@ -313,7 +312,7 @@ for i in robot_num:
 
 
 #
-box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time(s)",root_dir)
+box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time Step",root_dir)
 box_1(average_formation_all_ViT,"Average distance",robot_num,"Distance(m)",root_dir)
 box_1(average_formation_error_all_ViT,"Average group formation error",robot_num,"Formation Error(%)",root_dir)
 # box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
