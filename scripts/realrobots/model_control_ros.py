@@ -3,7 +3,7 @@ import math
 import rospy
 import os
 import cv2
-from multi_robot_formation.scripts.realrobots.robot_executor_robomaster import Executor
+from scripts.realrobots.robot_executor_robomaster import Executor
 from .multi_robot_formation.comm_data import SceneData, SensorData,ControlData
 from .multi_robot_formation.controller_new import VitController
 from .multi_robot_formation.utils.occupancy_map_simulator import MapSimulator
