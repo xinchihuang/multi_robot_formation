@@ -34,7 +34,7 @@ class ModelControl:
         self.map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,
                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
         self.executor=Executor()
-        self.color_index = {"Yellow": 0,"Blue": 1,"Orange": 2,"Green": 3}
+        self.color_index = {"Green": 0}
     def simple_control(self,position_list,index,desired_distance):
         out_put = ControlData()
         velocity_sum_x=0
@@ -73,8 +73,8 @@ class ModelControl:
         else:
 
             occupancy_map = self.map_simulator.generate_map_one(position_list_local)
-            # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-            # cv2.waitKey(1)
+            cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+            cv2.waitKey(1)
             data = {"robot_id": 0, "occupancy_map": occupancy_map}
             control_data = self.controller.get_control(data)
 
