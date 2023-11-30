@@ -19,7 +19,7 @@ def gabriel(pose_array):
                     gabriel_graph[v][u]=0
                     break
     return gabriel_graph
-def get_convergence_time_average(raw_data,desired_distance=2,tolerrance=0.1,check_timesteps=100):
+def get_convergence_time_average(raw_data,desired_distance=1,tolerrance=0.1,check_timesteps=100):
     time_steps=raw_data.shape[1]
     check_window=[]
     for time_step in range(time_steps):
@@ -298,7 +298,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(7,9,11)
+robot_num=(5,7,9,11,13)
 root_dir="/home/xinchi/gazebo_data/ViT_1m"
 for i in robot_num:
     folder="ViT_"+str(i)+"_1m"

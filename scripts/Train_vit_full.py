@@ -217,7 +217,7 @@ if __name__ == "__main__":
     data_path_root = "/home/xinchi/gazebo_data"
     save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
     desired_distance = 1.0
-    number_of_robot = 7
+    number_of_robot =5
     robot_size=0.15
     map_size=100
     max_x = 2

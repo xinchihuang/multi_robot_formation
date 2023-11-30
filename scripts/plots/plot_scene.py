@@ -349,7 +349,7 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
     position_array=np.transpose(position_array,(1,0,2))
     plot_relative_distance(dt, position_array, root_dir)
     plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array, root_dir)
+    plot_formation_gabreil(position_array, root_dir,desired_distance=1)
     plot_trace_triangle(position_array,root_dir)
     # plot_speed(dt, position_array, root_dir)
 
@@ -357,7 +357,7 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="/home/xinchi/gazebo_data/ViT_9_1m"
+    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_5_1m"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path))
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
