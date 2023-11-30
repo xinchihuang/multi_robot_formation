@@ -85,7 +85,7 @@ class Simulation:
         self.trace.append(pose_list)
         print("___________")
         # print(pose_list)
-        gabreil_graph_global=get_gabreil_graph(pose_list)
+        gabreil_graph_global=get_gabreil_graph(pose_list,sensor_range=self.sensor_range)
         for i in range(len(gabreil_graph_global)):
             for j in range(i+1,len(gabreil_graph_global)):
                 if gabreil_graph_global[i][j] == 0:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     ### Vit controller
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_13_1m"
+    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_5_1m"
     controller=VitController(model_path)
     #
     desired_distance = 1.0

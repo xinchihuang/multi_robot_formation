@@ -50,15 +50,10 @@ def is_gabriel(graph_global,graph_local):
 def check_valid_initial_graph(graph_local):
     valid=True
     connected_component=find_weakly_connected_components(graph_local)
-    # if is_graph_balanced(graph_local) == False:
-    #     valid = False
     if len(connected_component)>1:
         valid=False
-    # if is_gabriel(graph_global,graph_local)==False:
-    #     valid=False
     return valid
-def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
-
+def initialize_pose(num_robot, initial_max_range=2,initial_min_range=1,sensor_range=2):
     while True:
         pose_list = []
         for i in range(num_robot):
@@ -82,18 +77,19 @@ def initialize_pose(num_robot, initial_max_range=5,initial_min_range=1):
                     pose_list.append([x,y,theta])
                     break
 
-        gabriel_graph_global = get_gabreil_graph(pose_list)
-        gabriel_graph_local = get_gabreil_graph_local(pose_list)
+        gabriel_graph_global = get_gabreil_graph(pose_list,sensor_range=sensor_range)
+        # gabriel_graph_local = get_gabreil_graph_local(pose_list)
 
-        if check_valid_initial_graph(gabriel_graph_global,gabriel_graph_local)==True:
+        if check_valid_initial_graph(gabriel_graph_global)==True:
             for line in gabriel_graph_global:
                 print(line)
             # print("----------")
-            for line in gabriel_graph_local:
-                print(line)
+            # for line in gabriel_graph_local:
+            #     print(line)
             break
+    print(pose_list)
     return pose_list
-def initialize_pose_multi(queue,num_robot, initial_max_range=5,initial_min_range=1):
+def initialize_pose_multi(queue,num_robot, initial_max_range=2,initial_min_range=1,sensor_range=2):
     ignore_sigint()
     while True:
         while True:
@@ -119,12 +115,12 @@ def initialize_pose_multi(queue,num_robot, initial_max_range=5,initial_min_range
                         pose_list.append([x,y,theta])
                         break
 
-            gabriel_graph_global = get_gabreil_graph(pose_list)
-            gabriel_graph_local=get_gabreil_graph_local(pose_list)
+            gabriel_graph_global = get_gabreil_graph(pose_list,sensor_range=sensor_range)
+            # gabriel_graph_local=get_gabreil_graph_local(pose_list)
 
-            if check_valid_initial_graph(gabriel_graph_local)==True:
-                # for line in gabriel_graph_global:
-                #     print(line)
+            if check_valid_initial_graph(gabriel_graph_global)==True:
+                for line in gabriel_graph_global:
+                    print(line)
                 # # print("----------")
                 # for line in gabriel_graph_local:
                 #     print(line)
@@ -206,12 +202,14 @@ class PoseDataLoader:
 #     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 if __name__ == "__main__":
-    root="poses_pentagon_7"
+    root="poses"
     if not os.path.exists(root):
         os.mkdir(root)
-    num_robot = 9
-    initial_max_range = 5
-    initial_min_range = 0.5
+    num_robot = 5
+    initial_max_range = 2
+    initial_min_range = 1
+    sensor_range=2
+    # initialize_pose(num_robot,  initial_max_range=initial_max_range,  initial_min_range=initial_min_range, sensor_range=sensor_range)
     #
     queue = multiprocessing.Queue()
     num_process = 4  # Number of random number generating processes
@@ -222,7 +220,7 @@ if __name__ == "__main__":
 
     processes = []
     for _ in range(num_process):  # Four generator processes
-        p = multiprocessing.Process(target=initialize_pose_pentagon, args=(queue,2))
+        p = multiprocessing.Process(target=initialize_pose_multi, args=(queue,num_robot,initial_max_range,initial_min_range))
         processes.append(p)
         p.start()
 

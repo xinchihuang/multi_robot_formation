@@ -298,7 +298,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(5,7,9,11,13)
+robot_num=(5,)
 root_dir="/home/xinchi/gazebo_data/ViT_1m"
 for i in robot_num:
     folder="ViT_"+str(i)+"_1m"
