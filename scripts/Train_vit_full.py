@@ -217,9 +217,9 @@ if __name__ == "__main__":
     data_path_root = "/home/xinchi/gazebo_data"
     save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
     desired_distance = 1.0
-    number_of_robot =5
+    number_of_robot =7
     robot_size=0.15
-    map_size=100
+    map_size=1000
     max_x = 2
     max_y =2
     sensor_view_angle= 2*math.pi
@@ -245,13 +245,13 @@ if __name__ == "__main__":
         image_size = map_size,
         patch_size = patch_size,
         num_classes = 2,
-        dim = 256,
+        dim = 64,
         depth = 3,
         heads = 8,
-        mlp_dim = 512,
+        mlp_dim = 128,
         dropout = 0.1,
         emb_dropout = 0.1,
-        agent_number=5
+        agent_number=number_of_robot
     )
 
     # dataset
