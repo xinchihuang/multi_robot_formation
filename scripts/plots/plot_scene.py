@@ -313,7 +313,7 @@ def plot_load_data(root_dir,dt=0.05):
             continue
         velocity_array = np.concatenate((velocity_array, velocity_array_single), axis=0)
     plot_wheel_speed(dt, velocity_array, root_dir)
-def plot_load_data_gazebo(root_dir,dt=0.05):
+def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     """
 
     :param dt: Time interval
@@ -325,17 +325,17 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 
     position_array=np.transpose(position_array,(1,0,2))
     # plot_relative_distance(dt, position_array, root_dir)
-    plot_relative_distance_gabreil(dt, position_array, root_dir, sensor_range=2)
-    plot_formation_gabreil(position_array, root_dir,desired_distance=1,sensor_range=2)
-    plot_trace_triangle(position_array,root_dir,sensor_range=2)
+    plot_relative_distance_gabreil(dt, position_array, root_dir, sensor_range=sensor_range)
+    plot_formation_gabreil(position_array, root_dir,desired_distance=desired_distance,sensor_range=sensor_range)
+    plot_trace_triangle(position_array,root_dir,sensor_range=sensor_range)
     # plot_speed(dt, position_array, root_dir)
 
 #
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_11_1m"
+    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_7_1m"
     for path in os.listdir(root_path):
-        plot_load_data_gazebo(os.path.join(root_path,path))
+        plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=2,sensor_range=5)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

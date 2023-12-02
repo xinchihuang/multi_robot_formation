@@ -5,27 +5,13 @@ import math
 import distutils.dir_util
 from utils.gabreil_graph import get_gabreil_graph
 
-def gabriel(pose_array):
-    node_mum = np.shape(pose_array)[0]
-    gabriel_graph=[[1]*node_mum for _ in range(node_mum)]
-    position_array=pose_array[:,:2]
-    for u in range(node_mum):
-        for v in range(node_mum):
-            m=(position_array[u]+position_array[v])/2
-            for w in range(node_mum):
-                if w==v:
-                    continue
-                if  np.linalg.norm(position_array[w]-m)<np.linalg.norm(position_array[u]-m):
-                    gabriel_graph[u][v]=0
-                    gabriel_graph[v][u]=0
-                    break
-    return gabriel_graph
-def get_convergence_time_average(raw_data,desired_distance=1,tolerrance=0.1,check_timesteps=100):
+
+def get_convergence_time_average(raw_data,desired_distance=1,tolerrance=0.1,check_timesteps=50,sensor_range=1):
     time_steps=raw_data.shape[1]
     check_window=[]
     for time_step in range(time_steps):
         data=raw_data[:,time_step,:]
-        gabriel_graph = get_gabreil_graph(data)
+        gabriel_graph = get_gabreil_graph(data,sensor_range=sensor_range)
         stop=True
         distance_error_list=[]
         for i in range(len(gabriel_graph)):
@@ -45,105 +31,15 @@ def get_convergence_time_average(raw_data,desired_distance=1,tolerrance=0.1,chec
                     sum_distance_error+=check_window[i][j]
                 num_data_point+=len(check_window[i])
             average_formation_error= sum_distance_error/num_data_point
+            # print(time_step,sum_distance_error,num_data_point)
             if average_formation_error/desired_distance<=tolerrance:
                 return time_step
             else:
                 check_window.pop(0)
     return time_step
-def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=5):
-    time_steps=raw_data.shape[1]
-    realstop = 0
-    for time_step in range(time_steps):
-        data=raw_data[:,time_step,:]
-        gabriel_graph = get_gabreil_graph(data)
-        stop=True
-        for i in range(len(gabriel_graph)):
-            for j in range(i, len(gabriel_graph)):
-                if not i == j:
-                    if gabriel_graph[i][j] == 1:
-                        distance = ((data[i,0] - data[j,0])**2 + (data[i, 1] - data[j,1])**2)**0.5
-                        if math.fabs(distance-desired_distance)/desired_distance>tolerrance:
-                            stop=False
-        if stop:
-            realstop+=1
-        else:
-            realstop=0
-        if realstop>=check_time*20:
-            break
-        # print(realstop)
-    return time_step/10
-def process_data(root_path,robot_num):
-    path_list=[]
-    for path in os.listdir(root_path):
-        path_list.append(os.path.join(root_path, path))
-
-    converge_time_all=[]
-    average_formation_all=[]
-    average_formation_error_all=[]
-    unsuccess=0
-
-    for path in path_list:
-        for i in range(robot_num):
-            if i==0:
-                file=os.path.join(path,str(i), "trace.npy")
-                raw_data=np.load(file)[:,0,:]
-                raw_data=np.expand_dims(raw_data,axis=0)
-            else:
-                file = os.path.join(path, str(i), "trace.npy")
-                data_i= np.load(file)[:,0,:]
-                data_i=np.expand_dims(data_i, axis=0)
-                raw_data=np.concatenate((raw_data,data_i),axis=0)
-        sim_time=raw_data.shape[1]*0.05
-        convergence_time = get_convergence_time_average(raw_data)
-        observe_data=raw_data[:,-400:,:2]
-        time_steps=observe_data.shape[1]
-        for time_step in range(time_steps):
-            crash=False
-            separate=False
-            data=observe_data[:,time_step,:]
-            gabriel_graph=gabriel(data)
-            reference=np.ones(data.shape[1])
-            reference=reference*2
-            distance_error_list=[]
-            distance_list=[]
-            for i in range(len(gabriel_graph)):
-                for j in range(i,len(gabriel_graph)):
-                    if not i==j:
-                        if gabriel_graph[i][j]==1:
-                            distance=np.sqrt(np.square(data[i,0]-data[j,0])+np.square(data[i,1]-data[j,1]))
-                            # print(distance)
-                            distance_list.append(distance)
-                            if distance<1:
-                                crash=True
-                            if distance>5:
-                                separate=True
-                            distance_error=np.abs(distance-reference)
-                            distance_error_list.append(distance_error)
-        average_formation = np.average(np.array(distance_list))
-        average_formation_error = 100*np.average(np.array(distance_error_list)) / 2
-        if convergence_time >= 50:
-            unsuccess += 1
-            print(path,average_formation_error)
-            continue
-        if crash==True:
-            unsuccess += 1
-            print(path,average_formation_error)
-            continue
-        if crash==True:
-            unsuccess += 1
-            print(path,average_formation_error)
-            continue
-
-        converge_time_all.append(convergence_time)
-        average_formation_error_all.append(average_formation_error)
-        average_formation_all.append(average_formation)
-        # break
-    print(root_path,unsuccess)
-    return converge_time_all,average_formation_all,average_formation_error_all
-    # print(observe_data-reference)
 
 
-def process_data_gazebo(root_path):
+def process_data_gazebo(root_path,desired_distance=1,sensor_range=2):
     path_list=[]
     for path in os.listdir(root_path):
         path_list.append(os.path.join(root_path, path))
@@ -167,15 +63,15 @@ def process_data_gazebo(root_path):
         raw_data=np.load(os.path.join(path, "trace.npy"))
         raw_data=raw_data.transpose((1,0,2))
         sim_time=raw_data.shape[1]*0.05
-        convergence_time = get_convergence_time_average(raw_data)
+        convergence_time = get_convergence_time_average(raw_data,desired_distance=desired_distance,sensor_range=sensor_range)
         observe_data=raw_data[:,-400:,:2]
         time_steps=observe_data.shape[1]
         for time_step in range(time_steps):
             crash=False
             separate=False
             data=observe_data[:,time_step,:]
-            gabriel_graph=gabriel(data)
-            reference=np.ones(data.shape[1])
+            gabriel_graph=get_gabreil_graph(data,sensor_range=sensor_range)
+            reference=np.ones(data.shape[1])*desired_distance
             reference=reference
             distance_error_list=[]
             distance_list=[]
@@ -193,7 +89,7 @@ def process_data_gazebo(root_path):
                             distance_error=np.abs(distance-reference)
                             distance_error_list.append(distance_error)
         average_formation = np.average(np.array(distance_list))
-        average_formation_error = 100*np.average(np.array(distance_error_list)) / 2
+        average_formation_error = 100*np.average(np.array(distance_error_list))
         # if convergence_time >= 50:
         #     unsuccess += 1
         #     print(path,average_formation_error,"no converge")
@@ -203,14 +99,14 @@ def process_data_gazebo(root_path):
         if crash==True:
             unsuccess += 1
             print(path,average_formation_error,"crash")
-            to_root = "/home/xinchi/unsuccess"
-            distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
-            continue
-        if average_formation_error>10:
+            # to_root = "/home/xinchi/unsuccess"
+            # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
+            # continue
+        if average_formation_error>30:
             unsuccess += 1
             print(path, average_formation_error,"too much error")
-            to_root = "/home/xinchi/unsuccess"
-            distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
+            # to_root = "/home/xinchi/unsuccess"
+            # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             continue
 
         converge_time_all.append(convergence_time)
@@ -299,12 +195,12 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(5,7,9,11,13,)
-root_dir="/home/xinchi/gazebo_data/ViT_1m"
+robot_num=(5,7,9,11,13)
+root_dir="/home/xinchi/gazebo_data/ViT_full_0.5"
 for i in robot_num:
-    folder="ViT_"+str(i)+"_1m"
+    folder="ViT_"+str(i)+"_full"
     path = os.path.join(root_dir,folder)
-    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path)
+    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=2,sensor_range=5)
     converge_time_all_ViT.append(converge_time_all)
     average_formation_all_ViT.append(average_formation_all)
     average_formation_error_all_ViT.append(average_formation_error_all)
