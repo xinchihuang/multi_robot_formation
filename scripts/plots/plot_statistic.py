@@ -3,6 +3,7 @@ import numpy as np
 import os
 import math
 import distutils.dir_util
+from utils.gabreil_graph import get_gabreil_graph
 
 def gabriel(pose_array):
     node_mum = np.shape(pose_array)[0]
@@ -24,7 +25,7 @@ def get_convergence_time_average(raw_data,desired_distance=1,tolerrance=0.1,chec
     check_window=[]
     for time_step in range(time_steps):
         data=raw_data[:,time_step,:]
-        gabriel_graph = gabriel(data)
+        gabriel_graph = get_gabreil_graph(data)
         stop=True
         distance_error_list=[]
         for i in range(len(gabriel_graph)):
@@ -54,7 +55,7 @@ def get_convergence_time(raw_data,desired_distance=2,tolerrance=0.1,check_time=5
     realstop = 0
     for time_step in range(time_steps):
         data=raw_data[:,time_step,:]
-        gabriel_graph = gabriel(data)
+        gabriel_graph = get_gabreil_graph(data)
         stop=True
         for i in range(len(gabriel_graph)):
             for j in range(i, len(gabriel_graph)):
@@ -187,7 +188,7 @@ def process_data_gazebo(root_path):
                             distance_list.append(distance)
                             if distance<0.2:
                                 crash=True
-                            if distance>5:
+                            if distance>2:
                                 separate=True
                             distance_error=np.abs(distance-reference)
                             distance_error_list.append(distance_error)
@@ -298,7 +299,7 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(5,)
+robot_num=(5,7,9,11,13,)
 root_dir="/home/xinchi/gazebo_data/ViT_1m"
 for i in robot_num:
     folder="ViT_"+str(i)+"_1m"

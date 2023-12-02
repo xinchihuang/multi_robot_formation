@@ -6,14 +6,14 @@ author: Xinchi Huang
 import os
 import sys
 
-
+print(os.getcwd())
 import os
 import math
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
-from ..utils.gabreil_graph import get_gabreil_graph
+from utils.gabreil_graph import get_gabreil_graph
 # from LocalExpertController import LocalExpertController
 
 def plot_wheel_speed(dt, velocity_array, save_path):
@@ -90,7 +90,7 @@ def plot_relative_distance(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_relative_distance_gabreil(dt, pose_array, save_path):
+def plot_relative_distance_gabreil(dt, pose_array, save_path,sensor_range=2):
     """
     Plot line chart for robots relative distance, Only show the distance which are
     edges of gabreil graph
@@ -101,7 +101,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     """
     rob_num = np.shape(pose_array)[0]
     position_array = pose_array[:, -1, :]
-    gabriel_graph = get_gabreil_graph(position_array)
+    gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
     distance_dict = {}
     xlist = []
     for i in range(np.shape(pose_array)[1]):
@@ -135,7 +135,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,ylim=8):
+def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,ylim=8,sensor_range=2):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -143,9 +143,8 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,yli
     :return:
     """
     rob_num = np.shape(pose_array)[0]
-    position_array = pose_array[:, 0, :]
-    gabriel_graph = get_gabreil_graph(position_array)
-    print(position_array)
+    position_array = pose_array[:, -1, :]
+    gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
     plt.figure(figsize=(10, 10))
     plt.scatter(position_array[:, 0], position_array[:, 1])
     # for i in range(len(position_array)):
@@ -172,7 +171,6 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,yli
             plt.plot(xlist, ylist, label=f"Distane: {distance: .2f}")
             count+=1
             formation_error+=abs(distance-desired_distance)
-
     plt.subplots_adjust(left=0.13,
                         bottom=0.1,
                         right=0.95,
@@ -228,7 +226,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8):
+def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sensor_range=2):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
@@ -243,9 +241,10 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8):
             xtrace.append(pose_array[i][p][0])
             ytrace.append(pose_array[i][p][1])
             ax.plot(xtrace,ytrace,color=color,linestyle='--')
-    position_array = pose_array[:, 0, :]
-    gabriel_graph = get_gabreil_graph(position_array)
-    position_array = pose_array[:, time_step-1, :2]
+    # position_array = pose_array[:, 0, :]
+    position_array = pose_array[:, time_step - 1, :2]
+    gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
+
     for i in range(rob_num):
         for j in range(i + 1, rob_num):
             if gabriel_graph[i][j] == 0:
@@ -326,17 +325,17 @@ def plot_load_data_gazebo(root_dir,dt=0.05):
 
     position_array=np.transpose(position_array,(1,0,2))
     # plot_relative_distance(dt, position_array, root_dir)
-    plot_relative_distance_gabreil(dt, position_array, root_dir)
-    plot_formation_gabreil(position_array, root_dir,desired_distance=1)
-    plot_trace_triangle(position_array,root_dir)
+    plot_relative_distance_gabreil(dt, position_array, root_dir, sensor_range=2)
+    plot_formation_gabreil(position_array, root_dir,desired_distance=1,sensor_range=2)
+    plot_trace_triangle(position_array,root_dir,sensor_range=2)
     # plot_speed(dt, position_array, root_dir)
 
 #
-# if __name__ == "__main__":
-#
-#     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-#     root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_5_1m"
-#     for path in os.listdir(root_path):
-#         plot_load_data_gazebo(os.path.join(root_path,path))
-#     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
-#     # print(trace_array.shape)
+if __name__ == "__main__":
+
+    # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
+    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_11_1m"
+    for path in os.listdir(root_path):
+        plot_load_data_gazebo(os.path.join(root_path,path))
+    # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
+    # print(trace_array.shape)

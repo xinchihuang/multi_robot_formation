@@ -18,7 +18,7 @@ def is_valid_point(point_local,sensor_range=5,sensor_view_angle=math.pi/2):
     # print("valid",point_local)
     return True
 
-def get_gabreil_graph(position_array,sensor_range=1):
+def get_gabreil_graph(position_array,sensor_range=2):
     """
     Return a gabreil graph of the scene
     :param position_array: A numpy array contains all robots' positions
