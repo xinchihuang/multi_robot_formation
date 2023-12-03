@@ -39,8 +39,8 @@ class LocalExpertControllerFull:
             velocity_sum_x += self.K_f*velocity_x_f
             velocity_sum_y += self.K_f*velocity_y_f
         # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
-        out_put.velocity_x=velocity_sum_x if abs(velocity_sum_x)<self.max_speed else self.max_speed*abs(velocity_sum_x)/velocity_sum_x
-        out_put.velocity_y=velocity_sum_y if abs(velocity_sum_y)<self.max_speed else self.max_speed*abs(velocity_sum_y)/velocity_sum_y
+        out_put.velocity_x=velocity_sum_x
+        out_put.velocity_y=velocity_sum_y
         return out_put
 class LocalExpertControllerPartial:
     def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
@@ -257,6 +257,18 @@ class VitController:
         dropout = 0.1,
         emb_dropout = 0.1
     ).double()
+    #     self.model = ViT(
+    #         image_size=100,
+    #         patch_size=10,
+    #         num_classes=2,
+    #         dim=256,
+    #         depth=3,
+    #         heads=8,
+    #         mlp_dim=512,
+    #         dropout=0.1,
+    #         emb_dropout=0.1,
+    #         agent_number=7
+    #     ).double()
         if not self.use_cuda:
             self.model.load_state_dict(
                 torch.load(self.model_path, map_location=torch.device("cpu"))

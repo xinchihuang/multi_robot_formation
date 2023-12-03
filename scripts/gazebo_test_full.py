@@ -25,7 +25,7 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=0.05,stop_thresh=0.01,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.00,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -57,7 +57,8 @@ class Simulation:
         self.save_data_root = save_data_root
         self.trace = []
         self.observation_list = []
-        self.reference_control = []
+        # self.reference_control = []
+        self.model_control=[]
 
         self.execute_stop=1
 
@@ -70,10 +71,11 @@ class Simulation:
         os.mkdir(data_path)
         # observation_array=np.array(self.observation_list)
         trace_array=np.array(self.trace)
-        reference_control_array=np.array(self.reference_control)
+        # reference_control_array=np.array(self.reference_control)
         # np.save(os.path.join(data_path,"observation.npy"),observation_array)
+        model_control_array=np.array(self.model_control)
         np.save(os.path.join(data_path, "trace.npy"), trace_array)
-        np.save(os.path.join(data_path, "reference.npy"), reference_control_array)
+        np.save(os.path.join(data_path, "model_control.npy"), model_control_array)
 
 
 
@@ -106,19 +108,21 @@ class Simulation:
                     distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
                                 pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
                     print(i, j, distance)
-                position_lists_local=global_to_local(pose_list)
-                for index in range(0, self.robot_num):
-                    # print(position_lists_local[index])
-                    # start = time.time()
-                    occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
-                    # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
-                    # cv2.waitKey(1)
-                    data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
+            position_lists_local=global_to_local(pose_list)
+            for index in range(0, self.robot_num):
+                # print(position_lists_local[index])
+                # start = time.time()
+                occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
+                # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
+                # cv2.waitKey(1)
+                data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
 
-                    control_data = self.controller.get_control(data)
-                    # end=time.time()
-                    # print(end-start)
-                    control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
+                control_data = self.controller.get_control(data)
+                # end=time.time()
+                # print(end-start)
+                control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
+
+            self.model_control.append(control_list)
 
             for index in range(0,self.robot_num):
                 msg=Twist()
@@ -134,16 +138,14 @@ class Simulation:
                     msg.linear.y = self.max_velocity*abs(control_list[index][1])/control_list[index][1]
                 else:
                     msg.linear.y = 0
-                print(msg.linear.x,msg.linear.y)
                 self.pub_topic_dict[index].publish(msg)
-            time.sleep(0.05)
-            for index in range(0, self.robot_num):
-                msg = Twist()
-                msg.linear.x = 0
-                msg.linear.y = 0
-                print(msg.linear.x, msg.linear.y)
-                self.pub_topic_dict[index].publish(msg)
-
+            # time.sleep(0.01)
+            # for index in range(0, self.robot_num):
+            #     msg = Twist()
+            #     msg.linear.x = 0
+            #     msg.linear.y = 0
+            #     # print(msg.linear.x, msg.linear.y)
+            #     self.pub_topic_dict[index].publish(msg)
             self.time_step+=1
 
             # self.execute_stop = 1
@@ -188,11 +190,11 @@ if __name__ == "__main__":
 
     ### Vit controller
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_7_1m"
+    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_7_10p"
     controller=VitController(model_path)
     #
-    desired_distance = 1.0
-    # sensor_range=5
+    # desired_distance = 1.0
+    # sensor_range=2
     # K_f=1
     # max_speed = 1
     # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)

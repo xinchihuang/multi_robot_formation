@@ -334,8 +334,8 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_7_1m"
+    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_7_10p"
     for path in os.listdir(root_path):
-        plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=2,sensor_range=5)
+        plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=1,sensor_range=2)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

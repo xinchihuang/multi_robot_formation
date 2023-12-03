@@ -5,7 +5,7 @@ import os
 import numpy as np
 import multiprocessing
 import signal
-from .gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
+from utils.gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 # from gabreil_graph import get_gabreil_graph_local,get_gabreil_graph
 def dfs(node, visited, adjacency_matrix, component):
     visited[node] = True
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     root="poses"
     if not os.path.exists(root):
         os.mkdir(root)
-    num_robot = 5
+    num_robot = 7
     initial_max_range = 2
     initial_min_range = 1
     sensor_range=2

@@ -102,7 +102,7 @@ def process_data_gazebo(root_path,desired_distance=1,sensor_range=2):
             # to_root = "/home/xinchi/unsuccess"
             # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             # continue
-        if average_formation_error>30:
+        if average_formation_error>11:
             unsuccess += 1
             print(path, average_formation_error,"too much error")
             # to_root = "/home/xinchi/unsuccess"
@@ -195,12 +195,12 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(5,7,9,11,13)
-root_dir="/home/xinchi/gazebo_data/ViT_full_0.5"
+robot_num=(7,)
+root_dir="/home/xinchi/gazebo_data/ViT_1m"
 for i in robot_num:
-    folder="ViT_"+str(i)+"_full"
+    folder="ViT_"+str(i)+"_10p"
     path = os.path.join(root_dir,folder)
-    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=2,sensor_range=5)
+    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=1,sensor_range=2)
     converge_time_all_ViT.append(converge_time_all)
     average_formation_all_ViT.append(average_formation_all)
     average_formation_error_all_ViT.append(average_formation_error_all)

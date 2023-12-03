@@ -219,7 +219,7 @@ if __name__ == "__main__":
     desired_distance = 1.0
     number_of_robot =7
     robot_size=0.15
-    map_size=1000
+    map_size=100
     max_x = 2
     max_y =2
     sensor_view_angle= 2*math.pi
@@ -227,12 +227,12 @@ if __name__ == "__main__":
     local = True
     partial = False
     random_rate=0.5
-    pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_7","/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_pentagon_7"]
+    pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses"]
 
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
-    patch_size=10
+    patch_size = 10
     batch_size = 64
     learning_rate= 0.01
     max_epoch=1
@@ -245,10 +245,10 @@ if __name__ == "__main__":
         image_size = map_size,
         patch_size = patch_size,
         num_classes = 2,
-        dim = 64,
+        dim = 256,
         depth = 3,
         heads = 8,
-        mlp_dim = 128,
+        mlp_dim = 512,
         dropout = 0.1,
         emb_dropout = 0.1,
         agent_number=number_of_robot
@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     # dataset
 
-    map_simulator = MapSimulator(robot_size=robot_size,max_x=max_x,max_y=max_y,sensor_view_angle=2 * math.pi, partial=False)
+    map_simulator = MapSimulator(map_size=map_size,robot_size=robot_size,max_x=max_x,max_y=max_y,sensor_view_angle=2 * math.pi, partial=False)
     ref_controller = LocalExpertControllerFull(desired_distance=desired_distance, sensor_range=max_x)
 
     trainset = RobotDatasetTrace(
