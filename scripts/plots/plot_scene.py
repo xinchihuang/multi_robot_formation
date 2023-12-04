@@ -135,7 +135,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path,sensor_range=2):
     plt.close()
 
 
-def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=8,ylim=8,sensor_range=2):
+def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,ylim=4,sensor_range=2):
     """
     Plot the formation of robots, plot the gabreil graph
     :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -334,7 +334,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_7_10p"
+    root_path="/home/xinchi/gazebo_data/ViT_1m/ViT_9_200"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=1,sensor_range=2)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")

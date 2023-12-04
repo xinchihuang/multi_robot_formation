@@ -25,7 +25,7 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.02,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.05,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -125,8 +125,9 @@ class Simulation:
             self.model_control.append(control_list)
 
             for index in range(0,self.robot_num):
+                print(control_list[index])
                 msg=Twist()
-                if self.stop_thresh<abs(control_list[index][0])<self.max_velocity:
+                if self.stop_thresh <abs(control_list[index][0])<self.max_velocity:
                     msg.linear.x = control_list[index][0]
                 elif abs(control_list[index][0])>=self.max_velocity:
                     msg.linear.x = self.max_velocity*abs(control_list[index][0])/control_list[index][0]
@@ -160,7 +161,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 7
+    robot_num = 9
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
     # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
@@ -190,7 +191,7 @@ if __name__ == "__main__":
 
     ### Vit controller
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_7_10p"
+    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_9_200s"
     controller=VitController(model_path)
     #
     # desired_distance = 1.0
