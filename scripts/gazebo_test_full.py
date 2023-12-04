@@ -25,7 +25,7 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.00,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.02,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num

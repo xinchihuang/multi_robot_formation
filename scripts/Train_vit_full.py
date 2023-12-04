@@ -219,7 +219,7 @@ if __name__ == "__main__":
     desired_distance = 1.0
     number_of_robot =7
     robot_size=0.15
-    map_size=100
+    map_size=200
     max_x = 2
     max_y =2
     sensor_view_angle= 2*math.pi
@@ -233,7 +233,7 @@ if __name__ == "__main__":
     criterion = "mse"
     optimizer = "rms"
     patch_size = 10
-    batch_size = 64
+    batch_size = 16
     learning_rate= 0.01
     max_epoch=1
     use_cuda = True

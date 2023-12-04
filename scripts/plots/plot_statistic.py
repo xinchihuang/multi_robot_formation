@@ -102,7 +102,7 @@ def process_data_gazebo(root_path,desired_distance=1,sensor_range=2):
             # to_root = "/home/xinchi/unsuccess"
             # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
             # continue
-        if average_formation_error>11:
+        if average_formation_error>10:
             unsuccess += 1
             print(path, average_formation_error,"too much error")
             # to_root = "/home/xinchi/unsuccess"

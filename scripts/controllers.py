@@ -26,8 +26,8 @@ class LocalExpertControllerFull:
         gabreil_graph_local = get_gabreil_graph_local(self.pose_list, self.sensor_range,view_angle=math.pi*2 )
         pose_array_local= global_to_local(self.pose_list)
         neighbor_list = gabreil_graph_local[self.robot_id]
-        velocity_sum_x = 0
-        velocity_sum_y = 0
+        velocity_x = 0
+        velocity_y = 0
         for neighbor_id in range(len(neighbor_list)):
             if neighbor_id == self.robot_id or neighbor_list[neighbor_id] == 0:
                 continue
@@ -36,11 +36,16 @@ class LocalExpertControllerFull:
             rate_f = (distance_formation - desired_distance) / distance_formation
             velocity_x_f = rate_f * position_local[0]
             velocity_y_f = rate_f * position_local[1]
-            velocity_sum_x += self.K_f*velocity_x_f
-            velocity_sum_y += self.K_f*velocity_y_f
+            velocity_x += self.K_f*velocity_x_f
+            velocity_y += self.K_f*velocity_y_f
         # print(robot_id,velocity_x_f,velocity_x_l,velocity_x_r,velocity_x_s)
-        out_put.velocity_x=velocity_sum_x
-        out_put.velocity_y=velocity_sum_y
+
+        # out_put.velocity_x=velocity_sum_x
+        # out_put.velocity_y=velocity_sum_y
+        out_put.velocity_x = velocity_x if abs(velocity_x) < self.max_speed else self.max_speed * abs(
+            velocity_x) / velocity_x
+        out_put.velocity_y = velocity_y if abs(velocity_y) < self.max_speed else self.max_speed * abs(
+            velocity_y) / velocity_y
         return out_put
 class LocalExpertControllerPartial:
     def __init__(self,desired_distance=2,sensor_range=5,sensor_angle=math.pi/2,safe_margin=0.4,K_f=1,K_m=1,K_omega=1,max_speed=1,max_omega=1):
