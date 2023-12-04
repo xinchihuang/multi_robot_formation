@@ -18,7 +18,7 @@ def is_valid_point(point_local,sensor_range=5,sensor_view_angle=math.pi/2):
     # print("valid",point_local)
     return True
 
-def get_gabreil_graph(position_array):
+def get_gabreil_graph(position_array,sensor_range=2):
     """
     Return a gabreil graph of the scene
     :param position_array: A numpy array contains all robots' positions
@@ -30,15 +30,19 @@ def get_gabreil_graph(position_array):
     for u in range(node_num):
         for v in range(node_num):
             m = (position_array[u] + position_array[v]) / 2
-            for w in range(node_num):
-                if w == v:
-                    continue
-                if np.linalg.norm(position_array[w] - m) < np.linalg.norm(
-                    position_array[u] - m
-                ):
-                    gabriel_graph[u][v] = 0
-                    gabriel_graph[v][u] = 0
-                    break
+            if np.linalg.norm(position_array[u] - position_array[v])>sensor_range:
+                gabriel_graph[u][v] = 0
+                gabriel_graph[v][u] = 0
+            else:
+                for w in range(node_num):
+                    if w == v:
+                        continue
+                    if np.linalg.norm(position_array[w] - m) < np.linalg.norm(
+                        position_array[u] - m
+                    ):
+                        gabriel_graph[u][v] = 0
+                        gabriel_graph[v][u] = 0
+                        break
     return gabriel_graph
 
 def rotation(world_point, self_orientation):
@@ -86,7 +90,7 @@ def global_to_local(position_lists_global):
 
 
 #### not finished
-def get_gabreil_graph_local(position_array,view_range=5,view_angle=math.pi/2):
+def get_gabreil_graph_local(position_array,view_range=2,view_angle=2*math.pi):
     position_array = np.array(position_array)
     position_array_local=global_to_local(position_array)
     # print(position_array_local)

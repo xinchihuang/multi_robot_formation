@@ -25,12 +25,11 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,desired_distance,controller,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,
-                 map_size = 100,sensor_range=5,max_velocity=0.05,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.00,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
-        self.desired_distance = desired_distance
+        self.occupancy_map_simulator = map_simulator
         # communication related
         self.sub_topic_list = []
         self.pub_topic_dict = collections.defaultdict()
@@ -47,9 +46,9 @@ class Simulation:
         self.controller = controller
         self.robot_upper_bound=robot_upper_bound
         self.robot_lower_bound=robot_lower_bound
-        self.map_size = map_size
         self.sensor_range=sensor_range
         self.max_velocity=max_velocity
+        self.stop_thresh=stop_thresh
 
         # simulation related
         self.time_step=0
@@ -58,7 +57,10 @@ class Simulation:
         self.save_data_root = save_data_root
         self.trace = []
         self.observation_list = []
-        self.reference_control = []
+        # self.reference_control = []
+        self.model_control=[]
+
+        self.execute_stop=1
 
     def save_to_file(self):
         root=self.save_data_root
@@ -69,50 +71,85 @@ class Simulation:
         os.mkdir(data_path)
         # observation_array=np.array(self.observation_list)
         trace_array=np.array(self.trace)
-        reference_control_array=np.array(self.reference_control)
+        # reference_control_array=np.array(self.reference_control)
         # np.save(os.path.join(data_path,"observation.npy"),observation_array)
+        model_control_array=np.array(self.model_control)
         np.save(os.path.join(data_path, "trace.npy"), trace_array)
-        np.save(os.path.join(data_path, "reference.npy"), reference_control_array)
+        np.save(os.path.join(data_path, "model_control.npy"), model_control_array)
 
 
 
     def SimulateCallback(self, *argv):
-        # print(argv)
-        pose_list = []
-        control_list=[]
+        if self.execute_stop == 1:
+            for index in range(0, self.robot_num):
+                msg = Twist()
+                msg.linear.x = 0
+                msg.linear.y = 0
+                print(msg.linear.x, msg.linear.y)
+                self.pub_topic_dict[index].publish(msg)
+            self.execute_stop =0
+        else:
 
-        for index in range(self.robot_num):
-            q=Quaternion(argv[index].pose.pose.orientation.x,argv[index].pose.pose.orientation.y,argv[index].pose.pose.orientation.z,argv[index].pose.pose.orientation.w)
-            pose_index=[argv[index].pose.pose.position.x,argv[index].pose.pose.position.y,q.to_euler(degrees=False)[0]]
-            pose_list.append(pose_index)
-        self.trace.append(pose_list)
-        print("___________")
-        # print(pose_list)
-        gabreil_graph_global=get_gabreil_graph(pose_list)
-        for i in range(len(gabreil_graph_global)):
-            for j in range(i+1,len(gabreil_graph_global)):
-                if gabreil_graph_global[i][j] == 0:
-                    continue
-                distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
-                            pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
-                print(i, j, distance)
-            occupancy_map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,sensor_view_angle= math.pi*2, local=True,partial=False)
+            pose_list = []
+            control_list=[]
+
+            for index in range(self.robot_num):
+                q=Quaternion(argv[index].pose.pose.orientation.x,argv[index].pose.pose.orientation.y,argv[index].pose.pose.orientation.z,argv[index].pose.pose.orientation.w)
+                pose_index=[argv[index].pose.pose.position.x,argv[index].pose.pose.position.y,q.to_euler(degrees=False)[0]]
+                pose_list.append(pose_index)
+            self.trace.append(pose_list)
+            print("___________")
+            # print(pose_list)
+            gabreil_graph_global=get_gabreil_graph(pose_list,sensor_range=self.sensor_range)
+            for i in range(len(gabreil_graph_global)):
+                for j in range(i+1,len(gabreil_graph_global)):
+                    if gabreil_graph_global[i][j] == 0:
+                        continue
+                    distance = ((pose_list[i][0] - pose_list[j][0]) ** 2 + (
+                                pose_list[i][1] - pose_list[j][1]) ** 2) ** 0.5
+                    print(i, j, distance)
             position_lists_local=global_to_local(pose_list)
             for index in range(0, self.robot_num):
                 # print(position_lists_local[index])
-                occupancy_map = occupancy_map_simulator.generate_map_one(position_lists_local[index])
+                # start = time.time()
+                occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
                 # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
                 # cv2.waitKey(1)
                 data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
+
                 control_data = self.controller.get_control(data)
+                # end=time.time()
+                # print(end-start)
                 control_list.append([control_data.velocity_x, control_data.velocity_y, control_data.omega])
-            # print(control_list)
-        for index in range(0,self.robot_num):
-            msg=Twist()
-            msg.linear.x = control_list[index][0] if abs(control_list[index][0])<self.max_velocity else self.max_velocity*abs(control_list[index][0])/control_list[index][0]
-            msg.linear.y = control_list[index][1] if abs(control_list[index][1])<self.max_velocity else self.max_velocity*abs(control_list[index][1])/control_list[index][1]
-            self.pub_topic_dict[index].publish(msg)
-        self.time_step+=1
+
+            self.model_control.append(control_list)
+
+            for index in range(0,self.robot_num):
+                print(control_list[index])
+                msg=Twist()
+                if self.stop_thresh <abs(control_list[index][0])<self.max_velocity:
+                    msg.linear.x = control_list[index][0]
+                elif abs(control_list[index][0])>=self.max_velocity:
+                    msg.linear.x = self.max_velocity*abs(control_list[index][0])/control_list[index][0]
+                else:
+                    msg.linear.x = 0
+                if self.stop_thresh<abs(control_list[index][1])<self.max_velocity:
+                    msg.linear.y = control_list[index][1]
+                elif abs(control_list[index][1])>=self.max_velocity:
+                    msg.linear.y = self.max_velocity*abs(control_list[index][1])/control_list[index][1]
+                else:
+                    msg.linear.y = 0
+                self.pub_topic_dict[index].publish(msg)
+            # time.sleep(0.01)
+            # for index in range(0, self.robot_num):
+            #     msg = Twist()
+            #     msg.linear.x = 0
+            #     msg.linear.y = 0
+            #     # print(msg.linear.x, msg.linear.y)
+            #     self.pub_topic_dict[index].publish(msg)
+            self.time_step+=1
+
+            # self.execute_stop = 1
 
         if self.time_step>self.max_simulation_time_step:
             print("save")
@@ -124,23 +161,28 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 9
+    robot_num = 7
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
-    # pose_lists=initial_from_data(initial_pose)
+    # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
 
 
-    # pose_list=initialize_pose(robot_num)
-
-    pose_list=[[0,0,0],
-               [3,3,0],
-               [-3,3,0],
-               [-3,-3,0],
-               [3,-3,0],
-               [-3,0,0],
-               [3,0,0],
-               [0,3,0],
-               [0,-3,0]]
+    pose_list=initialize_pose(robot_num,initial_max_range=2)
+    #
+    # pose_list=[[0,0,0],
+    #            [1.5,1.5,0],
+    #            [-1.5,1.5,0],
+    #            # [-1.5,-1.5,0],
+    #            # [1.5,-1.5,0],
+    #            [-1.5,0,0],
+    #            [1.5,0,0],
+    #            [0,1.5,0],
+    #            [0,-1.5,0],
+    #            # [3,0,0],
+    #            # [-3,0,0],
+    #            # [0,3,0],
+    #            # [0,-3,0],
+    #            ]
 
 
     rospy.wait_for_service('/gazebo/set_model_state')
@@ -148,15 +190,15 @@ if __name__ == "__main__":
     rospy.init_node("collect_data")
 
     ### Vit controller
-    model_path="/home/xinchi/vit_full/vit.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_9_full"
-    controller=VitController(model_path)
+    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
+    save_data_root="/home/xinchi/gazebo_data/expert"
+    # controller=VitController(model_path)
     #
-    desired_distance = 2
-    # sensor_range=5
-    # K_f=1
-    # max_speed = 1
-    # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
+    desired_distance = 1.0
+    sensor_range=2
+    K_f=1
+    max_speed = 1
+    controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
 
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
@@ -165,7 +207,12 @@ if __name__ == "__main__":
  # [ 0.34727331  ,1.90429804 ,-1.54858546],
  # [-2.34736724  ,2.89713682 ,-1.14321162]]
 
-    listener = Simulation(robot_num,desired_distance,controller,save_data_root=save_data_root)
+
+    sensor_range=2
+    sensor_view_angle = math.pi * 2
+    occupancy_map_simulator = MapSimulator(max_x=sensor_range, max_y=sensor_range,
+                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
+    listener = Simulation(robot_num=robot_num,controller=controller,map_simulator=occupancy_map_simulator,sensor_range=sensor_range,save_data_root=save_data_root)
 
     for i in range(len(pose_list)):
         state_msg = ModelState()
