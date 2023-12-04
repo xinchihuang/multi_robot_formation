@@ -197,6 +197,21 @@ class PoseDataLoader:
         return self.data[item]
     def __len__(self):
         return len(self.data)
+class TraceDataLoader:
+    def __init__(self,root_list):
+        first=True
+        for root in root_list:
+            for i in range(len(os.listdir(root))):
+                if first:
+                    pose_array_data = np.load(os.path.join(root, os.listdir(root)[i],"trace.npy"))
+                    first=False
+                else:
+                    pose_array_data = np.concatenate((pose_array_data, np.load(os.path.join(root, os.listdir(root)[i],"trace.npy"))))
+        self.data=pose_array_data
+    def __getitem__(self, item):
+        return self.data[item]
+    def __len__(self):
+        return len(self.data)
 
 # def init_worker():
 #     signal.signal(signal.SIGINT, signal.SIG_IGN)

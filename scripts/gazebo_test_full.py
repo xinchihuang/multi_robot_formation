@@ -25,7 +25,7 @@ from utils.occupancy_map_simulator import MapSimulator
 from controllers import VitController,LocalExpertControllerFull
 
 class Simulation:
-    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.05,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.00,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -161,7 +161,7 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 9
+    robot_num = 7
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
     # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
@@ -191,14 +191,14 @@ if __name__ == "__main__":
 
     ### Vit controller
     model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/ViT_1m/ViT_9_200s"
-    controller=VitController(model_path)
+    save_data_root="/home/xinchi/gazebo_data/expert"
+    # controller=VitController(model_path)
     #
-    # desired_distance = 1.0
-    # sensor_range=2
-    # K_f=1
-    # max_speed = 1
-    # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
+    desired_distance = 1.0
+    sensor_range=2
+    K_f=1
+    max_speed = 1
+    controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
 
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
@@ -206,6 +206,8 @@ if __name__ == "__main__":
  # [-4.51360495  ,1.04370626  ,0.72373201],
  # [ 0.34727331  ,1.90429804 ,-1.54858546],
  # [-2.34736724  ,2.89713682 ,-1.14321162]]
+
+
     sensor_range=2
     sensor_view_angle = math.pi * 2
     occupancy_map_simulator = MapSimulator(max_x=sensor_range, max_y=sensor_range,

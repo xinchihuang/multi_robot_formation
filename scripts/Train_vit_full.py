@@ -13,7 +13,7 @@ import random
 from model.vit_model import ViT
 from utils.occupancy_map_simulator import MapSimulator
 from utils.gabreil_graph import global_to_local
-from utils.initial_pose import initialize_pose,PoseDataLoader
+from utils.initial_pose import initialize_pose,PoseDataLoader,TraceDataLoader
 from controllers import LocalExpertControllerFull
 
 
@@ -36,7 +36,7 @@ class RobotDatasetTrace(Dataset):
         #### dataset settings
         self.random_rate = random_rate
         self.pose_root=pose_root
-        self.pose_loader=PoseDataLoader(self.pose_root)
+        self.pose_loader=TraceDataLoader(self.pose_root)
         self.transform = True
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
@@ -80,6 +80,7 @@ class RobotDatasetTrace(Dataset):
         ref_control_list = []
         # if random.randrange(0,1)<self.random_rate:
         pose_array=self.pose_loader[random.randint(0,len(self.pose_loader)-1)]
+        # pose_array=self.pose_array
         for robot_id in range(number_of_robot):
             position_lists_local = global_to_local(pose_array)
             occupancy_maps = self.map_simulator.generate_maps(position_lists_local)
@@ -108,7 +109,7 @@ class Trainer:
         self,
         model,
         trainset,
-        evaluateset,
+        # evaluateset,
         number_of_agent,
         criterion,
         optimizer,
@@ -127,7 +128,7 @@ class Trainer:
                 torch.load(load_model_path, map_location=torch.device("cpu"))
             )
         self.trainset=trainset
-        self.evaluateset=evaluateset
+        # self.evaluateset=evaluateset
         self.number_of_agent = number_of_agent
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -157,9 +158,9 @@ class Trainer:
         trainloader = DataLoader(
             self.trainset, batch_size=self.batch_size, shuffle=True, drop_last=True
         )
-        evaluateloader = DataLoader(
-            self.evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
-        )
+        # evaluateloader = DataLoader(
+        #     self.evaluateset, batch_size=self.batch_size, shuffle=True, drop_last=True
+        # )
         self.model.train()
 
         while self.epoch < self.max_epoch:
@@ -214,7 +215,7 @@ if __name__ == "__main__":
     torch.cuda.memory_summary(device=None, abbreviated=False)
     torch.cuda.empty_cache()
     # global parameters
-    data_path_root = "/home/xinchi/gazebo_data"
+    data_path_root = "/home/xinchi/gazebo_data/expert"
     save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
     desired_distance = 1.0
     number_of_robot =7
@@ -227,7 +228,8 @@ if __name__ == "__main__":
     local = True
     partial = False
     random_rate=0.5
-    pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses"]
+    # pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses"]
+    pose_root = ["/home/xinchi/gazebo_data/expert"]
 
     #trainer parameters
     criterion = "mse"
@@ -260,7 +262,7 @@ if __name__ == "__main__":
     ref_controller = LocalExpertControllerFull(desired_distance=desired_distance, sensor_range=max_x)
 
     trainset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "training"),
+        data_path_root=os.path.join(data_path_root),
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         map_simulator=map_simulator,
@@ -270,24 +272,24 @@ if __name__ == "__main__":
         random_rate=random_rate,
         pose_root=pose_root
     )
-    evaluateset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root, "evaluating"),
-        desired_distance=desired_distance,
-        number_of_agents=number_of_robot,
-        map_simulator=map_simulator,
-        controller=ref_controller,
-        task_type=task_type,
-        sensor_view_angle=sensor_view_angle,
-        random_rate=random_rate,
-        pose_root=pose_root
-    )
+    # evaluateset = RobotDatasetTrace(
+    #     data_path_root=os.path.join(data_path_root),
+    #     desired_distance=desired_distance,
+    #     number_of_agents=number_of_robot,
+    #     map_simulator=map_simulator,
+    #     controller=ref_controller,
+    #     task_type=task_type,
+    #     sensor_view_angle=sensor_view_angle,
+    #     random_rate=random_rate,
+    #     pose_root=pose_root
+    # )
 
 
 
     T = Trainer(
         model=model,
         trainset=trainset,
-        evaluateset=evaluateset,
+        # evaluateset=evaluateset,
         number_of_agent=number_of_robot,
         criterion=criterion,
         optimizer=optimizer,
