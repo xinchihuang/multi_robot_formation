@@ -195,10 +195,10 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(9,)
-root_dir="/home/xinchi/gazebo_data/ViT_1m"
+robot_num=(5,7,9,11,13)
+root_dir="/home/xinchi/gazebo_data/ViT_100"
 for i in robot_num:
-    folder="ViT_"+str(i)+"_200s_0.05"
+    folder="ViT_"+str(i)
     path = os.path.join(root_dir,folder)
     converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=1,sensor_range=2)
     converge_time_all_ViT.append(converge_time_all)

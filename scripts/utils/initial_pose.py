@@ -225,7 +225,7 @@ if __name__ == "__main__":
         os.mkdir(root)
     num_robot = 7
     initial_max_range = 2
-    initial_min_range = 1
+    initial_min_range = 0.3
     sensor_range=2
     # initialize_pose(num_robot,  initial_max_range=initial_max_range,  initial_min_range=initial_min_range, sensor_range=sensor_range)
     #
