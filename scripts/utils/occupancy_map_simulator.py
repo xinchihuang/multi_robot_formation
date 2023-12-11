@@ -11,7 +11,7 @@ from .gabreil_graph import is_valid_point
 class MapSimulator:
     def __init__(
         self,
-        robot_size=0.1,
+        robot_size=0.15,
         max_height=0.3,
         map_size=100,
         max_x=5,

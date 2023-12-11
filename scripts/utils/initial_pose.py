@@ -81,13 +81,13 @@ def initialize_pose(num_robot, initial_max_range=2,initial_min_range=1,sensor_ra
         # gabriel_graph_local = get_gabreil_graph_local(pose_list)
 
         if check_valid_initial_graph(gabriel_graph_global)==True:
-            for line in gabriel_graph_global:
-                print(line)
+            # for line in gabriel_graph_global:
+            #     print(line)
             # print("----------")
             # for line in gabriel_graph_local:
             #     print(line)
             break
-    print(pose_list)
+    # print(pose_list)
     return pose_list
 def initialize_pose_multi(queue,num_robot, initial_max_range=2,initial_min_range=1,sensor_range=2):
     ignore_sigint()
@@ -119,8 +119,8 @@ def initialize_pose_multi(queue,num_robot, initial_max_range=2,initial_min_range
             # gabriel_graph_local=get_gabreil_graph_local(pose_list)
 
             if check_valid_initial_graph(gabriel_graph_global)==True:
-                for line in gabriel_graph_global:
-                    print(line)
+                # for line in gabriel_graph_global:
+                #     print(line)
                 # # print("----------")
                 # for line in gabriel_graph_local:
                 #     print(line)
@@ -172,9 +172,12 @@ def valid_pose_saver(queue,root):
     while True:
         pose_list=queue.get()
         pose_list_to_save.append(pose_list)
-        if len(pose_list_to_save) == 100:
-            pose_file = os.path.join(root, str((len(os.listdir(root))+1)*100))
-            print((len(os.listdir(root))+1)*100)
+        if len(pose_list_to_save) == 1000:
+            save_folder=os.path.join(root, str((len(os.listdir(root))+1)))
+            if not os.path.exists(save_folder):
+                os.mkdir(save_folder)
+            pose_file = os.path.join(save_folder,"trace.npy")
+            print((len(os.listdir(root))+1)*1000)
             pose_array = np.array(pose_list_to_save)
             np.save(pose_file, pose_array)
             pose_list_to_save = []
@@ -217,12 +220,12 @@ class TraceDataLoader:
 #     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 if __name__ == "__main__":
-    root="poses"
+    root="/home/xinchi/gazebo_data/random"
     if not os.path.exists(root):
         os.mkdir(root)
     num_robot = 7
     initial_max_range = 2
-    initial_min_range = 1
+    initial_min_range = 0.3
     sensor_range=2
     # initialize_pose(num_robot,  initial_max_range=initial_max_range,  initial_min_range=initial_min_range, sensor_range=sensor_range)
     #

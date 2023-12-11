@@ -126,8 +126,8 @@ class LocalExpertControllerPartial:
         out_put.omega=velocity_sum_omega if abs(velocity_sum_omega)<self.max_omega else self.max_omega*abs(velocity_sum_omega)/velocity_sum_omega
         return out_put
 class LocalExpertControllerHeuristic:
-    def __init__(self, desired_distance=2, sensor_range=5, sensor_angle=math.pi / 2, safe_margin=0.4, K_f=1, K_m=1,
-                 K_omega=1, max_speed=1, max_omega=1):
+    def __init__(self, desired_distance=2, sensor_range=3.5, sensor_angle=math.pi / 2, safe_margin=0.4, K_f=1, K_m=1,
+                 K_omega=1, max_speed=1, max_omega=10):
         self.name = "LocalExpertControllerHeuristic"
         self.desired_distance = desired_distance
         self.sensor_range = sensor_range
@@ -160,6 +160,7 @@ class LocalExpertControllerHeuristic:
         velocity_sum_y = 0
         velocity_sum_omega = 0
         # no robot in the view
+        print(self.robot_id,self.state)
         if sum(neighbor_list) <= 1:
             self.state = "rotate"
             velocity_sum_omega = self.max_omega
@@ -174,7 +175,7 @@ class LocalExpertControllerHeuristic:
                     position_local = pose_array_local[self.robot_id][neighbor_id]
                     gamma = math.atan2(position_local[1], (position_local[0]))
                     distance_formation = (position_local[0] ** 2 + position_local[1] ** 2) ** 0.5
-                    if abs(gamma) < 0.01 and (distance_formation - desired_distance) < 0.05:
+                    if abs(gamma) < 0.02 and (distance_formation - desired_distance) < 0.05:
                         self.state = "swing"
                         break
                     rate_f = (distance_formation - desired_distance) / distance_formation
@@ -251,29 +252,29 @@ class VitController:
         Initialize ViT model
         """
         # print(self.name)
-        self.model = ViT(
-        image_size = 100,
-        patch_size = 10,
-        num_classes = 2,
-        dim = 256,
-        depth = 3,
-        heads = 8,
-        mlp_dim = 512,
-        dropout = 0.1,
-        emb_dropout = 0.1
-    ).double()
     #     self.model = ViT(
-    #         image_size=100,
-    #         patch_size=10,
-    #         num_classes=2,
-    #         dim=256,
-    #         depth=3,
-    #         heads=8,
-    #         mlp_dim=512,
-    #         dropout=0.1,
-    #         emb_dropout=0.1,
-    #         agent_number=7
-    #     ).double()
+    #     image_size = 100,
+    #     patch_size = 10,
+    #     num_classes = 2,
+    #     dim = 256,
+    #     depth = 3,
+    #     heads = 8,
+    #     mlp_dim = 512,
+    #     dropout = 0.1,
+    #     emb_dropout = 0.1
+    # ).double()
+        self.model = ViT(
+            image_size=100,
+            patch_size=10,
+            num_classes=2,
+            dim=256,
+            depth=3,
+            heads=8,
+            mlp_dim=512,
+            dropout=0.1,
+            emb_dropout=0.1,
+            agent_number=7
+        ).double()
         if not self.use_cuda:
             self.model.load_state_dict(
                 torch.load(self.model_path, map_location=torch.device("cpu"))

@@ -22,10 +22,10 @@ from utils.gabreil_graph import get_gabreil_graph,get_gabreil_graph_local,global
 from utils.initial_pose import initialize_pose,PoseDataLoader,initial_from_data
 from utils.occupancy_map_simulator import MapSimulator
 
-from controllers import VitController,LocalExpertControllerFull
+from controllers import *
 
 class Simulation:
-    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=1,stop_thresh=0.00,max_simulation_time_step = 1000):
+    def __init__(self, robot_num,controller,map_simulator,save_data_root=None,robot_upper_bound=0.12,robot_lower_bound=-0.12,sensor_range=5,max_velocity=0.5,stop_thresh=0.00,max_simulation_time_step = 1000):
 
         # basic settings
         self.robot_num = robot_num
@@ -113,8 +113,9 @@ class Simulation:
                 # print(position_lists_local[index])
                 # start = time.time()
                 occupancy_map = self.occupancy_map_simulator.generate_map_one(position_lists_local[index])
-                # cv2.imshow("robot view " + str(index), np.array(occupancy_map))
-                # cv2.waitKey(1)
+                # if index==0:
+                #     cv2.imshow("robot view " + str(index), np.array(occupancy_map))
+                #     cv2.waitKey(100)
                 data={"robot_id":index,"pose_list":pose_list,"occupancy_map":occupancy_map}
 
                 control_data = self.controller.get_control(data)
@@ -125,7 +126,7 @@ class Simulation:
             self.model_control.append(control_list)
 
             for index in range(0,self.robot_num):
-                print(control_list[index])
+
                 msg=Twist()
                 if self.stop_thresh <abs(control_list[index][0])<self.max_velocity:
                     msg.linear.x = control_list[index][0]
@@ -140,13 +141,10 @@ class Simulation:
                 else:
                     msg.linear.y = 0
                 self.pub_topic_dict[index].publish(msg)
-            # time.sleep(0.01)
-            # for index in range(0, self.robot_num):
-            #     msg = Twist()
-            #     msg.linear.x = 0
-            #     msg.linear.y = 0
-            #     # print(msg.linear.x, msg.linear.y)
-            #     self.pub_topic_dict[index].publish(msg)
+                # msg.angular.z=10
+                # print(control_list[index])
+                # msg.linear.x,msg.linear.y,msg.angular.z=control_list[index][0],control_list[index][1],3
+                self.pub_topic_dict[index].publish(msg)
             self.time_step+=1
 
             # self.execute_stop = 1
@@ -161,7 +159,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    robot_num = 7
+    robot_num =13
+
     # initial_pose="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses_large_9"
     # # pose_lists=initial_from_data(initial_pose)
     # pose_list=pose_lists[random.randint(0,len(pose_lists)-1)]
@@ -169,20 +168,20 @@ if __name__ == "__main__":
 
     pose_list=initialize_pose(robot_num,initial_max_range=2)
     #
-    # pose_list=[[0,0,0],
-    #            [1.5,1.5,0],
-    #            [-1.5,1.5,0],
-    #            # [-1.5,-1.5,0],
-    #            # [1.5,-1.5,0],
-    #            [-1.5,0,0],
-    #            [1.5,0,0],
-    #            [0,1.5,0],
-    #            [0,-1.5,0],
-    #            # [3,0,0],
-    #            # [-3,0,0],
-    #            # [0,3,0],
-    #            # [0,-3,0],
-    #            ]
+    pose_list=[[0,0,0],
+               [1.5,1.5,0],
+               [-1.5,1.5,0],
+               [-1.5,-1.5,0],
+               [1.5,-1.5,0],
+               [-1.5,0,0],
+               [1.5,0,0],
+               [0,1.5,0],
+               [0,-1.5,0],
+               [3,0,0],
+               [-3,0,0],
+               [0,3,0],
+               [0,-3,0],
+               ]
 
 
     rospy.wait_for_service('/gazebo/set_model_state')
@@ -190,15 +189,19 @@ if __name__ == "__main__":
     rospy.init_node("collect_data")
 
     ### Vit controller
-    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
-    save_data_root="/home/xinchi/gazebo_data/expert"
-    # controller=VitController(model_path)
+    model_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_15600_epoch1.pth"
+    save_data_root="/home/xinchi/gazebo_data/ViT_demo"
+    map_size = 100
+    controller=VitController(model_path,input_width=map_size,input_height=map_size)
+    # controller=LocalExpertControllerHeuristic()
+    print(controller.name)
+
     #
-    desired_distance = 1.0
-    sensor_range=2
-    K_f=1
-    max_speed = 1
-    controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
+    # desired_distance = 1.0
+    # sensor_range=2
+    # K_f=1
+    # max_speed = 1
+    # controller = LocalExpertControllerFull(desired_distance=desired_distance,sensor_range=sensor_range,K_f=K_f,max_speed=max_speed)
 
  #
  #    pose_list=[[-1.8344854  ,-2.54902913  ,1.31531797],
@@ -210,8 +213,8 @@ if __name__ == "__main__":
 
     sensor_range=2
     sensor_view_angle = math.pi * 2
-    occupancy_map_simulator = MapSimulator(max_x=sensor_range, max_y=sensor_range,
-                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
+    occupancy_map_simulator = MapSimulator(map_size=map_size,max_x=sensor_range, max_y=sensor_range,
+                                           sensor_view_angle=math.pi* 2, local=True, partial=False)
     listener = Simulation(robot_num=robot_num,controller=controller,map_simulator=occupancy_map_simulator,sensor_range=sensor_range,save_data_root=save_data_root)
 
     for i in range(len(pose_list)):

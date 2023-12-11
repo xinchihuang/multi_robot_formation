@@ -21,7 +21,7 @@ from controllers import LocalExpertControllerFull
 class RobotDatasetTrace(Dataset):
     def __init__(
         self,
-        data_path_root,
+        data_path_list,
         desired_distance,
         number_of_agents,
         sensor_view_angle,
@@ -29,45 +29,46 @@ class RobotDatasetTrace(Dataset):
         controller,
         task_type="all",
         random_rate=0.5,
-        pose_root=None
 
     ):
 
         #### dataset settings
         self.random_rate = random_rate
-        self.pose_root=pose_root
-        self.pose_loader=TraceDataLoader(self.pose_root)
         self.transform = True
         self.desired_distance = desired_distance
         self.number_of_agents = number_of_agents
         self.task_type = task_type
-        self.num_sample = len(os.listdir(data_path_root))
+        self.data_path_list=data_path_list
         self.occupancy_maps_list = []
         self.pose_array = np.empty(shape=(self.number_of_agents, 1, 3))
 
         self.reference_control_list = []
         self.neighbor_list = []
-        self.scale = np.zeros((self.number_of_agents, 1))
-        for i in range(self.number_of_agents):
-            self.scale[i, 0] = self.desired_distance
-        for sample_index in tqdm(range(self.num_sample)):
-            data_sample_path = os.path.join(data_path_root, str(sample_index))
-            pose_array_i = np.load(
-                os.path.join(data_sample_path, "trace.npy")
-            )
-            if self.pose_array.shape[1] == 1:
-                self.pose_array = pose_array_i
-                continue
-            # print(pose_array_i.shape)
-            self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=0)
-        self.pose_array=np.transpose(self.pose_array,(1,0,2))
+
+        for data_path_root in self.data_path_list:
+            print("Loading: ",data_path_root)
+            self.num_sample = len(os.listdir(data_path_root))
+            for sample_index in tqdm(range(self.num_sample)):
+                data_sample_path = os.path.join(data_path_root, str(sample_index))
+                pose_array_i = np.load(
+                    os.path.join(data_sample_path, "trace.npy")
+                )
+                if self.pose_array.shape[1] == 1:
+                    self.pose_array = pose_array_i
+                    continue
+                # print(pose_array_i.shape)
+                self.pose_array = np.concatenate((self.pose_array, pose_array_i), axis=0)
+        # print()
+        # self.pose_array=np.transpose(self.pose_array,(1,0,2))
+        print(len(self.pose_array))
         self.sensor_view_angle = sensor_view_angle
         self.map_simulator=map_simulator
         self.controller=controller
         print("RobotDatasetTrace",self.__dict__)
     def __len__(self):
         # return self.pose_array.shape[1]
-        return len(self.pose_loader)
+
+        return len(self.pose_array)
     def __getitem__(self, idx):
 
         if torch.is_tensor(idx):
@@ -79,7 +80,7 @@ class RobotDatasetTrace(Dataset):
         occupancy_maps=[]
         ref_control_list = []
         # if random.randrange(0,1)<self.random_rate:
-        pose_array=self.pose_loader[random.randint(0,len(self.pose_loader)-1)]
+        pose_array=self.pose_array[random.randint(0,len(self.pose_array)-1)]
         # pose_array=self.pose_array
         for robot_id in range(number_of_robot):
             position_lists_local = global_to_local(pose_array)
@@ -171,6 +172,7 @@ class Trainer:
 
             # random_rate=0.1*self.epoch
             # trainloader.random_rate=random_rate
+            print(len(trainloader))
             for _, batch in enumerate(tqdm(trainloader)):
                 occupancy_maps = batch["occupancy_maps"]
                 reference = batch["reference_control"]
@@ -202,7 +204,7 @@ class Trainer:
                     print("total ", total)
                     total_loss = 0
                     total = 0
-                    self.save("/home/xinchi/vit_random7/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
+                    self.save("/home/xinchi/vit_100/"+"model_" + str(iteration)+"_epoch"+str(self.epoch) + ".pth")
             self.save("/home/xinchi/vit_random7/vit.pth")
         # return total_loss / total
 
@@ -215,12 +217,12 @@ if __name__ == "__main__":
     torch.cuda.memory_summary(device=None, abbreviated=False)
     torch.cuda.empty_cache()
     # global parameters
-    data_path_root = "/home/xinchi/gazebo_data/expert"
-    save_model_path = "/home/xinchi/vit_random7_pentagon/vit.pth"
+    data_path_list = ["/home/xinchi/gazebo_data/expert","/home/xinchi/gazebo_data/random"]
+    save_model_path = "/home/xinchi/vit_100/vit.pth"
     desired_distance = 1.0
     number_of_robot =7
-    robot_size=0.15
-    map_size=200
+    robot_size=0.1
+    map_size=100
     max_x = 2
     max_y =2
     sensor_view_angle= 2*math.pi
@@ -229,13 +231,13 @@ if __name__ == "__main__":
     partial = False
     random_rate=0.5
     # pose_root=["/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/utils/poses"]
-    pose_root = ["/home/xinchi/gazebo_data/expert"]
+
 
     #trainer parameters
     criterion = "mse"
     optimizer = "rms"
     patch_size = 10
-    batch_size = 16
+    batch_size = 64
     learning_rate= 0.01
     max_epoch=1
     use_cuda = True
@@ -262,7 +264,7 @@ if __name__ == "__main__":
     ref_controller = LocalExpertControllerFull(desired_distance=desired_distance, sensor_range=max_x)
 
     trainset = RobotDatasetTrace(
-        data_path_root=os.path.join(data_path_root),
+        data_path_list=data_path_list,
         desired_distance=desired_distance,
         number_of_agents=number_of_robot,
         map_simulator=map_simulator,
@@ -270,26 +272,13 @@ if __name__ == "__main__":
         task_type=task_type,
         sensor_view_angle=sensor_view_angle,
         random_rate=random_rate,
-        pose_root=pose_root
     )
-    # evaluateset = RobotDatasetTrace(
-    #     data_path_root=os.path.join(data_path_root),
-    #     desired_distance=desired_distance,
-    #     number_of_agents=number_of_robot,
-    #     map_simulator=map_simulator,
-    #     controller=ref_controller,
-    #     task_type=task_type,
-    #     sensor_view_angle=sensor_view_angle,
-    #     random_rate=random_rate,
-    #     pose_root=pose_root
-    # )
 
 
 
     T = Trainer(
         model=model,
         trainset=trainset,
-        # evaluateset=evaluateset,
         number_of_agent=number_of_robot,
         criterion=criterion,
         optimizer=optimizer,
