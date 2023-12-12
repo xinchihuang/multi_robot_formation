@@ -45,8 +45,10 @@ class ControlTransmitter:
             self.get_input_data()
             control_x = self.input_data[self.robot_id][0]
             control_y = self.input_data[self.robot_id][1]
+            control_omega = self.input_data[self.robot_id][2]
             control_data.velocity_x = control_x
             control_data.velocity_y = control_y
+            control_data.omega=control_omega
             control_data.robot_index = self.robot_id
         except:
             pass

@@ -12,21 +12,25 @@ class ControlPublisher():
         if keyboard.is_pressed(hotkey='w'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "6:[1,0];"
+            message = "4:[1,0,0];"
         elif keyboard.is_pressed(hotkey='a'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "6:[0,1];"
+            message = "4:[0,1,0];"
         elif keyboard.is_pressed(hotkey='s'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "6:[-1,0];"
+            message = "4:[-1,0,0];"
         elif keyboard.is_pressed(hotkey='d'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "6:[0,-1];"
+            message = "4:[0,-1,0];"
+        elif keyboard.is_pressed(hotkey='q'):
+            user_input = keyboard.read_event().name
+            print(f"\nYou entered: {user_input}")
+            message = "4:[0,0,1];"
         else:
-            message="6:[0,0];"
+            message="4:[0,0,0];"
         # print(message)
         broadcast_address = ('<broadcast>', 12345)
         self.udp_socket.sendto(message.encode(), broadcast_address)
@@ -74,7 +78,7 @@ if __name__ == "__main__":
     controller=ControlPublisher()
     # receiver=ControlRec()
     while True:
-        sender_thread = threading.Thread(target=controller.send_broadcast_message)
+        sender_thread = threading.Thread(target=controller.send_keyboard_message)
         sender_thread.start()
 
         # 启动接收广播回应的线程

@@ -4,7 +4,7 @@ import math
 import matplotlib.animation as animation
 from matplotlib.widgets import Slider
 from utils.gabreil_graph import get_gabreil_graph
-
+from queue import Q
 
 def plot_formation_gabreil_dynamic(ax, position_array, desired_distance=1, xlim=5, ylim=5, sensor_range=2):
     rob_num = np.shape(position_array)[0]
