@@ -28,7 +28,11 @@ class ControlPublisher():
         elif keyboard.is_pressed(hotkey='q'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0,0,1];"
+            message = "4:[0,0,10];"
+        elif keyboard.is_pressed(hotkey='e'):
+            user_input = keyboard.read_event().name
+            print(f"\nYou entered: {user_input}")
+            message = "4:[0,0,10];"
         else:
             message="4:[0,0,0];"
         # print(message)

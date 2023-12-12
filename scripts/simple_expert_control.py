@@ -36,7 +36,8 @@ class ControlTransmitter:
                 object_id = int(marker_list[i].split(":")[0])
                 control_x = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[0])
                 control_y = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[1])
-                self.input_data[object_id]=(control_x,control_y)
+                omega = float(marker_list[i].split(":")[1].strip('[').strip(']').split(",")[2])
+                self.input_data[object_id]=(control_x,control_y,omega)
         except:
             pass
     def get_control(self):
