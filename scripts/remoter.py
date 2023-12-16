@@ -12,27 +12,27 @@ class ControlPublisher():
         if keyboard.is_pressed(hotkey='w'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0.1,0,0];"
+            message = "4:[3,0,0];"
         elif keyboard.is_pressed(hotkey='a'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0,0.1,0];"
+            message = "4:[0,3,0];"
         elif keyboard.is_pressed(hotkey='s'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[-0.1,0,0];"
+            message = "4:[-3,0,0];"
         elif keyboard.is_pressed(hotkey='d'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0,-0.1,0];"
+            message = "4:[0,-3,0];"
         elif keyboard.is_pressed(hotkey='q'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0,0,1];"
+            message = "4:[0,0,-10];"
         elif keyboard.is_pressed(hotkey='e'):
             user_input = keyboard.read_event().name
             print(f"\nYou entered: {user_input}")
-            message = "4:[0,0,-1];"
+            message = "4:[0,0,10];"
         else:
             message="4:[0,0,0];"
         # print(message)
