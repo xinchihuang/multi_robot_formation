@@ -142,7 +142,6 @@ class Executor:
 
     def __init__(self):
         self.connector = UartConnector()
-        self.idle_frame=0
 
     def execute_control(self, control_data):
         """
@@ -161,7 +160,7 @@ class Executor:
         # omega = 0.1 * abs(omega) / omega if abs(omega) > 0.1 else omega
         # velocity_x=0
         # velocity_y=0
-        omega=1
+        omega=0
         if velocity_x==0 and velocity_y==0 and omega==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
@@ -170,7 +169,11 @@ class Executor:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
-            self.idle_frame=0
+        self.connector.send_to_robot(msg)
+        time.sleep(0.02)
+        msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
+            speed_x=0, speed_y=-0, speed_z=150
+        )
         self.connector.send_to_robot(msg)
         time.sleep(0.02)
     def stop(self):
