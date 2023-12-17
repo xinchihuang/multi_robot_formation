@@ -170,7 +170,7 @@ class Executor:
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
         self.connector.send_to_robot(msg)
-        time.sleep(0.02)
+        time.sleep(0.1)
         msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
             speed_x=0, speed_y=-0, speed_z=150
         )
