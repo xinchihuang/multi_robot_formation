@@ -252,29 +252,29 @@ class VitController:
         Initialize ViT model
         """
         # print(self.name)
-    #     self.model = ViT(
-    #     image_size = 100,
-    #     patch_size = 10,
-    #     num_classes = 2,
-    #     dim = 256,
-    #     depth = 3,
-    #     heads = 8,
-    #     mlp_dim = 512,
-    #     dropout = 0.1,
-    #     emb_dropout = 0.1
-    # ).double()
         self.model = ViT(
-            image_size=100,
-            patch_size=10,
-            num_classes=2,
-            dim=256,
-            depth=3,
-            heads=8,
-            mlp_dim=512,
-            dropout=0.1,
-            emb_dropout=0.1,
-            agent_number=7
-        ).double()
+        image_size = 100,
+        patch_size = 10,
+        num_classes = 2,
+        dim = 256,
+        depth = 3,
+        heads = 8,
+        mlp_dim = 512,
+        dropout = 0.1,
+        emb_dropout = 0.1
+    ).double()
+        # self.model = ViT(
+        #     image_size=100,
+        #     patch_size=10,
+        #     num_classes=2,
+        #     dim=256,
+        #     depth=3,
+        #     heads=8,
+        #     mlp_dim=512,
+        #     dropout=0.1,
+        #     emb_dropout=0.1,
+        #     agent_number=7
+        # ).double()
         if not self.use_cuda:
             self.model.load_state_dict(
                 torch.load(self.model_path, map_location=torch.device("cpu"))
