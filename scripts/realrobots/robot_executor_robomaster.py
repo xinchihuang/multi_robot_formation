@@ -160,7 +160,7 @@ class Executor:
         # omega = 0.1 * abs(omega) / omega if abs(omega) > 0.1 else omega
         # velocity_x=0
         # velocity_y=0
-        omega=0
+        omega=15
         if velocity_x==0 and velocity_y==0 and omega==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
@@ -170,12 +170,12 @@ class Executor:
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
         self.connector.send_to_robot(msg)
-        time.sleep(0.05)
-        msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
-            speed_x=0, speed_y=-0, speed_z=150
-        )
-        self.connector.send_to_robot(msg)
-        time.sleep(0.05)
+        time.sleep(0.03)
+        # msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
+        #     speed_x=0, speed_y=-0, speed_z=15
+        # )
+        # self.connector.send_to_robot(msg)
+        # time.sleep(0.05)
     def stop(self):
         # msg = "quit"
         msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
