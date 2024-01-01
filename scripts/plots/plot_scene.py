@@ -13,8 +13,31 @@ import itertools
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
-from utils.gabreil_graph import get_gabreil_graph
 # from LocalExpertController import LocalExpertController
+
+def gabriel(pose_array):
+    """
+    Get the gabriel graph of the formation
+    :param pose_array: A numpy array contains all robots formation
+    :return: Gabriel graph ( 2D matrix ) 1 represent connected, 0 represent disconnected
+    """
+    node_mum = np.shape(pose_array)[0]
+    gabriel_graph = [[1] * node_mum for _ in range(node_mum)]
+    position_array = pose_array[:, -1, :2]
+    for u in range(node_mum):
+        for v in range(node_mum):
+            m = (position_array[u] + position_array[v]) / 2
+            for w in range(node_mum):
+                if w == v or w==u:
+                    continue
+                if np.linalg.norm(position_array[w] - m) <= np.linalg.norm(
+                    position_array[u] - m
+                ):
+                    gabriel_graph[u][v] = 0
+                    gabriel_graph[v][u] = 0
+                    break
+    return gabriel_graph
+
 
 def plot_wheel_speed(dt, velocity_array, save_path):
     """
@@ -143,6 +166,7 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,yli
     :return:
     """
     rob_num = np.shape(pose_array)[0]
+    gabriel_graph = gabriel(pose_array)
     position_array = pose_array[:, -1, :]
     gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
     plt.figure(figsize=(10, 10))
@@ -227,7 +251,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=4,ylim=4,sensor_range=2):
+def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
