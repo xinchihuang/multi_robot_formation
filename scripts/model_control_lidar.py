@@ -81,7 +81,7 @@ class ModelControl:
         self.sub = rospy.Subscriber(topic, PointCloud, self.ModelControlCallback)
         self.map_size = 100
         self.sensor_range = 2
-        self.robot_size=2
+        self.robot_size=0.15
         self.map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,
                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
         # self.executor=Executor()
@@ -120,7 +120,7 @@ class ModelControl:
             y_map = min(int(self.map_size / 2) + int(x_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
             x_map = min(int(self.map_size / 2) - int(y_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
             if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
-                point_map[x_map][y_map]=1
+                point_map[y_map][x_map]=1
                 # print(x_world,y_world)
         connected_components, component_counts = find_connected_components_with_count(point_map)
         _,center_dict=check_valid_components(connected_components,component_counts)
@@ -145,35 +145,7 @@ class ModelControl:
         cv2.imshow("raw" + str(0), point_map)
         cv2.waitKey(1)
         cv2.imwrite("/home/xinchi/map.png",occupancy_map)
-        # <for blob in data.blobs:
-        #     if not blob.name in self.color_index:
-        #         continue
-        #     robot_index = self.color_index[blob.name]
-        #     # if look_up_table[robot_index] == 1:
-        #     #     continue
-        #     look_up_table[robot_index] = 1
-        #     x_c, z_c, y_c = blob.center.x, -blob.center.y, blob.center.z
-        #     if -0.25<z_c<0.25:
-        #     # print(blob.name,x_w,y_w,z_w)
-        #         position_list_local.append([y_c, -x_c, z_c])
-        # if len(position_list_local) == 0:
-        #     print("no data")
-        #     control_data=ControlData()
-        # else:
-        #
-        #     occupancy_map = self.map_simulator.generate_map_one(position_list_local)
-        #     # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-        #     # cv2.waitKey(1)
-        #     data = {"robot_id": 0, "occupancy_map": occupancy_map}
-        #     control_data = self.controller.get_control(data)
-        #
-        # self.executor.execute_control(control_data=control_data)>
 
-    # def keyboard_stop(self):
-    #     if data.data == 'q':
-    #         self.robot.executor.stop()
-    #         # exit(1)
-    #         rospy.signal_shutdown("Shut down!")
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
