@@ -71,9 +71,9 @@ class ModelControl:
     def __init__(self, topic):
 
         self.model_path = os.path.abspath(
-            '') + "/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_3200_epoch10.pth"
+            '') + "/catkin_ws/src/multi_robot_formation/scripts/saved_model/model_15600_epoch1.pth"
         self.desired_distance=1.0
-        # self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
+        self.controller=VitController(model_path=self.model_path,desired_distance=self.desired_distance)
         # self.controller=LocalExpertController()
 
         self.topic = topic
@@ -84,7 +84,7 @@ class ModelControl:
         self.robot_size=0.15
         self.map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,
                                           sensor_view_angle=math.pi * 2, local=True, partial=False)
-        # self.executor=Executor()
+        self.executor=Executor()
         self.color_index = {"Green": 0}
     def simple_control(self,position_list,index,desired_distance):
         out_put = ControlData()
@@ -145,7 +145,9 @@ class ModelControl:
         cv2.imshow("raw" + str(0), point_map)
         cv2.waitKey(1)
         cv2.imwrite("/home/xinchi/map.png",occupancy_map)
-
+        data = {"robot_id": 0, "occupancy_map": occupancy_map}
+        control_data = self.controller.get_control(data)
+        self.executor.execute_control(control_data=control_data)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
