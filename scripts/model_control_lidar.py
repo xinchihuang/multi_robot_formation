@@ -82,8 +82,6 @@ class ModelControl:
         self.map_size = 100
         self.sensor_range = 2
         self.robot_size=0.15
-        self.map_simulator = MapSimulator(max_x=self.sensor_range, max_y=self.sensor_range,
-                                          sensor_view_angle=math.pi * 2, local=True, partial=False)
         self.executor=Executor()
         self.color_index = {"Green": 0}
     def simple_control(self,position_list,index,desired_distance):
@@ -140,11 +138,11 @@ class ModelControl:
                         ]
         # for component_number, count in component_counts.items():
         #     print(f"Component {component_number}: {count} '1's")
-        cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-        cv2.waitKey(1)
-        cv2.imshow("raw" + str(0), point_map)
-        cv2.waitKey(1)
-        cv2.imwrite("/home/xinchi/map.png",occupancy_map)
+        # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+        # cv2.waitKey(1)
+        # cv2.imshow("raw" + str(0), point_map)
+        # cv2.waitKey(1)
+        # cv2.imwrite("/home/xinchi/map.png",occupancy_map)
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
         control_data = self.controller.get_control(data)
         self.executor.execute_control(control_data=control_data)
