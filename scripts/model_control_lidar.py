@@ -138,8 +138,8 @@ class ModelControl:
         occupancy_map = occupancy_map[
                         robot_range:-robot_range, robot_range:-robot_range
                         ]
-        for component_number, count in component_counts.items():
-            print(f"Component {component_number}: {count} '1's")
+        # for component_number, count in component_counts.items():
+        #     print(f"Component {component_number}: {count} '1's")
         cv2.imshow("robot view " + str(0), np.array(occupancy_map))
         cv2.waitKey(1)
         cv2.imshow("raw" + str(0), point_map)
