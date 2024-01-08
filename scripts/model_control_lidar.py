@@ -106,7 +106,6 @@ class ModelControl:
         point_map=np.zeros((self.map_size,self.map_size))
         scale = self.map_size
         robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale)))
-        print(robot_range)
         occupancy_map = (
                 np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
         )
@@ -138,14 +137,14 @@ class ModelControl:
                         ]
         # for component_number, count in component_counts.items():
         #     print(f"Component {component_number}: {count} '1's")
-        cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-        cv2.waitKey(1)
-        cv2.imshow("raw" + str(0), point_map)
-        cv2.waitKey(1)
+        # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+        # cv2.waitKey(1)
+        # cv2.imshow("raw" + str(0), point_map)
+        # cv2.waitKey(1)
         # cv2.imwrite("/home/xinchi/map.png",occupancy_map)
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
         control_data = self.controller.get_control(data)
-        # self.executor.execute_control(control_data=control_data)
+        self.executor.execute_control(control_data=control_data)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
