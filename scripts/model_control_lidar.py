@@ -114,8 +114,8 @@ class ModelControl:
         )
         for point in data.points:
             # print(point)
-            x_world=point.y
-            y_world=-point.x
+            x_world=-point.y
+            y_world=point.x
             # print(x_world,y_world)
             y_map = min(int(self.map_size / 2) + int(x_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
             x_map = min(int(self.map_size / 2) - int(y_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
