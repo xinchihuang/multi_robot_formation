@@ -114,13 +114,13 @@ class ModelControl:
         )
         for point in data.points:
             # print(point)
-            x_world=point.x
-            y_world=point.y
+            x_world=point.y
+            y_world=-point.x
             # print(x_world,y_world)
             y_map = min(int(self.map_size / 2) + int(x_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
             x_map = min(int(self.map_size / 2) - int(y_world * self.map_size / self.sensor_range / 2), self.map_size - 1)
             if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
-                point_map[y_map][x_map]=1
+                point_map[x_map][y_map]=1
                 # print(x_world,y_world)
         connected_components, component_counts = find_connected_components_with_count(point_map)
         _,center_dict=check_valid_components(connected_components,component_counts)
