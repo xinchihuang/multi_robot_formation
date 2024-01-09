@@ -1,4 +1,4 @@
-from flask import Flask, send_file
+from remote_img import Flask, send_file
 import time
 
 app = Flask(__name__)
