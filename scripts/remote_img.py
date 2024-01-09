@@ -1,8 +1,6 @@
 from flask import Flask, send_file
 import time
-
 app = Flask(__name__)
-
 
 @app.route('/video_feed')
 def video_feed():
