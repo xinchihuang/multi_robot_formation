@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route('/video_feed')
 def video_feed():
     while True:
-        time.sleep(0.1)  # 控制图像刷新的频率
+        time.sleep(0.1)
         return send_file('path_to_save_image/image.jpg', mimetype='image/jpeg')
 
 if __name__ == '__main__':
