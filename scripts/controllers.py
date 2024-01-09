@@ -230,7 +230,7 @@ class LocalExpertControllerHeuristic:
             velocity_sum_omega) / velocity_sum_omega
         return out_put
 class VitController:
-    def __init__(self, model_path, desired_distance=2.0, num_robot=5, input_height=100, input_width=100, use_cuda=True,max_speed=1):
+    def __init__(self, model_path, desired_distance=2.0, num_robot=5, input_height=100, input_width=100, use_cuda=True,max_speed=0.05):
         """
         :param desired_distance: Desired formation distance (type: float)
         :param num_robot: The number of robots (type: int)
