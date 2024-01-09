@@ -110,6 +110,8 @@ class ModelControl:
                 np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
         )
         for point in data.points:
+            if abs(point.x)>self.sensor_range or abs(point.y)>self.sensor_range:
+                continue
             # print(point)
             x_world=-point.y
             y_world=point.x
