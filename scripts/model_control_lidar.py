@@ -43,7 +43,7 @@ def find_connected_components_with_count(matrix):
                 component_number += 1
 
     return matrix, component_counts
-def check_valid_components(matrix,component_counts,upper=10,lower=5):
+def check_valid_components(matrix,component_counts,upper=40,lower=20):
     rows = matrix.shape[0]
     cols = matrix.shape[1]
     center_dict={}
@@ -83,7 +83,7 @@ class ModelControl:
         self.map_size = 100
         self.sensor_range = 2
         self.robot_size=0.15
-        self.executor=Executor()
+        # self.executor=Executor()
         self.color_index = {"Green": 0}
     def simple_control(self,position_list,index,desired_distance):
         out_put = ControlData()
@@ -108,8 +108,9 @@ class ModelControl:
         scale = self.map_size
         robot_range = max(1, int(math.floor(self.map_size * self.robot_size / scale)))
         occupancy_map = (
-                np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range)) * 255
+                np.ones((self.map_size + 2 * robot_range, self.map_size + 2 * robot_range))
         )
+
         for point in data.points:
             if abs(point.x)>self.sensor_range or abs(point.y)>self.sensor_range:
                 continue
@@ -122,6 +123,8 @@ class ModelControl:
             if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
                 point_map[x_map][y_map]=1
                 # print(x_world,y_world)
+        point_map = cv2.GaussianBlur(point_map, (3, 3), 0)
+        point_map=np.ceil(point_map)
         connected_components, component_counts = find_connected_components_with_count(point_map)
         _,center_dict=check_valid_components(connected_components,component_counts)
         # print(component_counts)
@@ -140,15 +143,18 @@ class ModelControl:
                         ]
         # for component_number, count in component_counts.items():
         #     print(f"Component {component_number}: {count} '1's")
-        # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-        # cv2.waitKey(1)
-        # cv2.imshow("raw" + str(0), point_map)
-        # cv2.waitKey(1)
-        # cv2.imwrite("/home/xinchi/raw.png",point_map)
+        occupancy_map = occupancy_map*255
+        point_map = point_map*255
+        cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+        cv2.waitKey(1)
+        cv2.imshow("raw" + str(0), point_map)
+        cv2.waitKey(1)
+        cv2.imwrite("/home/xinchi/raw.png",point_map)
+        cv2.imwrite("/home/xinchi/map.png", occupancy_map)
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
         control_data = self.controller.get_control(data)
-
-        self.executor.execute_control(control_data=control_data)
+        #
+        # self.executor.execute_control(control_data=control_data)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
