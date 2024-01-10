@@ -79,7 +79,7 @@ class ModelControl:
 
         self.topic = topic
         # self.bridge = CvBridge()
-        self.sub = rospy.Subscriber(topic, PointCloud, self.ModelControlCallback)
+        self.sub = rospy.Subscriber(topic, PointCloud, self.ModelControlCallback,queue_size=1)
         self.map_size = 100
         self.sensor_range = 2
         self.robot_size=0.15
