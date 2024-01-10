@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import math
+import time
+
 import rospy
 import os
 import cv2
@@ -154,6 +156,10 @@ class ModelControl:
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
         control_data = self.controller.get_control(data)
         #
+        self.executor.execute_control(control_data=control_data)
+        time.sleep(0.2)
+        control_data.velocity_x=0
+        control_data.velocity_y=0
         self.executor.execute_control(control_data=control_data)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
