@@ -171,7 +171,7 @@ class Executor:
             )
         self.connector.send_to_robot(msg)
         print(time.localtime(time.time()))
-        time.sleep(0.2)
+        time.sleep(0.1)
         # msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
         #     speed_x=0, speed_y=-0, speed_z=15
         # )
