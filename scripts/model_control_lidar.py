@@ -145,10 +145,10 @@ class ModelControl:
         #     print(f"Component {component_number}: {count} '1's")
         occupancy_map = occupancy_map*255
         point_map = point_map*255
-        # cv2.imshow("robot view " + str(0), np.array(occupancy_map))
-        # cv2.waitKey(1)
-        # cv2.imshow("raw" + str(0), point_map)
-        # cv2.waitKey(1)
+        cv2.imshow("robot view " + str(0), np.array(occupancy_map))
+        cv2.waitKey(1)
+        cv2.imshow("raw" + str(0), point_map)
+        cv2.waitKey(1)
         # cv2.imwrite("/home/xinchi/raw.png",point_map)
         # cv2.imwrite("/home/xinchi/map.png", occupancy_map)
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
