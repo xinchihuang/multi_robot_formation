@@ -25,7 +25,7 @@ def find_connected_components_with_count(matrix):
         matrix[r][c] = component_number
         count = 1  # Count the current cell
 
-        for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1),(1,1),(1,-1),(-1,1),(-1,-1)]:
+        for dr, dc in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             count += dfs(r + dr, c + dc, component_number)
 
         return count
