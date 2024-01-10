@@ -154,13 +154,13 @@ class ModelControl:
         # cv2.imwrite("/home/xinchi/raw.png",point_map)
         # cv2.imwrite("/home/xinchi/map.png", occupancy_map)
         data = {"robot_id": 0, "occupancy_map": occupancy_map}
-        control_data = self.controller.get_control(data)
+        # control_data = self.controller.get_control(data)
         #
-        self.executor.execute_control(control_data=control_data)
-        time.sleep(0.2)
-        control_data.velocity_x=0
-        control_data.velocity_y=0
-        self.executor.execute_control(control_data=control_data)
+        # self.executor.execute_control(control_data=control_data)
+        # time.sleep(0.2)
+        # control_data.velocity_x=0
+        # control_data.velocity_y=0
+        # self.executor.execute_control(control_data=control_data)
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
