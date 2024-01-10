@@ -176,7 +176,7 @@ class Executor:
         print("本地时间：", local_time)
         formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
         print("格式化时间：", formatted_time)
-        time.sleep(0.4)
+        # time.sleep(0.4)
         # msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
         #     speed_x=0, speed_y=-0, speed_z=15
         # )
