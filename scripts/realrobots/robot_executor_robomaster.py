@@ -170,7 +170,12 @@ class Executor:
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
         self.connector.send_to_robot(msg)
-        print(time.localtime(time.time()))
+        timestamp = time.time()
+        print("当前时间戳：", timestamp)
+        local_time = time.localtime(timestamp)
+        print("本地时间：", local_time)
+        formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+        print("格式化时间：", formatted_time)
         time.sleep(0.1)
         # msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
         #     speed_x=0, speed_y=-0, speed_z=15
