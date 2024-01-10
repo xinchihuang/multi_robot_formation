@@ -125,20 +125,20 @@ class ModelControl:
             if 0 <= x_map < self.map_size and 0 <= y_map < self.map_size:
                 point_map[x_map][y_map]=1
                 # print(x_world,y_world)
-        point_map = cv2.GaussianBlur(point_map, (3, 3), 0)
-        point_map=np.ceil(point_map)
-        connected_components, component_counts = find_connected_components_with_count(point_map)
-        _,center_dict=check_valid_components(connected_components,component_counts)
+        # point_map = cv2.GaussianBlur(point_map, (3, 3), 0)
+        # point_map=np.ceil(point_map)
+        # connected_components, component_counts = find_connected_components_with_count(point_map)
+        # _,center_dict=check_valid_components(connected_components,component_counts)
         # print(component_counts)
         # print(center_dict)
 
-        for object in center_dict:
-            # print(center_dict[object])
-            x=center_dict[object][0]
-            y=center_dict[object][1]
-            for m in range(-robot_range, robot_range, 1):
-                for n in range(-robot_range, robot_range, 1):
-                    occupancy_map[x + m][y + n] = 0
+        # for object in center_dict:
+        #     # print(center_dict[object])
+        #     x=center_dict[object][0]
+        #     y=center_dict[object][1]
+        #     for m in range(-robot_range, robot_range, 1):
+        #         for n in range(-robot_range, robot_range, 1):
+        #             occupancy_map[x + m][y + n] = 0
 
         occupancy_map = occupancy_map[
                         robot_range:-robot_range, robot_range:-robot_range
