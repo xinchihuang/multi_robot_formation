@@ -43,7 +43,7 @@ def find_connected_components_with_count(matrix):
                 component_number += 1
 
     return matrix, component_counts
-def check_valid_components(matrix,component_counts,upper=40,lower=20):
+def check_valid_components(matrix,component_counts,upper=40,lower=15):
     rows = matrix.shape[0]
     cols = matrix.shape[1]
     center_dict={}
