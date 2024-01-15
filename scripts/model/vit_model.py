@@ -85,7 +85,7 @@ class Transformer(nn.Module):
         return x
 
 class ViT(nn.Module):
-    def __init__(self, *, image_size, patch_size, dim, depth, heads, mlp_dim,num_classes, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,agent_number=5):
+    def __init__(self, *, image_size, patch_size, dim, depth, heads, mlp_dim,num_classes, pool = 'cls', channels = 1, dim_head = 64, dropout = 0., emb_dropout = 0.,agent_number=7):
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
