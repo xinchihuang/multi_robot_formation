@@ -189,7 +189,52 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,yli
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
+def plot_formation_gabreil_real(pose_array,save_path='',desired_distance=2,xlim=4,ylim=4,sensor_range=2,robot_size=0.1):
+    """
+    Plot the formation of robots, plot the gabreil graph
+    :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
+    :param save_path: Path to save figures
+    :return:
+    """
+    rob_num = np.shape(pose_array)[0]
+    position_array = pose_array[:, -1, :]
+    gabriel_graph = get_gabreil_graph(position_array, sensor_range=sensor_range)
+    # Create a figure and a set of subplots
+    fig, ax = plt.subplots(figsize=(10, 10))
+    # Scatter plot for position_array
+    ax.scatter(position_array[:, 0], position_array[:, 1])
 
+    formation_error = 0
+    count = 0
+    for i in range(rob_num):
+        circle = plt.Circle((position_array[i][0], position_array[i][1]), robot_size, color='black', fill=False)
+        ax.add_artist(circle)
+        for j in range(i + 1, rob_num):
+            if gabriel_graph[i][j] == 0:
+                continue
+            xlist = [position_array[i][0], position_array[j][0]]
+            ylist = [position_array[i][1], position_array[j][1]]
+            distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
+            if distance > 5:
+                continue
+            ax.plot(xlist, ylist, label=f"Distance: {distance: .2f}")
+            count += 1
+            formation_error += abs(distance - desired_distance)
+
+
+    ax.set_aspect('equal')
+    ax.set_title(f"Average formation error: {formation_error / count:.5f}", fontsize=20)
+    ax.set_xlabel("x(m)", fontsize=20)
+    ax.set_ylabel("y(m)", fontsize=20)
+    ax.legend()
+    ax.tick_params(axis='both', which='major', labelsize=20)
+    ax.set_xlim(-xlim, xlim)
+    ax.set_ylim(-ylim, ylim)
+    ax.grid()
+
+    # Save the figure
+    fig.savefig(os.path.join(save_path, f"formation_gabreil_real_{rob_num}.png"), pad_inches=0.0)
+    plt.close(fig)
 
 def plot_trace(position_array, save_path):
     """
@@ -254,7 +299,6 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=4,ylim=4,sen
             ylist = [position_array[i][1], position_array[j][1]]
             distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
             ax.plot(xlist, ylist,color="black")
-
     plt.subplots_adjust(left=0.13,
                         bottom=0.11,
                         right=0.98,
@@ -335,7 +379,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="C:\\Users\\xinchi\\Downloads\\1m-20231211T160355Z-001\\1m\\ViT_demo"
+    root_path="C:\\Users\\huang xinchi\\Downloads\\ViT_demo"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=1,sensor_range=2)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")

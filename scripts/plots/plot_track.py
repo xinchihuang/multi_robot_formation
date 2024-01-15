@@ -5,11 +5,10 @@ import sys
 import numpy
 import matplotlib.pyplot as plt
 from scripts.utils.object_tracker import detect_objects
-from plot_scene import plot_formation_gabreil,plot_relative_distance_gabreil,plot_trace_triangle
+from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil,plot_trace_triangle
 from collections import defaultdict
 import matplotlib
-# Replace 'your_file.csv' with the path to your CSV file
-file_path = 'Take 2023-12-04 1.csv'
+file_path = '1.csv'
 robot_index_list=[3,4,5,6]
 # Open the CSV file and read its content
 with open(file_path, 'r') as file:
@@ -68,7 +67,7 @@ with open(file_path, 'r') as file:
         pose_lists.append(object_dict[item])
     pose_array=numpy.array(pose_lists)
     plot_trace_triangle(pose_array,time_step=len(object_dict[item]),xlim=3,ylim=3)
-    plot_formation_gabreil(pose_array,desired_distance=1.25,xlim=2,ylim=2)
+    plot_formation_gabreil_real(pose_array,desired_distance=1,xlim=2,ylim=2)
     plot_relative_distance_gabreil(0.02,pose_array)
 
 
