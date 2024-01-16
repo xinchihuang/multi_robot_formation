@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 # from LocalExpertController import LocalExpertController
+from utils.gabreil_graph import get_gabreil_graph
 
 def gabriel(pose_array):
     """
@@ -296,7 +297,7 @@ def plot_triangle(ax,pos,theta,length,color):
     ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
     ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
     ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8):
+def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sensor_range=2):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
     fig,ax=plt.subplots(figsize=(5, 5))
@@ -312,6 +313,7 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8):
             ytrace.append(pose_array[i][p][1])
             ax.plot(xtrace,ytrace,color=color,linestyle='--')
     # position_array = pose_array[:, 0, :]
+
     position_array = pose_array[:, time_step - 1, :2]
     gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
 

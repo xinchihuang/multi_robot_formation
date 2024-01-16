@@ -68,7 +68,6 @@ def detect_objects(points,eps=0.3,sep1=0.1):
                 else:
                     back.append(point_to_search)
                     # direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
-            # print(front,back)
             centroid=np.zeros((2))
             if len(front)==0:
                 front.append(sum(back))

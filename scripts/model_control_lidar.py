@@ -82,7 +82,7 @@ class ModelControl:
         self.sub = rospy.Subscriber(topic, PointCloud, self.ModelControlCallback,queue_size=1)
         self.map_size = 100
         self.sensor_range = 2
-        self.robot_size=0.15
+        self.robot_size=0.1
         self.executor=Executor()
         self.color_index = {"Green": 0}
     def simple_control(self,position_list,index,desired_distance):

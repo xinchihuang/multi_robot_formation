@@ -1,16 +1,22 @@
-import matplotlib.pyplot as plt
+import pandas as pd
 
-# Create a new figure
-fig, ax = plt.subplots()
+# Replace 'your_file.csv' with the path to your CSV file
+df = pd.read_csv('C:\\Users\\huang xinchi\\Desktop\\multi_robot_formation\\scripts\\plots\\1.csv',skiprows=3)
+df=df.iloc[:, 2:]
+# 计算每列的非空元素数量
+non_null_counts = df.count()
+print(non_null_counts[:20])
+# 确定要选取的列数
+N = 54  # 比如，我们想选取非空元素数量最多的前 3 列
 
-# Define the circle's properties
-circle = plt.Circle((0.5, 0.5), 0.4, color='blue', fill=False)
+# 找出非空元素数量最多的 N 列的名称
+top_columns = non_null_counts.nlargest(N).index
+print(top_columns)
+# 保持原始列顺序，选取这些列
+selected_columns = [col for col in df.columns if col in top_columns]
 
-# Add the circle to the axes
-ax.add_artist(circle)
+# 获取选中的列
+selected_df = df[selected_columns]
 
-# Set the aspect of the plot to be equal, so the circle isn't skewed
-ax.set_aspect('equal')
-
-# Show the plot
-plt.show()
+# 查看结果
+print(selected_df.columns)

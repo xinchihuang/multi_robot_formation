@@ -8,7 +8,7 @@ from scripts.utils.object_tracker import detect_objects
 from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil,plot_trace_triangle
 from collections import defaultdict
 import matplotlib
-file_path = '1.csv'
+file_path = '2.csv'
 robot_index_list=[3,4,5,6]
 # Open the CSV file and read its content
 with open(file_path, 'r') as file:
@@ -20,9 +20,10 @@ with open(file_path, 'r') as file:
     object_dict=defaultdict(list)
     for i in robot_index_list:
         object_dict[i] = []
-    print(object_dict)
     for row in csv_reader:
         count+=1
+        # if count>6000:
+        #     break
         if count<=7:
             continue
         index=2
@@ -57,8 +58,8 @@ with open(file_path, 'r') as file:
                 else:
                     object_dict[item].append(object_dict[item][-1])
             else:
-                # print(item,object_dict,count)
-                # print(centroids_dict)
+                print(item,centroids_dict)
+
                 if len(object_dict[item])>0:
                     object_dict[item].append(object_dict[item][-1])
     pose_lists=[]
@@ -68,7 +69,7 @@ with open(file_path, 'r') as file:
     pose_array=numpy.array(pose_lists)
     plot_trace_triangle(pose_array,time_step=len(object_dict[item]),xlim=3,ylim=3)
     plot_formation_gabreil_real(pose_array,desired_distance=1,xlim=2,ylim=2)
-    plot_relative_distance_gabreil(0.02,pose_array)
+    plot_relative_distance_gabreil(0.01,pose_array)
 
 
 
