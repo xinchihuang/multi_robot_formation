@@ -30,56 +30,48 @@ def generate_object(number_of_point,sep1=0.02,sep2=0.25):
 def detect_objects(points,eps=0.3,sep1=0.1):
     direction_vectors_dict = defaultdict(list)
     centroids_dict=defaultdict(list)
+    X = np.array(points)
 
-    try:
-        X = np.array(points)
+    dbscan = DBSCAN(eps=eps, min_samples=3)
 
-        dbscan = DBSCAN(eps=eps, min_samples=3)
+    # 使用DBSCAN进行聚类
+    predicted_labels = dbscan.fit_predict(X)
 
-        # 使用DBSCAN进行聚类
-        predicted_labels = dbscan.fit_predict(X)
+    groups = defaultdict(list)
+    centroids_dict=defaultdict(list)
 
-        # kmeans = KMeans(n_clusters=number_of_objects)
-        # kmeans.fit(X)
-        # predicted_labels = kmeans.predict(X)
-        # centroids = kmeans.cluster_centers_
-        # print(centroids,predicted_labels)
-        groups = defaultdict(list)
-        centroids_dict=defaultdict(list)
-
-        # for i in range(centroids.shape[0]):
-        #     centroids_dict[i]=centroids[i]
-        for i in range(len(X)):
-            groups[predicted_labels[i]].append(X[i])
-        direction_vectors_dict=defaultdict(list)
-        for group_id in groups:
-            points = np.array(groups[group_id])
-            tree = KDTree(points)
-            direction_vector = np.zeros((2))
-            front=[]
-            back=[]
-            # print(points)
-            for point_index in range(points.shape[0]):
-                point_to_search = points[point_index]
-                distance, index = tree.query(point_to_search, k=2)
-                if distance[1] > 2*sep1:
-                    front.append(point_to_search)
-                    # direction_vector = direction_vector+(point_to_search - centroids_dict[group_id])
-                else:
-                    back.append(point_to_search)
-                    # direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
-            centroid=np.zeros((2))
-            if len(front)==0:
-                front.append(sum(back))
-            for point_back in back:
-                direction_vector = direction_vector + (front[0] - point_back)
-                centroid=centroid+point_back+front[0]
-            centroids_dict[len(groups[group_id])]=centroid/len(back)/2
-            direction_vectors_dict[len(groups[group_id])]=(direction_vector/np.linalg.norm(direction_vector))
-    except:
-        pass
+    # for i in range(centroids.shape[0]):
+    #     centroids_dict[i]=centroids[i]
+    for i in range(len(X)):
+        groups[predicted_labels[i]].append(X[i])
+    direction_vectors_dict=defaultdict(list)
+    for group_id in groups:
+        points = np.array(groups[group_id])
+        tree = KDTree(points)
+        direction_vector = np.zeros((2))
+        front=[]
+        back=[]
+        # print(points)
+        for point_index in range(points.shape[0]):
+            point_to_search = points[point_index]
+            distance, index = tree.query(point_to_search, k=2)
+            if distance[1] > 2*sep1:
+                front.append(point_to_search)
+                # direction_vector = direction_vector+(point_to_search - centroids_dict[group_id])
+            else:
+                back.append(point_to_search)
+                # direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
+        centroid=np.zeros((2))
+        if len(front)==0 or len(back)<2:
+            valid=False
+            continue
+        for point_back in back:
+            direction_vector = direction_vector + (front[0] - point_back)
+            centroid=centroid+point_back+front[0]
+        centroids_dict[len(groups[group_id])]=centroid/len(back)/2
+        direction_vectors_dict[len(groups[group_id])]=(direction_vector/np.linalg.norm(direction_vector))
     # print(direction_vectors_dict,centroids_dict)
-    return  direction_vectors_dict,centroids_dict
+    return direction_vectors_dict,centroids_dict
 
 if __name__=="__main__":
     X=[]
