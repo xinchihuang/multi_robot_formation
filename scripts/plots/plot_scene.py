@@ -140,20 +140,20 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path='',sensor_range=2):
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    plt.figure(figsize=(5, 3))
+    plt.figure(figsize=(10, 6))
     for key, _ in distance_dict.items():
-        plt.plot(xlist, distance_dict[key], label=key)
+        plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
     # plt.legend()
-    plt.subplots_adjust(left=0.18,
-                        bottom=0.23,
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.18,
                         right=0.98,
                         top=0.98,
                         wspace=0.0,
                         hspace=0.0)
-    plt.xlabel("time(s)", fontsize=20)
-    plt.ylabel("distance(m)", fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xlabel("time(s)", fontsize=30)
+    plt.ylabel("distance(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.grid()
     plt.savefig(os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
@@ -204,11 +204,11 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,yli
                         wspace=0.0,
                         hspace=0.0)
     plt.title("Average formation error: "+str(formation_error/count),fontsize=20)
-    plt.xlabel("x(m)", fontsize=20)
-    plt.ylabel("y(m)", fontsize=20)
+    plt.xlabel("x(m)", fontsize=30)
+    plt.ylabel("y(m)", fontsize=30)
     plt.legend()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.xlim(-xlim, xlim)
     plt.ylim(-ylim, ylim)
     plt.grid()
@@ -249,10 +249,10 @@ def plot_formation_gabreil_real(pose_array,save_path='',desired_distance=2,xlim=
 
     ax.set_aspect('equal')
     ax.set_title(f"Average formation error: {formation_error / count:.5f}", fontsize=20)
-    ax.set_xlabel("x(m)", fontsize=20)
-    ax.set_ylabel("y(m)", fontsize=20)
+    ax.set_xlabel("x(m)", fontsize=30)
+    ax.set_ylabel("y(m)", fontsize=30)
     ax.legend()
-    ax.tick_params(axis='both', which='major', labelsize=20)
+    ax.tick_params(axis='both', which='major', labelsize=30)
     ax.set_xlim(-xlim, xlim)
     ax.set_ylim(-ylim, ylim)
     ax.grid()
@@ -294,18 +294,18 @@ def plot_triangle(ax,pos,theta,length,color):
     p2=[x+length*math.cos(theta-2*math.pi/3),y+length*math.sin(theta-2*math.pi/3)]
     p3 = [x + length * math.cos(theta + 2*math.pi / 3), y + length * math.sin(theta + 2*math.pi / 3)]
     # ax.scatter(x,y,c=color)
-    ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
-    ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
-    ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
+    ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color,linewidth=4)
+    ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color,linewidth=4)
+    ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color,linewidth=4)
 def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sensor_range=2):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
-    fig,ax=plt.subplots(figsize=(5, 5))
+    fig,ax=plt.subplots(figsize=(10, 10))
     for i in range(rob_num):
         color = next(colors)
         xtrace = []
         ytrace = []
-        for p in range(0,time_step-1,100):
+        for p in range(0,time_step-1,500):
             pos=[pose_array[i][p][0],pose_array[i][p][1]]
             theta=pose_array[i][p][2]
             plot_triangle(ax, pos,theta, 0.1, color)
@@ -324,17 +324,17 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sen
             xlist = [position_array[i][0], position_array[j][0]]
             ylist = [position_array[i][1], position_array[j][1]]
             distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
-            ax.plot(xlist, ylist,color="black")
-    plt.subplots_adjust(left=0.13,
-                        bottom=0.11,
+            ax.plot(xlist, ylist,color="black",linewidth=4)
+    plt.subplots_adjust(left=0.18,
+                        bottom=0.13,
                         right=0.98,
                         top=0.98,
                         wspace=0.0,
                         hspace=0.0)
-    plt.xlabel("x(m)", fontsize=15)
-    plt.ylabel("y(m)", fontsize=15)
-    plt.xticks(fontsize=15)
-    plt.yticks(fontsize=15)
+    plt.xlabel("x(m)", fontsize=30)
+    plt.ylabel("y(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
 
     plt.xlim(-xlim, xlim)
     plt.ylim(-ylim, ylim)

@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Replace 'your_file.csv' with the path to your CSV file
-df = pd.read_csv('C:\\Users\\huang xinchi\\Desktop\\multi_robot_formation\\scripts\\plots\\1.csv',skiprows=3)
+df = pd.read_csv('/plots/ViT_4/1.csv', skiprows=3)
 df=df.iloc[:, 2:]
 # 计算每列的非空元素数量
 non_null_counts = df.count()
