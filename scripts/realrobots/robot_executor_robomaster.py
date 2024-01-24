@@ -81,7 +81,7 @@ class UartConnector:
     def __init__(self):
 
         self.ser = serial.Serial()
-        self.ser.port = "/dev/ttyUSB0"
+        self.ser.port = "/dev/ttyUSB1"
         self.ser.baudrate = 115200
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.stopbits = serial.STOPBITS_ONE
@@ -155,12 +155,12 @@ class Executor:
         print("x", velocity_x)
         print("y", velocity_y)
         print("omega", omega)
-        velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x) > 0.1 else velocity_x
-        velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
+        # velocity_x = 0.1 * abs(velocity_x) / velocity_x if abs(velocity_x) > 0.1 else velocity_x
+        # velocity_y = 0.1 * abs(velocity_y) / velocity_y if abs(velocity_y) > 0.1 else velocity_y
         # omega = 0.1 * abs(omega) / omega if abs(omega) > 0.1 else omega
         # velocity_x=0
         # velocity_y=0
-        omega=0
+        # omega=0
         if velocity_x==0 and velocity_y==0 and omega==0:
             msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
@@ -170,7 +170,13 @@ class Executor:
                 speed_x=velocity_x, speed_y=-velocity_y, speed_z=math.degrees(omega)
             )
         self.connector.send_to_robot(msg)
-        time.sleep(0.03)
+        # timestamp = time.time()
+        # print("当前时间戳：", timestamp)
+        # local_time = time.localtime(timestamp)
+        # print("本地时间：", local_time)
+        # formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", local_time)
+        # print("格式化时间：", formatted_time)
+        # time.sleep(0.4)
         # msg = "chassis speed x {speed_x} y {speed_y} z {speed_z}".format(
         #     speed_x=0, speed_y=-0, speed_z=15
         # )

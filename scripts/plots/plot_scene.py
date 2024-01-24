@@ -13,8 +13,32 @@ import itertools
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
-from utils.gabreil_graph import get_gabreil_graph
 # from LocalExpertController import LocalExpertController
+from utils.gabreil_graph import get_gabreil_graph
+
+def gabriel(pose_array):
+    """
+    Get the gabriel graph of the formation
+    :param pose_array: A numpy array contains all robots formation
+    :return: Gabriel graph ( 2D matrix ) 1 represent connected, 0 represent disconnected
+    """
+    node_mum = np.shape(pose_array)[0]
+    gabriel_graph = [[1] * node_mum for _ in range(node_mum)]
+    position_array = pose_array[:, -1, :2]
+    for u in range(node_mum):
+        for v in range(node_mum):
+            m = (position_array[u] + position_array[v]) / 2
+            for w in range(node_mum):
+                if w == v or w==u:
+                    continue
+                if np.linalg.norm(position_array[w] - m) <= np.linalg.norm(
+                    position_array[u] - m
+                ):
+                    gabriel_graph[u][v] = 0
+                    gabriel_graph[v][u] = 0
+                    break
+    return gabriel_graph
+
 
 def plot_wheel_speed(dt, velocity_array, save_path):
     """
@@ -116,20 +140,20 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path='',sensor_range=2):
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    plt.figure(figsize=(5, 3))
+    plt.figure(figsize=(10, 6))
     for key, _ in distance_dict.items():
-        plt.plot(xlist, distance_dict[key], label=key)
+        plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
     # plt.legend()
-    plt.subplots_adjust(left=0.18,
-                        bottom=0.23,
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.18,
                         right=0.98,
                         top=0.98,
                         wspace=0.0,
                         hspace=0.0)
-    plt.xlabel("time(s)", fontsize=20)
-    plt.ylabel("distance(m)", fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xlabel("time(s)", fontsize=30)
+    plt.ylabel("distance(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.grid()
     plt.savefig(os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
@@ -143,6 +167,7 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,yli
     :return:
     """
     rob_num = np.shape(pose_array)[0]
+    gabriel_graph = gabriel(pose_array)
     position_array = pose_array[:, -1, :]
     gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
     plt.figure(figsize=(10, 10))
@@ -179,17 +204,62 @@ def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,yli
                         wspace=0.0,
                         hspace=0.0)
     plt.title("Average formation error: "+str(formation_error/count),fontsize=20)
-    plt.xlabel("x(m)", fontsize=20)
-    plt.ylabel("y(m)", fontsize=20)
+    plt.xlabel("x(m)", fontsize=30)
+    plt.ylabel("y(m)", fontsize=30)
     plt.legend()
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.xlim(-xlim, xlim)
     plt.ylim(-ylim, ylim)
     plt.grid()
     plt.savefig(os.path.join(save_path, "formation_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
+def plot_formation_gabreil_real(pose_array,save_path='',desired_distance=2,xlim=4,ylim=4,sensor_range=2,robot_size=0.1):
+    """
+    Plot the formation of robots, plot the gabreil graph
+    :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
+    :param save_path: Path to save figures
+    :return:
+    """
+    rob_num = np.shape(pose_array)[0]
+    position_array = pose_array[:, -1, :]
+    gabriel_graph = get_gabreil_graph(position_array, sensor_range=sensor_range)
+    # Create a figure and a set of subplots
+    fig, ax = plt.subplots(figsize=(10, 10))
+    # Scatter plot for position_array
+    ax.scatter(position_array[:, 0], position_array[:, 1])
 
+    formation_error = 0
+    count = 0
+    for i in range(rob_num):
+        circle = plt.Circle((position_array[i][0], position_array[i][1]), robot_size, color='black', fill=False)
+        ax.add_artist(circle)
+        for j in range(i + 1, rob_num):
+            if gabriel_graph[i][j] == 0:
+                continue
+            xlist = [position_array[i][0], position_array[j][0]]
+            ylist = [position_array[i][1], position_array[j][1]]
+            distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
+            if distance > 5:
+                continue
+            ax.plot(xlist, ylist, label=f"Distance: {distance: .2f}")
+            count += 1
+            formation_error += abs(distance - desired_distance)
+
+
+    ax.set_aspect('equal')
+    ax.set_title(f"Average formation error: {formation_error / count:.5f}", fontsize=20)
+    ax.set_xlabel("x(m)", fontsize=30)
+    ax.set_ylabel("y(m)", fontsize=30)
+    ax.legend()
+    ax.tick_params(axis='both', which='major', labelsize=30)
+    ax.set_xlim(-xlim, xlim)
+    ax.set_ylim(-ylim, ylim)
+    ax.grid()
+
+    # Save the figure
+    fig.savefig(os.path.join(save_path, f"formation_gabreil_real_{rob_num}.png"), pad_inches=0.0)
+    plt.close(fig)
 
 def plot_trace(position_array, save_path):
     """
@@ -224,18 +294,18 @@ def plot_triangle(ax,pos,theta,length,color):
     p2=[x+length*math.cos(theta-2*math.pi/3),y+length*math.sin(theta-2*math.pi/3)]
     p3 = [x + length * math.cos(theta + 2*math.pi / 3), y + length * math.sin(theta + 2*math.pi / 3)]
     # ax.scatter(x,y,c=color)
-    ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color)
-    ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color)
-    ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color)
-def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=4,ylim=4,sensor_range=2):
+    ax.plot([p1[0],p2[0]],[p1[1],p2[1]],color=color,linewidth=4)
+    ax.plot([p2[0],p3[0]],[p2[1],p3[1]],color=color,linewidth=4)
+    ax.plot([p3[0],p1[0]],[p3[1],p1[1]],color=color,linewidth=4)
+def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sensor_range=2):
     rob_num = np.shape(pose_array)[0]
     colors = itertools.cycle(mcolors.TABLEAU_COLORS)
-    fig,ax=plt.subplots(figsize=(5, 5))
+    fig,ax=plt.subplots(figsize=(10, 10))
     for i in range(rob_num):
         color = next(colors)
         xtrace = []
         ytrace = []
-        for p in range(0,time_step-1,100):
+        for p in range(0,time_step-1,500):
             pos=[pose_array[i][p][0],pose_array[i][p][1]]
             theta=pose_array[i][p][2]
             plot_triangle(ax, pos,theta, 0.1, color)
@@ -243,6 +313,7 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=4,ylim=4,sen
             ytrace.append(pose_array[i][p][1])
             ax.plot(xtrace,ytrace,color=color,linestyle='--')
     # position_array = pose_array[:, 0, :]
+
     position_array = pose_array[:, time_step - 1, :2]
     gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
 
@@ -253,18 +324,17 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=4,ylim=4,sen
             xlist = [position_array[i][0], position_array[j][0]]
             ylist = [position_array[i][1], position_array[j][1]]
             distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
-            ax.plot(xlist, ylist,color="black")
-
-    plt.subplots_adjust(left=0.13,
-                        bottom=0.11,
+            ax.plot(xlist, ylist,color="black",linewidth=4)
+    plt.subplots_adjust(left=0.18,
+                        bottom=0.13,
                         right=0.98,
                         top=0.98,
                         wspace=0.0,
                         hspace=0.0)
-    plt.xlabel("x(m)", fontsize=15)
-    plt.ylabel("y(m)", fontsize=15)
-    plt.xticks(fontsize=15)
-    plt.yticks(fontsize=15)
+    plt.xlabel("x(m)", fontsize=30)
+    plt.ylabel("y(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
 
     plt.xlim(-xlim, xlim)
     plt.ylim(-ylim, ylim)
@@ -335,7 +405,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="C:\\Users\\xinchi\\Downloads\\1m-20231211T160355Z-001\\1m\\ViT_demo"
+    root_path="C:\\Users\\huang xinchi\\Downloads\\ViT_demo"
     for path in os.listdir(root_path):
         plot_load_data_gazebo(os.path.join(root_path,path),desired_distance=1,sensor_range=2)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")

@@ -69,16 +69,13 @@ def detect_objects(points,eps=0.3,sep1=0.1):
                     back.append(point_to_search)
                     # direction_vector = direction_vector-(point_to_search - centroids_dict[group_id])
             # print(front,back)
-            # centroid=np.zeros((2))
-            # if len(front)==0:
-            #     front.append(sum(back))
-            # for point_back in back:
-            #     direction_vector = direction_vector + (front[0] - point_back)
-            #     centroid=centroid+point_back+front[0]
-            # centroids_dict[len(groups[group_id])]=centroid/len(back)/2
-            centroids_dict[len(groups[group_id])]=front[0]
-
-
+            centroid=np.zeros((2))
+            if len(front)==0:
+                front.append(sum(back))
+            for point_back in back:
+                direction_vector = direction_vector + (front[0] - point_back)
+                centroid=centroid+point_back+front[0]
+            centroids_dict[len(groups[group_id])]=centroid/len(back)/2
             direction_vectors_dict[len(groups[group_id])]=(direction_vector/np.linalg.norm(direction_vector))
     except:
         pass
