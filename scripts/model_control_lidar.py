@@ -159,6 +159,11 @@ class ModelControl:
         # control_data.velocity_x=0
         # control_data.velocity_y=0
         # self.executor.execute_control(control_data=control_data)
+    def keyboard_stop(self):
+        if data.data == 'q':
+            self.robot.executor.stop()
+            # exit(1)
+            rospy.signal_shutdown("Shut down!")
 def stop_node(event):
     rospy.signal_shutdown("Time's up!")
 if __name__ == "__main__":
@@ -166,7 +171,7 @@ if __name__ == "__main__":
     rospy.init_node("model_control")
     topic = "pointcloud2d"
     listener = ModelControl(topic)
-    # rospy.Subscriber('keyboard_input', String, listener.keyboard_stop)
+    rospy.Subscriber('keyboard_input', String, listener.keyboard_stop)
     # timer = rospy.Timer(rospy.Duration(100), listener.timed_stop)
     rospy.spin()
 
