@@ -83,10 +83,10 @@ for file_name in range(12,13):
             os.mkdir(str(file_name))
 
         pose_array=numpy.array(pose_lists)
-        pose_array=pose_array[:,:,:]
+        pose_array=pose_array[:,:5000,:]
         print(pose_array.shape)
-        numpy.save(os.path.join(str(file_name), "trace"), pose_array)
-        plot_trace_triangle_real(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
+        numpy.save(os.path.join(str(file_name), "trace"), pose_array.transpose((1,0,2)))
+        plot_trace_triangle(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
         plot_formation_gabreil_real(pose_array,desired_distance=1.1,xlim=2,ylim=2,save_path=str(file_name))
         plot_relative_distance_gabreil_real(0.01,pose_array,save_path=str(file_name))
 

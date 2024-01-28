@@ -1,22 +1,26 @@
-import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Replace 'your_file.csv' with the path to your CSV file
-df = pd.read_csv('/plots/ViT_4/1.csv', skiprows=3)
-df=df.iloc[:, 2:]
-# 计算每列的非空元素数量
-non_null_counts = df.count()
-print(non_null_counts[:20])
-# 确定要选取的列数
-N = 54  # 比如，我们想选取非空元素数量最多的前 3 列
+# Sample data
+x = np.linspace(0, 10, 100)
+y = np.sin(x)
 
-# 找出非空元素数量最多的 N 列的名称
-top_columns = non_null_counts.nlargest(N).index
-print(top_columns)
-# 保持原始列顺序，选取这些列
-selected_columns = [col for col in df.columns if col in top_columns]
+# Determine the common range for both axes
+# You might want to base this on your data's min and max values
+axis_range = [0, 10]  # For example, setting both axes from 0 to 10
 
-# 获取选中的列
-selected_df = df[selected_columns]
+# Create figure and axes
+fig, ax = plt.subplots()
 
-# 查看结果
-print(selected_df.columns)
+# Plot data
+ax.plot(x, y)
+
+# Customize grid
+ax.grid(color='lightgrey', linestyle='--', linewidth=0.5)
+
+# Set the same range for both x and y axes
+ax.set_xlim(axis_range)
+ax.set_ylim(axis_range)
+
+# Show plot
+plt.show()
