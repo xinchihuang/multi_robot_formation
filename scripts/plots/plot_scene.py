@@ -157,6 +157,49 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path='',sensor_range=2):
     plt.grid()
     plt.savefig(os.path.join(save_path, "relative_distance_gabreil_" + str(rob_num) + ".png"), pad_inches=0.0)
     plt.close()
+def plot_relative_distance_gabreil_real(dt, pose_array, save_path='',sensor_range=2):
+    """
+    Plot line chart for robots relative distance, Only show the distance which are
+    edges of gabreil graph
+    :param dt: Time interval
+    :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
+    :param save_path: Path to save figures
+    :return:
+    """
+    rob_num = np.shape(pose_array)[0]
+    position_array = pose_array[:, -1, :]
+    gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
+    distance_dict = {}
+    xlist = []
+    for i in range(np.shape(pose_array)[1]):
+        xlist.append(i * dt)
+    for i in range(rob_num):
+        for j in range(i + 1, rob_num):
+            if gabriel_graph[i][j] == 0:
+                continue
+            name = str(i + 1) + " to " + str(j + 1)
+            distance_array = np.sqrt(
+                np.square(pose_array[i, :, 0] - pose_array[j, :, 0])
+                + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
+            )
+            distance_dict[name] = distance_array
+    plt.figure(figsize=(10, 6))
+    for key, _ in distance_dict.items():
+        plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
+    # plt.legend()
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.18,
+                        right=0.98,
+                        top=0.98,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.xlabel("time(s)", fontsize=30)
+    plt.ylabel("distance(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+    plt.grid()
+    plt.savefig(os.path.join(save_path, "relative_distance_gabreil_real_" + str(rob_num) + ".png"), pad_inches=0.0)
+    plt.close()
 
 
 def plot_formation_gabreil(pose_array,save_path='',desired_distance=2,xlim=4,ylim=4,sensor_range=2):
@@ -340,6 +383,51 @@ def plot_trace_triangle(pose_array,save_path='',time_step=1000,xlim=8,ylim=8,sen
     plt.ylim(-ylim, ylim)
     plt.grid()
     plt.savefig(os.path.join(save_path, "robot_trace_" + str(rob_num) + ".png"))
+    plt.close()
+    # plt.show()
+def plot_trace_triangle_real(pose_array,save_path='',time_step=5000,xlim=8,ylim=8,sensor_range=2):
+    rob_num = np.shape(pose_array)[0]
+    colors = itertools.cycle(mcolors.TABLEAU_COLORS)
+    fig,ax=plt.subplots(figsize=(10, 10))
+    for i in range(rob_num):
+        color = next(colors)
+        xtrace = []
+        ytrace = []
+        for p in range(0,time_step-1,500):
+            pos=[pose_array[i][p][0],pose_array[i][p][1]]
+            theta=pose_array[i][p][2]
+            plot_triangle(ax, pos,theta, 0.1, color)
+            xtrace.append(pose_array[i][p][0])
+            ytrace.append(pose_array[i][p][1])
+            ax.plot(xtrace,ytrace,color=color,linestyle='--')
+    # position_array = pose_array[:, 0, :]
+
+    position_array = pose_array[:, time_step - 1, :2]
+    gabriel_graph = get_gabreil_graph(position_array,sensor_range=sensor_range)
+
+    for i in range(rob_num):
+        for j in range(i + 1, rob_num):
+            if gabriel_graph[i][j] == 0:
+                continue
+            xlist = [position_array[i][0], position_array[j][0]]
+            ylist = [position_array[i][1], position_array[j][1]]
+            distance = math.sqrt((xlist[0] - xlist[1]) ** 2 + (ylist[0] - ylist[1]) ** 2)
+            ax.plot(xlist, ylist,color="black",linewidth=4)
+    plt.subplots_adjust(left=0.18,
+                        bottom=0.13,
+                        right=0.98,
+                        top=0.98,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.xlabel("x(m)", fontsize=30)
+    plt.ylabel("y(m)", fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+
+    plt.xlim(-xlim, xlim)
+    plt.ylim(-ylim, ylim)
+    plt.grid()
+    plt.savefig(os.path.join(save_path, "robot_trace_real_" + str(rob_num) + ".png"))
     plt.close()
     # plt.show()
 
