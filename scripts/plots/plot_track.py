@@ -6,10 +6,10 @@ import sys
 import numpy
 import matplotlib.pyplot as plt
 from scripts.utils.object_tracker import detect_objects
-from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil,plot_trace_triangle
+from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil_real,plot_trace_triangle_real
 from collections import defaultdict
 import matplotlib
-for file_name in range(1,12):
+for file_name in range(12,13):
     file_path = '{0}.csv'.format(file_name)
     robot_index_list=[3,4,5,6]
     # Open the CSV file and read its content
@@ -84,10 +84,11 @@ for file_name in range(1,12):
 
         pose_array=numpy.array(pose_lists)
         pose_array=pose_array[:,:5000,:]
-        numpy.save(os.path.join(str(file_name), "trace"), pose_array)
+        print(pose_array.shape)
+        numpy.save(os.path.join(str(file_name), "trace"), pose_array.transpose((1,0,2)))
         plot_trace_triangle(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
         plot_formation_gabreil_real(pose_array,desired_distance=1.1,xlim=2,ylim=2,save_path=str(file_name))
-        plot_relative_distance_gabreil(0.01,pose_array,save_path=str(file_name))
+        plot_relative_distance_gabreil_real(0.01,pose_array,save_path=str(file_name))
 
 
 
