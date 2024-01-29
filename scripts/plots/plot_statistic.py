@@ -195,18 +195,18 @@ def process_data_real(root_path,desired_distance=1.1,sensor_range=2,check_time=5
         #     to_root = "/home/xinchi/unsuccess"
         #     distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
         #     continue
-        if crash==True:
-            unsuccess += 1
-            print(path,average_formation_error,"crash")
-            # to_root = "/home/xinchi/unsuccess"
-            # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
-            # continue
-        if average_formation_error>10:
-            unsuccess += 1
-            print(path, average_formation_error,"too much error")
-            # to_root = "/home/xinchi/unsuccess"
-            # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
-            continue
+        # if crash==True:
+        #     unsuccess += 1
+        #     print(path,average_formation_error,"crash")
+        #     # to_root = "/home/xinchi/unsuccess"
+        #     # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
+        #     # continue
+        # if average_formation_error>10:
+        #     unsuccess += 1
+        #     print(path, average_formation_error,"too much error")
+        #     # to_root = "/home/xinchi/unsuccess"
+        #     # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
+        #     continue
 
         converge_time_all.append(convergence_time)
         average_formation_error_all.append(average_formation_error)
@@ -289,28 +289,51 @@ def box_2(data_m,data_e,title,ylabel,save_dir):
     plt.ylabel(ylabel,fontsize=15)
     plt.savefig(os.path.join(save_dir,title+'.png'))
 
+def real_scatter(data):
+    plt.figure(figsize=(5, 4))
+    y=data
+    x=[i for i in range(len(data))]
+    plt.scatter(x, y, label='Data Points')
+    plt.xticks(x, labels=x, fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.xlabel("Test case", fontsize=15)
+    plt.ylabel("Converge time (s)", fontsize=15)
+    plt.ylim((0,60))
+    # plt.grid()
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15,
+                        right=0.99,
+                        top=0.95,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.savefig(os.path.join('converge time real.png'))
 
 
 converge_time_all_ViT=[]
 average_formation_all_ViT=[]
 average_formation_error_all_ViT=[]
-robot_num=(5,7,9,11,13)
-root_dir="/home/xinchi/gazebo_data/ViT_100"
-for i in robot_num:
-    folder="ViT_"+str(i)
-    path = os.path.join(root_dir,folder)
-    converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=1,sensor_range=2)
-    converge_time_all_ViT.append(converge_time_all)
-    average_formation_all_ViT.append(average_formation_all)
-    average_formation_error_all_ViT.append(average_formation_error_all)
+# robot_num=(5,7,9,11,13)
+# root_dir="/home/xinchi/gazebo_data/ViT_100"
+# for i in robot_num:
+#     folder="ViT_"+str(i)
+#     path = os.path.join(root_dir,folder)
+#     converge_time_all, average_formation_all, average_formation_error_all = process_data_gazebo(path,desired_distance=1,sensor_range=2)
+#     converge_time_all_ViT.append(converge_time_all)
+#     average_formation_all_ViT.append(average_formation_all)
+#     average_formation_error_all_ViT.append(average_formation_error_all)
 
 
 
 
 #
-box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time",root_dir)
-box_1(average_formation_all_ViT,"Average distance",robot_num,"Distance(m)",root_dir)
-box_1(average_formation_error_all_ViT,"Average group formation error",robot_num,"Formation Error(%)",root_dir)
+# box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time",root_dir)
+# box_1(average_formation_all_ViT,"Average distance",robot_num,"Distance(m)",root_dir)
+# box_1(average_formation_error_all_ViT,"Average group formation error",robot_num,"Formation Error(%)",root_dir)
+root_dir=""
+folder="ViT_4"
+path = os.path.join(root_dir,folder)
+converge_time_all, average_formation_all, average_formation_error_all = process_data_real(path,desired_distance=1.1,sensor_range=2)
+real_scatter(converge_time_all)
 # box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
 # box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)
 # box_1(average_formation_error_all_expert,"Average group formation error","Formation Error(%)",root_dir)
