@@ -387,7 +387,7 @@ def plot_trace_triangle_real(pose_array,save_path='',time_step=5000,xlim=8,ylim=
         color = next(colors)
         xtrace = []
         ytrace = []
-        for p in range(0,time_step-1,500):
+        for p in range(0,time_step-1,1000):
             pos=[pose_array[i][p][0],pose_array[i][p][1]]
             theta=pose_array[i][p][2]
             plot_triangle(ax, pos,theta, 0.1, color)
@@ -474,7 +474,6 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     :return:
     """
     position_array = np.load(os.path.join(root_dir, "trace.npy"))
-    orientation_array=position_array[:,:,2]
 
     position_array=np.transpose(position_array,(1,0,2))
     # plot_relative_distance(dt, position_array, root_dir)
@@ -482,7 +481,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     plot_formation_gabreil(position_array, root_dir,desired_distance=desired_distance,sensor_range=sensor_range)
     plot_trace_triangle(position_array,root_dir,sensor_range=sensor_range)
 
-def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=6):
+def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=50):
         """
 
         :param dt: Time interval
@@ -501,8 +500,8 @@ def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_r
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="/home/xinchi/catkin_ws/src/multi_robot_formation/scripts/plots/ViT_4"
+    root_path="C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots"
     for path in os.listdir(root_path):
-        plot_load_data_gazebo_multi_fromation(os.path.join(root_path,path),desired_distance=1,sensor_range=2)
+        plot_load_data_gazebo_multi_fromation(os.path.join(root_path,path),desired_distance=1.1,sensor_range=2)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

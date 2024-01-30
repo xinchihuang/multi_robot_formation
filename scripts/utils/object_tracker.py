@@ -76,6 +76,7 @@ def detect_objects(points,eps=0.3,sep1=0.1):
                 direction_vector = direction_vector + (front[0] - point_back)
                 centroid=centroid+point_back+front[0]
             centroids_dict[len(groups[group_id])]=centroid/len(back)/2
+
             direction_vectors_dict[len(groups[group_id])]=(direction_vector/np.linalg.norm(direction_vector))
     except:
         pass

@@ -9,7 +9,7 @@ from scripts.utils.object_tracker import detect_objects
 from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil_real,plot_trace_triangle_real
 from collections import defaultdict
 import matplotlib
-for file_name in range(12,13):
+for file_name in range(16,17):
     file_path = '{0}.csv'.format(file_name)
     robot_index_list=[3,4,5,6]
     # Open the CSV file and read its content
@@ -55,6 +55,16 @@ for file_name in range(12,13):
                         break
             if start==False:
                 continue
+            if not len(centroids_dict)==len(object_dict):
+                continue
+            skip=False
+            for item in centroids_dict:
+                if not item in object_dict:
+                    skip=True
+                    break
+            if skip:
+                continue
+
             for item in object_dict:
                 if item in centroids_dict:
                     if len(object_dict[item]) == 0:
@@ -68,13 +78,13 @@ for file_name in range(12,13):
                                                              direction_vectors_dict[item][1])])
                     else:
                         object_dict[item].append(object_dict[item][-1])
-                else:
-                    # print(item,centroids_dict)
-
-                    if len(object_dict[item])>0:
-                        object_dict[item].append(object_dict[item][-1])
-                    else:
-                        print(centroids_dict)
+                # else:
+                #
+                #     if len(object_dict[item])>0:
+                #         object_dict[item].append(object_dict[item][-1])
+                #     else:
+                #         print(centroids_dict)
+            print(count,centroids_dict)
         pose_lists=[]
         for item in object_dict:
             # print(len(object_dict[item]),item)
@@ -83,10 +93,11 @@ for file_name in range(12,13):
             os.mkdir(str(file_name))
 
         pose_array=numpy.array(pose_lists)
-        pose_array=pose_array[:,:5000,:]
+        print(pose_array.shape)
+        pose_array=pose_array[:,:,:]
         print(pose_array.shape)
         numpy.save(os.path.join(str(file_name), "trace"), pose_array.transpose((1,0,2)))
-        plot_trace_triangle(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
+        plot_trace_triangle_real(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
         plot_formation_gabreil_real(pose_array,desired_distance=1.1,xlim=2,ylim=2,save_path=str(file_name))
         plot_relative_distance_gabreil_real(0.01,pose_array,save_path=str(file_name))
 
