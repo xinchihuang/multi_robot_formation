@@ -9,8 +9,8 @@ from scripts.utils.object_tracker import detect_objects
 from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabreil_real,plot_trace_triangle_real
 from collections import defaultdict
 import matplotlib
-for file_name in range(17,18):
-    file_path = '{0}.csv'.format(file_name)
+for file_name in range(1,2):
+    file_path = 'C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots\\csv\\{0}.csv'.format(file_name)
     robot_index_list=[3,4,5,6]
     # Open the CSV file and read its content
     with open(file_path, 'r') as file:
