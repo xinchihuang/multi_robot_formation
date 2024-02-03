@@ -184,14 +184,15 @@ def plot_relative_distance_gabreil_real(dt, pose_array, save_path='',sensor_rang
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(30, 5))
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
     # plt.legend()
-    plt.subplots_adjust(left=0.13,
+    plt.ylim(0,3)
+    plt.subplots_adjust(left=0.05,
                         bottom=0.18,
                         right=0.98,
-                        top=0.98,
+                        top=0.95,
                         wspace=0.0,
                         hspace=0.0)
     plt.xlabel("time(s)", fontsize=30)
@@ -203,7 +204,7 @@ def plot_relative_distance_gabreil_real(dt, pose_array, save_path='',sensor_rang
     plt.close()
 
 
-def plot_formation_gabreil(pose_array,save_path='',file_name="formation_gabreil.png",desired_distance=1,xlim=2,ylim=2,sensor_range=2,robot_size=0.1):
+def plot_formation_gabreil(pose_array,save_path='',file_name="formation_gabreil.png",desired_distance=1,xlim=1.5,ylim=1.5,sensor_range=2,robot_size=0.1):
     """
         Plot the formation of robots, plot the gabreil graph
         :param pose_array: Robots trace data 3D numpy array [robot:[time step:[x,y]]]
@@ -238,10 +239,10 @@ def plot_formation_gabreil(pose_array,save_path='',file_name="formation_gabreil.
 
 
     # ax.set_title(f"Average formation error: {formation_error / count:.5f}", fontsize=20)
-    ax.set_xlabel("x(m)", fontsize=30)
-    ax.set_ylabel("y(m)", fontsize=30)
+    ax.set_xlabel("x(m)", fontsize=35)
+    ax.set_ylabel("y(m)", fontsize=35)
     # ax.legend()
-    ax.tick_params(axis='both', which='major', labelsize=30)
+    ax.tick_params(axis='both', which='major', labelsize=35)
     ax.set_xlim(-xlim, xlim)
     ax.set_ylim(-ylim, ylim)
     ax.grid()
@@ -481,7 +482,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     plot_formation_gabreil(position_array, root_dir,desired_distance=desired_distance,sensor_range=sensor_range)
     plot_trace_triangle(position_array,root_dir,sensor_range=sensor_range)
 
-def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=50):
+def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=6):
         """
 
         :param dt: Time interval
@@ -493,7 +494,6 @@ def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_r
         range=int((position_array.shape[1]-1)/(num_graph-1))
         i=0
         while i<num_graph:
-
             plot_formation_gabreil(position_array[:,:range*i+1,:], root_dir,file_name=f"formation_gabreil_{position_array.shape[0]}_{i}.png", desired_distance=desired_distance, sensor_range=sensor_range)
             i += 1
 #
