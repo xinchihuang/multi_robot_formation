@@ -94,7 +94,7 @@ for file_name in range(17,18):
 
         pose_array=numpy.array(pose_lists)
         print(pose_array.shape)
-        pose_array=pose_array[:,2700:7700,:]
+        pose_array=pose_array[:,:,:]
         print(pose_array.shape)
         numpy.save(os.path.join(str(file_name), "trace"), pose_array.transpose((1,0,2)))
         plot_trace_triangle_real(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
