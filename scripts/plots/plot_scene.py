@@ -145,7 +145,7 @@ def plot_relative_distance_gabreil(dt, pose_array, save_path='',sensor_range=2):
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
     # plt.legend()
-    plt.subplots_adjust(left=0.13,
+    plt.subplots_adjust(left=0.05,
                         bottom=0.18,
                         right=0.98,
                         top=0.98,
@@ -184,13 +184,13 @@ def plot_relative_distance_gabreil_real(dt, pose_array, save_path='',sensor_rang
                 + np.square(pose_array[i, :, 1] - pose_array[j, :, 1])
             )
             distance_dict[name] = distance_array
-    plt.figure(figsize=(30, 5))
+    plt.figure(figsize=(10, 6))
     for key, _ in distance_dict.items():
         plt.plot(xlist, distance_dict[key], label=key,linewidth=5)
     # plt.legend()
     plt.ylim(0,3)
-    plt.subplots_adjust(left=0.05,
-                        bottom=0.18,
+    plt.subplots_adjust(left=0.13,
+                        bottom=0.16,
                         right=0.98,
                         top=0.95,
                         wspace=0.0,
@@ -388,7 +388,7 @@ def plot_trace_triangle_real(pose_array,save_path='',time_step=5000,xlim=8,ylim=
         color = next(colors)
         xtrace = []
         ytrace = []
-        for p in range(0,time_step-1,1000):
+        for p in range(0,time_step+1,500):
             pos=[pose_array[i][p][0],pose_array[i][p][1]]
             theta=pose_array[i][p][2]
             plot_triangle(ax, pos,theta, 0.1, color)
@@ -410,8 +410,8 @@ def plot_trace_triangle_real(pose_array,save_path='',time_step=5000,xlim=8,ylim=
             ax.plot(xlist, ylist,color="black",linewidth=4)
     plt.subplots_adjust(left=0.18,
                         bottom=0.13,
-                        right=0.98,
-                        top=0.98,
+                        right=0.95,
+                        top=0.95,
                         wspace=0.0,
                         hspace=0.0)
     plt.xlabel("x(m)", fontsize=30)
@@ -475,6 +475,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     :return:
     """
     position_array = np.load(os.path.join(root_dir, "trace.npy"))
+    orientation_array=position_array[:,:,2]
 
     position_array=np.transpose(position_array,(1,0,2))
     # plot_relative_distance(dt, position_array, root_dir)
@@ -482,26 +483,31 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     plot_formation_gabreil(position_array, root_dir,desired_distance=desired_distance,sensor_range=sensor_range)
     plot_trace_triangle(position_array,root_dir,sensor_range=sensor_range)
 
-def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=6):
+def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=4):
         """
 
         :param dt: Time interval
         :param dir: Root dir
         :return:
         """
-        position_array = np.load(os.path.join(root_dir, "trace.npy"))
-        position_array = np.transpose(position_array, (1, 0, 2))
-        range=int((position_array.shape[1]-1)/(num_graph-1))
+        pose_array = np.load(os.path.join(root_dir, "trace.npy"))
+        pose_array = np.transpose(pose_array, (1, 0, 2))
+
+        range=int((pose_array.shape[1]-1)/(num_graph-1))
+        print(pose_array.shape,range)
         i=0
         while i<num_graph:
-            plot_formation_gabreil(position_array[:,:range*i+1,:], root_dir,file_name=f"formation_gabreil_{position_array.shape[0]}_{i}.png", desired_distance=desired_distance, sensor_range=sensor_range)
+            plot_formation_gabreil(pose_array[:,:range*i+1,:], root_dir,file_name=f"formation_gabreil_{pose_array.shape[0]}_{i}.png", desired_distance=desired_distance, sensor_range=sensor_range)
             i += 1
+        plot_trace_triangle_real(pose_array, time_step=pose_array.shape[1], xlim=1.5, ylim=1.5, save_path=str(root_dir))
+        plot_formation_gabreil_real(pose_array, desired_distance=1.1, xlim=2, ylim=2, save_path=str(root_dir))
+        plot_relative_distance_gabreil_real(0.01, pose_array, save_path=str(root_dir))
 #
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots"
+    root_path="C:\\Users\\huang xinchi\\Desktop\\multi_robot_formation\\scripts\\plots"
     for path in os.listdir(root_path):
-        plot_load_data_gazebo_multi_fromation(os.path.join(root_path,path),desired_distance=1.1,sensor_range=2)
+        plot_load_data_gazebo_multi_fromation(os.path.join(root_path,path),desired_distance=1.1,sensor_range=2,num_graph=4)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)

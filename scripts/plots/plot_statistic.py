@@ -189,25 +189,6 @@ def process_data_real(root_path,desired_distance=1.1,sensor_range=2,check_time=5
                             distance_error_list.append(distance_error)
         average_formation = np.average(np.array(distance_list))
         average_formation_error = 100*np.average(np.array(distance_error_list))
-        # if convergence_time >= 50:
-        #     unsuccess += 1
-        #     print(path,average_formation_error,"no converge")
-        #     to_root = "/home/xinchi/unsuccess"
-        #     distutils.dir_util.copy_tree(path, os.path.join(to_root,path.split("/")[-1]))
-        #     continue
-        # if crash==True:
-        #     unsuccess += 1
-        #     print(path,average_formation_error,"crash")
-        #     # to_root = "/home/xinchi/unsuccess"
-        #     # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
-        #     # continue
-        # if average_formation_error>10:
-        #     unsuccess += 1
-        #     print(path, average_formation_error,"too much error")
-        #     # to_root = "/home/xinchi/unsuccess"
-        #     # distutils.dir_util.copy_tree(path, os.path.join(to_root, path.split("/")[-1]))
-        #     continue
-
         converge_time_all.append(convergence_time)
         average_formation_error_all.append(average_formation_error)
         average_formation_all.append(average_formation)
@@ -218,7 +199,7 @@ def process_data_real(root_path,desired_distance=1.1,sensor_range=2,check_time=5
     return converge_time_all,average_formation_all,average_formation_error_all
 
 def box_1(data_m,title,xlabel,ylabel,save_dir):
-    fig = plt.figure(figsize=(5, 3))
+    fig = plt.figure(figsize=(3, 6))
 
     color_model='#1f77b4'
     color_expert='#ff7f0e'
@@ -230,14 +211,14 @@ def box_1(data_m,title,xlabel,ylabel,save_dir):
                       flierprops=dict(color=color_model,markeredgecolor=color_model),
                       medianprops=dict(color="black"),
                       widths=0.6)
-    plt.subplots_adjust(left=0.18,
-                        bottom=0.18,
+    plt.subplots_adjust(left=0.28,
+                        bottom=0.15,
                         right=0.99,
                         top=0.99,
                         wspace=0.0,
                         hspace=0.0)
     # plt.legend([model["boxes"][0], exp["boxes"][0]], ['GNN', 'Expert'], loc='upper left',borderpad=0.5,labelspacing=0.5)
-    plt.xticks(np.array(range(len(data_m)))*1.0,labels=xlabel,fontsize=15)
+    # plt.xticks(np.array(range(len(data_m)))*1.0,labels=xlabel,fontsize=15)
     plt.yticks(fontsize=15)
     # plt.title(title,fontsize=18)
     plt.xlabel("Number of robots",fontsize=15)
@@ -324,16 +305,26 @@ average_formation_error_all_ViT=[]
 
 
 
-
 #
 # box_1(converge_time_all_ViT,"Converge time",robot_num,"Convergence Time",root_dir)
 # box_1(average_formation_all_ViT,"Average distance",robot_num,"Distance(m)",root_dir)
 # box_1(average_formation_error_all_ViT,"Average group formation error",robot_num,"Formation Error(%)",root_dir)
+
+
 root_dir=""
 folder="ViT_4"
 path = os.path.join(root_dir,folder)
 converge_time_all, average_formation_all, average_formation_error_all = process_data_real(path,desired_distance=1.1,sensor_range=2)
-real_scatter(converge_time_all)
+# real_scatter(converge_time_all)
+converge_time_all_ViT.append(converge_time_all)
+average_formation_all_ViT.append(average_formation_all)
+average_formation_error_all_ViT.append(average_formation_error_all)
+print(converge_time_all_ViT)
+print(average_formation_error_all_ViT)
+box_1(converge_time_all_ViT,"Converge time",4,"Convergence Time(s)",root_dir)
+# box_1(average_formation_all_ViT,"Average distance",4,"Distance(m)",root_dir)
+box_1(average_formation_error_all_ViT,"Average group formation error",4,"Formation Error(%)",root_dir)
+
 # box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
 # box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)
 # box_1(average_formation_error_all_expert,"Average group formation error","Formation Error(%)",root_dir)
