@@ -10,7 +10,7 @@ from plot_scene import plot_formation_gabreil_real,plot_relative_distance_gabrei
 from collections import defaultdict
 import matplotlib
 for file_name in range(1,2):
-    file_path = 'C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots\\csv\\{0}.csv'.format(file_name)
+    file_path = 'C:\\Users\\huang xinchi\\Desktop\\multi_robot_formation\\scripts\\plots\\csv\\{0}.csv'.format(file_name)
     robot_index_list=[3,4,5,6]
     # Open the CSV file and read its content
     with open(file_path, 'r') as file:
@@ -25,7 +25,7 @@ for file_name in range(1,2):
         start = False
         for row in csv_reader:
             count+=1
-            if count>12000:
+            if count>6000:
                 break
             # remove header
             if count<=7:
@@ -44,7 +44,7 @@ for file_name in range(1,2):
                 points.append([float(row[index]),-float(row[index+2])])
                 index+=3
             # get detected object
-            direction_vectors_dict, centroids_dict = detect_objects(points)
+            direction_vectors_dict, centroids_dict,valid = detect_objects(points)
 
             if start==False:
                 for item in object_dict:
@@ -55,14 +55,23 @@ for file_name in range(1,2):
                         break
             if start==False:
                 continue
-            if not len(centroids_dict)==len(object_dict):
-                continue
-            skip=False
-            for item in centroids_dict:
-                if not item in object_dict:
-                    skip=True
-                    break
+            skip = False
+            if valid==False:
+                skip=True
+            elif not len(centroids_dict)==len(object_dict):
+                skip=True
+            else:
+                for item in centroids_dict:
+                    if not item in object_dict:
+                        skip=True
+                        break
             if skip:
+                for item in object_dict:
+                    if len(object_dict[item])>0:
+                        object_dict[item].append(object_dict[item][-1])
+                    else:
+                        print(centroids_dict)
+                    print(count,len(object_dict[item]))
                 continue
 
             for item in object_dict:
@@ -84,7 +93,6 @@ for file_name in range(1,2):
                 #         object_dict[item].append(object_dict[item][-1])
                 #     else:
                 #         print(centroids_dict)
-            # print(count,centroids_dict)
         pose_lists=[]
         for item in object_dict:
             # print(len(object_dict[item]),item)
@@ -93,13 +101,10 @@ for file_name in range(1,2):
             os.mkdir(str(file_name))
 
         pose_array=numpy.array(pose_lists)
-        print(pose_array.shape)
-        pose_array=pose_array[:,:,:]
-        print(pose_array.shape)
+        pose_array=pose_array[:,:1501,:]
+        print(count,pose_array.shape)
         numpy.save(os.path.join(str(file_name), "trace"), pose_array.transpose((1,0,2)))
-        plot_trace_triangle_real(pose_array,time_step=pose_array.shape[1],xlim=2,ylim=2,save_path=str(file_name))
-        plot_formation_gabreil_real(pose_array,desired_distance=1.1,xlim=2,ylim=2,save_path=str(file_name))
-        plot_relative_distance_gabreil_real(0.01,pose_array,save_path=str(file_name))
+
 
 
 

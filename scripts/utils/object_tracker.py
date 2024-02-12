@@ -30,6 +30,7 @@ def generate_object(number_of_point,sep1=0.02,sep2=0.25):
 def detect_objects(points,eps=0.3,sep1=0.1):
     direction_vectors_dict = defaultdict(list)
     centroids_dict=defaultdict(list)
+    valid=True
 
     try:
         X = np.array(points)
@@ -79,9 +80,10 @@ def detect_objects(points,eps=0.3,sep1=0.1):
 
             direction_vectors_dict[len(groups[group_id])]=(direction_vector/np.linalg.norm(direction_vector))
     except:
+        valid=False
         pass
     # print(direction_vectors_dict,centroids_dict)
-    return  direction_vectors_dict,centroids_dict
+    return  direction_vectors_dict,centroids_dict,valid
 
 if __name__=="__main__":
     X=[]
