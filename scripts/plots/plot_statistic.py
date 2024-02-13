@@ -299,6 +299,7 @@ def real_bar(data):
     plt.ylabel("Converge time (s)", fontsize=15)
     plt.ylim((5, 20))
     # plt.grid()
+
     plt.subplots_adjust(left=0.15,
                         bottom=0.15,
                         right=0.99,
