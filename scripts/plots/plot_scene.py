@@ -483,7 +483,7 @@ def plot_load_data_gazebo(root_dir,desired_distance=1,sensor_range=2,dt=0.05):
     plot_formation_gabreil(position_array, root_dir,desired_distance=desired_distance,sensor_range=sensor_range)
     plot_trace_triangle(position_array,root_dir,sensor_range=sensor_range)
 
-def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=4):
+def plot_load_data_multi_fromation(root_dir, desired_distance=1, sensor_range=2, num_graph=4):
         """
 
         :param dt: Time interval
@@ -506,8 +506,8 @@ def plot_load_data_gazebo_multi_fromation(root_dir, desired_distance=1, sensor_r
 if __name__ == "__main__":
 
     # plot_load_data_gazebo("/home/xinchi/gazebo_data/ViT_5_full/70")
-    root_path="C:\\Users\\huang xinchi\\Desktop\\multi_robot_formation\\scripts\\plots"
+    root_path="C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots"
     for path in os.listdir(root_path):
-        plot_load_data_gazebo_multi_fromation(os.path.join(root_path,path),desired_distance=1.1,sensor_range=2,num_graph=4)
+        plot_load_data_multi_fromation(os.path.join(root_path,path),desired_distance=1.1,sensor_range=2,num_graph=4)
     # trace_array=np.load("/home/xinchi/gazebo_data/0/trace.npy")
     # print(trace_array.shape)
