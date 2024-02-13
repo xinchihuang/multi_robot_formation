@@ -288,6 +288,24 @@ def real_scatter(data):
                         wspace=0.0,
                         hspace=0.0)
     plt.savefig(os.path.join('converge time real.png'))
+def real_bar(data):
+    plt.figure(figsize=(5, 4))
+    y=data
+    x = [i for i in range(1,len(data)+1)]
+    plt.bar(x, y, label='Data Points')
+    plt.xticks(x, labels=x, fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.xlabel("Test case", fontsize=15)
+    plt.ylabel("Converge time (s)", fontsize=15)
+    plt.ylim((5, 20))
+    # plt.grid()
+    plt.subplots_adjust(left=0.15,
+                        bottom=0.15,
+                        right=0.99,
+                        top=0.95,
+                        wspace=0.0,
+                        hspace=0.0)
+    plt.savefig(os.path.join('converge time real.png'))
 
 
 converge_time_all_ViT=[]
@@ -315,15 +333,16 @@ root_dir=""
 folder="ViT_4"
 path = os.path.join(root_dir,folder)
 converge_time_all, average_formation_all, average_formation_error_all = process_data_real(path,desired_distance=1.1,sensor_range=2)
+real_bar(converge_time_all)
 # real_scatter(converge_time_all)
-converge_time_all_ViT.append(converge_time_all)
-average_formation_all_ViT.append(average_formation_all)
-average_formation_error_all_ViT.append(average_formation_error_all)
-print(converge_time_all_ViT)
-print(average_formation_error_all_ViT)
-box_1(converge_time_all_ViT,"Converge time",4,"Convergence Time(s)",root_dir)
-# box_1(average_formation_all_ViT,"Average distance",4,"Distance(m)",root_dir)
-box_1(average_formation_error_all_ViT,"Average group formation error",4,"Formation Error(%)",root_dir)
+# converge_time_all_ViT.append(converge_time_all)
+# average_formation_all_ViT.append(average_formation_all)
+# average_formation_error_all_ViT.append(average_formation_error_all)
+# print(converge_time_all_ViT)
+# print(average_formation_error_all_ViT)
+# box_1(converge_time_all_ViT,"Converge time",4,"Convergence Time(s)",root_dir)
+# # box_1(average_formation_all_ViT,"Average distance",4,"Distance(m)",root_dir)
+# box_1(average_formation_error_all_ViT,"Average group formation error",4,"Formation Error(%)",root_dir)
 
 # box_1(converge_time_all_expert,"Converge time","Convergence Time(s)",root_dir)
 # box_1(average_formation_all_expert,"Average distance","Distance(m)",root_dir)

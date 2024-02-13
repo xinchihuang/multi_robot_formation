@@ -6,7 +6,7 @@ author: Xinchi Huang
 import math
 import numpy as np
 import cv2
-from .gabreil_graph import is_valid_point
+from gabreil_graph import is_valid_point,global_to_local
 
 class MapSimulator:
     def __init__(
@@ -189,16 +189,40 @@ class MapSimulator:
 
 if __name__ == "__main__":
     map_simulator=MapSimulator(sensor_view_angle= 2*math.pi, local=True,partial=False)
-    position_list_local = [[-0.35, 0.3, 0.],
-                           [0.3, 0.3, 0.],
-                           [0., 0., 0.],
-                           [-0.3, -0.3, 0.],
-                           [0.3, -0.3, 0.], ]
 
+    data = "C:\\Users\\xinchi\\multi_robot_formation\\scripts\\plots\\ViT_4\\3\\trace.npy"
+    pose_array=np.load(data)
+    print(pose_array.shape)
+    pose_array=np.transpose(pose_array, (1, 0, 2))
+    robot_num=pose_array.shape[0]
 
-    print(position_list_local)
-    occupancy_map = map_simulator.generate_map_one(position_list_local)
-    cv2.imshow("robot view " + str(1), np.array(occupancy_map))
-    cv2.waitKey(0)
+    time=1500
+
+    pose_list=pose_array[:,time,:]
+
+    position_lists_local = global_to_local(pose_list)
+    for index in range(0, robot_num):
+        occupancy_map = map_simulator.generate_map_one(position_lists_local[index])
+        occupancy_map=occupancy_map[20:80,20:80]
+        # for i in range(occupancy_map.shape[0]):
+        #     for j in range(occupancy_map.shape[1]):
+        #         if occupancy_map[i][j]==255:
+        #             occupancy_map[i][j]=0
+        #         else:
+        #             occupancy_map[i][j] =255
+        cv2.imshow("robot view " + str(index), np.array(occupancy_map))
+        cv2.waitKey(0)
+        cv2.imwrite(f"robot view {time} {index} .png".format(time,index) , np.array(occupancy_map))
+    # position_list_local = [[-0.35, 0.3, 0.],
+    #                        [0.3, 0.3, 0.],
+    #                        [0., 0., 0.],
+    #                        [-0.3, -0.3, 0.],
+    #                        [0.3, -0.3, 0.], ]
+    #
+    #
+    # print(position_list_local)
+    # occupancy_map = map_simulator.generate_map_one(position_list_local)
+    # cv2.imshow("robot view " + str(1), np.array(occupancy_map))
+    # cv2.waitKey(0)
 
 # print(math.sin(arctan(-1.732,-1)))
